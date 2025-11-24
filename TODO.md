@@ -1,467 +1,301 @@
-# TODO - Home-Manager Decoupling Project
+# Master TODO - My Modular Workspace
 
-**Project:** my-modular-workspace-decoupling-home
-**Started:** 2025-11-17
-**Status:** Phase 1 Complete - Testing Phase
-
----
-
-## 🎯 Project Goals
-
-- [x] Decouple home-manager from NixOS system
-- [x] Create standalone, portable home-manager configuration
-- [x] Change username: mitso → mitsio
-- [x] Use unstable packages for user environment (latest versions)
-- [x] Enable multi-OS deployment (NixOS, Fedora, WSL)
-- [ ] Test and verify complete setup
-- [ ] Refactor to modular structure (Phase 2)
+**Project:** my-modular-workspace
+**Last Updated:** 2025-11-24 00:10
+**Current Phase:** Phase 1 Complete, Transitioning to Phase 2
+**Working Directory:** `/home/mitsio/.MyHome/MySpaces/my-modular-workspace/`
 
 ---
 
-## 📋 Phase 1: Standalone Home-Manager (COMPLETE ✅)
+## 📍 Purpose
 
-### System Changes (DONE)
-- [x] Change username mitso → mitsio in NixOS config
-- [x] Update all user references in system modules
-- [x] Remove home-manager module from NixOS flake.nix
-- [x] Remove home-manager, plasma-manager inputs
-- [x] Remove claude-desktop from system (moved to home)
-- [x] Minimal system packages (remove GUI apps)
-- [x] System rebuild successful
-- [x] User mitsio created (uid=1001)
-- [x] Password set for mitsio
+This is the **MASTER TODO** consolidating all tasks across the my-modular-workspace project.
 
-### Home-Manager Repo (DONE)
-- [x] Create `~/.config/my-home-manager-flake/` repository
-- [x] Create standalone flake.nix (nixpkgs-unstable)
-- [x] Copy all config files from old home/mitso/
-- [x] Update username to mitsio throughout configs
-- [x] Verify no hardcoded paths (use ${config.home.homeDirectory})
-- [x] Create .gitignore
-- [x] Create README.md
-- [x] Git init and commit
-
-### Documentation (DONE)
-- [x] Create ADR-001: stable vs unstable architecture decision
-- [x] Create comprehensive session docs
-- [x] Create implementation steps guide
-- [x] Create session summary
-- [x] Save project state to thread-continuity MCP
+**Component-Specific Details:**
+- **Home-Manager:** `home-manager/TODO.md` - Detailed package management tasks
+- **Ansible:** `docs/ANSIBLE_TODO.md` - Automation and playbook tasks
+- **NixOS:** `hosts/shoshin/nixos/TODO.md` - System configuration tasks
+- **Docs:** `docs/TODO.md` - Documentation and cross-cutting tasks
+- **Sessions:** `sessions/*/TODO.md` - Session-specific tasks
 
 ---
 
-## 🚀 Phase 1.5: Migration & Testing (IN PROGRESS ⏳)
+## 🔴 IMMEDIATE PRIORITY (Week 48 - Nov 24-30, 2025)
 
-### Data Migration (CURRENT)
-- [ ] **Run full home migration script as root**
-  ```bash
-  su -
-  bash /home/mitso/migrate-full-home-as-root.sh
-  exit
-  ```
-  - [ ] Verify all files migrated
-  - [ ] Verify permissions correct (.ssh: 700/600, .gnupg: 700/600)
-  - [ ] Verify ownership (mitsio:users)
+### 1. Git Repository Commits & Cleanup
 
-### System Testing
-- [ ] **Reboot system**
-  ```bash
-  sudo reboot
-  ```
+**Status:** IN PROGRESS
 
-- [ ] **Login as mitsio**
-  - [ ] Password works
-  - [ ] KDE Plasma loads
-  - [ ] Can access files
+#### home-manager repository
+- [ ] Commit modified `home.nix` (service cleanup changes)
+- [ ] Add and commit untracked files:
+  - [ ] `ansible-backup.nix`
+  - [ ] `ansible-collections.nix`
+  - [ ] `chezmoi.nix`
+  - [ ] `continue-dot-dev.nix`
+  - [ ] `git-hooks.nix`
+  - [ ] `navi.nix`
+- [ ] Clean up: `.ansible/` and `.cache/` directories (add to .gitignore)
+- [ ] Push all commits to origin/main
 
-- [ ] **Apply home-manager configuration**
-  ```bash
-  cd ~/.config/my-home-manager-flake
-  nix flake lock
-  home-manager switch --flake .#mitsio@shoshin
-  ```
-  - [ ] Build succeeds without errors
-  - [ ] All packages install (~100+ packages from unstable)
-  - [ ] Note any errors or warnings
+#### docs repository
+- [ ] Stage and commit deleted Archive files (KDE_Connect, Plasma_Manager)
+- [ ] Add commit message: "Archive cleanup: Moved KDE Connect and Plasma Manager docs to deprecated"
+- [ ] Push to origin/main
 
-### Verification Checklist
-- [ ] **Shell Environment**
-  - [ ] Bash loads correctly
-  - [ ] Aliases work (gs, ga, gc, nrs, bwu, etc.)
-  - [ ] PATH includes npm-global and go bins
-  - [ ] EDITOR, GOPATH, GOBIN set correctly
-  - [ ] Greeting message displays
+#### ansible repository
+- [ ] Commit deleted files (.navi/, TODO.md, docs/development/pre-commit-setup.md)
+- [ ] Commit modified: logs/ansible.log, playbooks/gdrive-backup.yml, playbooks/rclone-gdrive-sync.yml
+- [ ] Add untracked: playbooks/rclone-gdrive-sync-v2.yml, templates/
+- [ ] Review logs before committing (exclude if too large)
+- [ ] Push to origin/main
 
-- [ ] **GUI Applications**
-  - [ ] Firefox launches
-  - [ ] Brave launches
-  - [ ] Kitty terminal works
-  - [ ] VSCodium/VSCode launches
-  - [ ] KeePassXC launches
-  - [ ] Obsidian launches
-  - [ ] Discord launches
+### 2. Post Home-Manager Switch Verification (Gen #46)
 
-- [ ] **Development Tools**
-  - [ ] Git config correct (name, email)
-  - [ ] Git aliases work
-  - [ ] Python available
-  - [ ] Go available
-  - [ ] Node.js available
-  - [ ] Claude Code CLI works
+**Completed:** 2025-11-23
+**Remaining:**
+- [ ] Test Firefox with new symlink structure
+- [ ] Verify VSCodium extensions loading correctly
+- [ ] Confirm KeePassXC vault accessible at `~/MyVault`
+- [ ] Check all symlinked directories work: `MySpaces`, `Documents`, `Archives`
+- [ ] Review `.backup` files, delete if everything works
+- [ ] Document findings in `home-manager/docs/DEBUGGING_AND_MAINTENANCE.md`
 
-- [ ] **KDE Plasma Settings**
-  - [ ] Panels correct (top/bottom)
-  - [ ] Keyboard shortcuts work
-  - [ ] Virtual desktops configured
-  - [ ] Themes applied
-  - [ ] System tray widgets correct
+### 3. Master TODO Maintenance
 
-- [ ] **User Services**
-  - [ ] Check systemd user services: `systemctl --user status`
-  - [ ] KeePassXC vault sync timer: `systemctl --user status keepassxc-vault-sync.timer`
-  - [ ] VSCode extension updater: `systemctl --user status vscode-extensions-update.timer`
-  - [ ] Cline updater: `systemctl --user status cline-update.timer`
-  - [ ] Claude Code updater: `systemctl --user status claude-code-update.timer`
-
-- [ ] **Data Integrity**
-  - [ ] MyVault/ exists and accessible
-  - [ ] SSH keys work (test git push/pull)
-  - [ ] GPG keys work (if used)
-  - [ ] rclone config exists
-  - [ ] Dropbox syncing
-  - [ ] GoogleDrive accessible
-  - [ ] Workspaces symlink correct
-  - [ ] Projects accessible
+- [x] Create MASTER_TODO.md consolidating all TODOs
+- [ ] Update all component TODOs to reference MASTER_TODO.md
+- [ ] Establish update protocol: when to sync MASTER_TODO with component TODOs
 
 ---
 
-## 🐛 Phase 1.6: Bug Fixes & Refinements (PENDING)
+## 🟡 HIGH PRIORITY (This Month - November 2025)
 
-### Known Issues to Fix
-- [ ] **Fix syncthing-myspaces.nix**
-  - Currently syncs MySpaces, should sync MyHome
-  - Update paths in `/home/mitso/.config/nixos/modules/workspace/syncthing-myspaces.nix`
+### 4. Home-Manager Enhancements (Week 48)
 
-- [ ] **Add missing packages to home-manager**
-  - Currently only has `ast-grep`
-  - Need to add ALL GUI apps, browsers, dev tools (~100+ packages)
-  - See: current system packages.nix for full list to migrate
+**Session:** `sessions/home-manager-enchantments-week-48/`
+**Detailed Plan:** `sessions/home-manager-enchantments-week-48/PLAN.md`
 
-- [ ] **Test on clean boot**
-  - Reboot and verify everything persists
-  - Check services auto-start
+#### Phase 1: Semantic-Grep Installation
+- [x] Create `semantic-grep.nix` with buildGoModule derivation
+- [x] Set up word embedding model download automation
+- [ ] Get correct hashes from build output
+- [ ] Update hashes in `semantic-grep.nix`
+- [ ] Test semantic-grep (w2vgrep command)
+- [ ] Create documentation at `docs/tools/semantic-grep/`
+- [ ] Create navi cheatsheets
 
-### Optional Improvements
-- [ ] Add more comprehensive git aliases
-- [ ] Configure Bitwarden CLI integration
-- [ ] Add development environment configs (Python, Go, Node)
-- [ ] Configure VSCode settings via home-manager
-- [ ] Add custom KDE themes/icons
+#### Phase 2: MCP Servers Reorganization
+- [ ] Research node2nix for npm-based MCPs
+- [ ] Create `mcps/` directory structure
+- [ ] Convert npm MCPs to node2nix derivations:
+  - [ ] context7-mcp
+  - [ ] firecrawl-mcp
+  - [ ] mcp-read-website-fast
+- [ ] Create Go MCP derivations:
+  - [ ] git-mcp-go
+  - [ ] mcp-filesystem-server
+  - [ ] mcp-shell
+- [ ] Handle Python/uv MCPs:
+  - [ ] mcp-server-fetch
+  - [ ] mcp-server-time
+  - [ ] sequential-thinking
+- [ ] Install all to `~/.local-mcp-servers/<mcp-name>/`
+- [ ] Update Claude Desktop config
+- [ ] Test all MCPs
 
----
+#### Phase 3: Pre-commit Hooks Setup
+- [ ] Add pre-commit-hooks.nix to home.nix imports
+- [ ] Configure nixfmt/alejandra formatter
+- [ ] Configure statix linter
+- [ ] Configure deadnix detector
+- [ ] Test pre-commit workflow
+- [ ] Document in README
 
-## 📦 Phase 2: Modular Refactor (PLANNED)
+### 5. Ansible Repository Setup
 
-**Reference:** `HOME-MANAGER_REPO_SKELETON_DRAFT_1.md`
+**Goal:** Establish ansible as standalone git repository
 
-### Restructure home-manager repo
-- [ ] Create modular directory structure:
-  ```
-  my-home-manager-flake/
-  ├── flake.nix
-  ├── home/
-  │   ├── common/
-  │   │   ├── core.nix           # username, stateVersion, basic env
-  │   │   ├── cli-tools.nix      # generic CLI tools
-  │   │   ├── dev-core.nix       # git config, editor defaults
-  │   │   └── secrets.nix        # secrets management
-  │   └── mitsio/
-  │       ├── default.nix        # main entry, imports everything
-  │       ├── shell.nix          # bash config
-  │       ├── editors.nix        # kitty + vscodium merged
-  │       ├── desktop.nix        # plasma settings
-  │       ├── dev-go.nix         # Go tools
-  │       ├── dev-python.nix     # Python tools
-  │       ├── dev-js.nix         # JS/Node tools
-  │       ├── llm-tools.nix      # claude-code, cline
-  │       ├── vaults.nix         # keepassxc
-  │       └── machines/
-  │           ├── shoshin.nix    # NixOS-specific overrides
-  │           ├── kinoite.nix    # Fedora-specific
-  │           └── wsl-workspace.nix
-  └── hosts/
-      ├── shoshin.nix
-      ├── kinoite.nix
-      └── wsl-workspace.nix
-  ```
+- [x] Research pre-commit automation (git-hooks.nix)
+- [x] Create quality check infrastructure (Makefile, lint configs)
+- [ ] Initialize ansible as separate repo: `github.com/dtsioumas/modular-workspace-ansible`
+- [ ] Set up branch protection
+- [ ] Update my-modular-workspace docs to reference repo
 
-### Split monolithic files
-- [ ] Extract common configs to `home/common/`
-- [ ] Split `home.nix` into modules
-- [ ] Merge `kitty.nix` + `vscodium.nix` → `editors.nix`
-- [ ] Rename `claude-code.nix` → `llm-tools.nix` (add Cline)
-- [ ] Move NixOS-specific aliases to `machines/shoshin.nix`
-- [ ] Create host entry points in `hosts/`
+#### RClone Collection Migration
+- [ ] Research rolehippie/rclone collection
+- [ ] Create migration plan for bash scripts → collection
+- [ ] Install collection via requirements.yml
+- [ ] Migrate `rclone-gdrive-sync.yml` playbook
+- [ ] Migrate `gdrive-backup.yml` playbook
+- [ ] Update systemd services
+- [ ] Test and verify
 
-### Test modular structure
-- [ ] Build and test: `home-manager switch --flake .#mitsio@shoshin`
-- [ ] Verify no regressions
-- [ ] Update documentation
+### 6. Migration & Conflict Prevention
 
----
+**Purpose:** Track items needing migration to avoid conflicts
 
-## 🌐 Phase 3: Multi-OS Support (FUTURE)
+#### Completed Cleanup (2025-11-23)
+- [x] Removed `vscode-extensions-update` service/timer
+- [x] Removed `cline-update` service/timer
+- [x] Resolved symlink conflicts with `-b backup`
+- [x] Backed up `~/MyVault` and Firefox profiles
 
-### Fedora Kinoite Setup
-- [ ] Create Fedora Kinoite bluebuild image (or use stock)
-- [ ] Install Fedora Kinoite on shoshin (replaces NixOS)
-- [ ] Install Nix package manager
-- [ ] Install home-manager
-- [ ] Clone my-home-manager-flake repo
-- [ ] Apply: `home-manager switch --flake .#mitsio@kinoite`
-- [ ] Verify same user experience as NixOS
-- [ ] Document Fedora-specific quirks
-
-### WSL Support
-- [ ] Install WSL2 on work laptop (if applicable)
-- [ ] Install Nix in WSL
-- [ ] Clone my-home-manager-flake repo
-- [ ] Create WSL-specific config (no desktop)
-- [ ] Apply: `home-manager switch --flake .#mitsio@wsl-workspace`
-- [ ] Test dev tools work in WSL
+#### Pending Migrations
+- [ ] `claude-code-update` service → node2nix derivation
+- [ ] `claude-code` activation script → proper Nix derivation
+- [ ] Verify all `symlinks.nix` targets exist in `~/.MyHome/`
+- [ ] Review Firefox/VSCodium configs for chezmoi migration
+- [ ] Document npm global packages migration strategy
 
 ---
 
-## 🧹 Phase 4: Cleanup (AFTER TESTING)
+## 🟢 MEDIUM PRIORITY (This Quarter - Q4 2025)
 
-### Remove old user (CAREFUL!)
-- [ ] Verify mitsio user works 100%
-- [ ] Verify all data migrated
-- [ ] **Backup important files** (just in case)
-- [ ] Remove mitso user from NixOS config:
-  ```nix
-  # In configuration.nix, delete entire users.users.mitso block
-  # OR set: users.users.mitso = null;
-  ```
-- [ ] Rebuild NixOS
-- [ ] **Delete old home directory:**
-  ```bash
-  sudo rm -rf /home/mitso/
-  ```
+### 7. Documentation Updates
 
-### Repository Management
-- [ ] Push NixOS config to git remote (if applicable)
-- [ ] Push my-home-manager-flake to GitHub/GitLab
-- [ ] Make repo private (contains configs but no secrets)
-- [ ] Add proper README
-- [ ] Tag releases (v1.0-phase1-complete, etc.)
+- [ ] Update README.md with symlink structure explanation
+- [ ] Document `-b backup` flag usage in debugging guide
+- [ ] Add recovery procedures for symlink conflicts
+- [ ] Create integration architecture document:
+  - [ ] Document home-manager + ansible + NixOS interaction
+  - [ ] Map activation scripts and timing
+  - [ ] Document shared secrets strategy (KeePassXC)
+  - [ ] Create component relationship diagrams
+  - [ ] Location: `docs/commons/integrations/KEEPASSXC_INTEGRATION.md`
 
----
+### 8. Secrets Management Integration
 
-## 📚 Documentation Tasks
+**Goal:** Unified KeePassXC-based secrets strategy
 
-### Complete Documentation
-- [ ] Add troubleshooting guide
-- [ ] Document common workflows
-- [ ] Create migration guide for future systems
-- [ ] Add screenshots of final setup
-- [ ] Document lessons learned
+- [ ] Define cross-component secrets access:
+  - [ ] KeePassXC vault location (currently `~/MyVault/`)
+  - [ ] Ansible accessing secrets from KeePassXC
+  - [ ] Home-manager activation scripts accessing secrets
+  - [ ] Secrets rotation policy
+- [ ] Chezmoi integration with KeePassXC
+- [ ] Replace KDE-Wallet with KeePassXC in home-manager:
+  - [ ] Dropbox secrets retrieval
+  - [ ] rclone secrets retrieval
+- [ ] Document in `docs/security/secrets-management.md`
 
-### Update ADRs
-- [ ] Create ADR-002 (if needed for major decisions)
-- [ ] Document tool choices (chezmoi, stow, ansible plans)
+### 9. Repository Structure Reorganization
 
----
+- [ ] Evaluate git submodules for components:
+  - [ ] home-manager/ → Separate repo?
+  - [ ] ansible/ → Separate repo (in progress)
+  - [ ] docs/ → Keep in main workspace
+- [ ] Write ADR for decision
+- [ ] Implement if approved
 
-## 🔮 Phase 5: Advanced Features (OPTIONAL)
+### 10. Session Management Cleanup
 
-### Dotfile Management
-- [ ] Evaluate chezmoi vs current approach
-- [ ] Consider GNU Stow for additional flexibility
-- [ ] Implement dotfile templating if needed
-
-### Secrets Management
-- [ ] Implement sops-nix for encrypted secrets in repo
-- [ ] Integrate with KeePassXC CLI
-- [ ] Automate secret retrieval from vault
-
-### Ansible Bootstrap
-- [ ] Create Ansible playbook for fresh system setup
-- [ ] Automate: Nix install → home-manager → apply configs
-- [ ] Test on clean Fedora install
-- [ ] Create "from zero to hero" script
-
-### Multi-Machine Setup
-- [ ] Add laptop-specific configs
-- [ ] Sync settings across machines
-- [ ] Document machine-specific overrides
+- [ ] Review all sessions/ directories
+- [ ] Archive obsolete sessions
+- [ ] Update project context in `my-modular-workspace.json`
+- [ ] Document session naming convention
 
 ---
 
-## 📊 Success Metrics
+## 🔵 LOW PRIORITY (Q1 2026)
 
-### Phase 1 Success
-- [x] NixOS system minimal and stable
-- [x] Home-manager standalone and portable
-- [x] Username changed successfully
-- [ ] All packages install from unstable
-- [ ] All services work
-- [ ] No data loss
-- [ ] System survives reboot
+### 11. Chezmoi Migration
 
-### Phase 2 Success
-- [ ] Modular structure implemented
-- [ ] Easier to maintain and understand
-- [ ] No regressions from refactor
+- [ ] Audit current dotfiles under management
+- [ ] Create chezmoi templates for configs
+- [ ] Set up encryption for sensitive dotfiles
+- [ ] Test chezmoi apply workflow
+- [ ] Migrate from home-manager dotfile management to chezmoi where appropriate
 
-### Phase 3 Success
-- [ ] Same user experience on Fedora
-- [ ] Easy migration process
-- [ ] Documented for future use
+### 12. NixOS to Fedora Atomic Migration Planning
 
----
+**Status:** Research phase
+**Target:** Q1-Q2 2026
 
-## 🆘 Troubleshooting Guide
+- [ ] Research BlueBuild custom image creation
+- [ ] Plan desktop environment migration (KDE Plasma)
+- [ ] Test home-manager standalone on Fedora
+- [ ] Create migration runbook
+- [ ] Test on VM before production
 
-### If home-manager build fails
-```bash
-# Check flake syntax
-nix flake check
+### 13. Lint Tools & Code Quality
 
-# Show detailed errors
-home-manager switch --flake .#mitsio@shoshin --show-trace
-
-# Check specific module
-nix eval .#homeConfigurations."mitsio@shoshin".config.home.packages
-```
-
-### If services don't start
-```bash
-# Check all user services
-systemctl --user status
-
-# Restart specific service
-systemctl --user restart keepassxc-vault-sync
-
-# View logs
-journalctl --user -u keepassxc-vault-sync -f
-```
-
-### If packages missing
-```bash
-# List installed packages
-home-manager packages
-
-# Search for package
-nix search nixpkgs <package-name>
-
-# Add to home.packages in home.nix
-```
-
-### If rollback needed
-```bash
-# List generations
-home-manager generations
-
-# Rollback to previous
-home-manager switch --rollback
-
-# Or specific generation
-/nix/store/...-home-manager-generation/activate
-```
+- [ ] Research Nix formatters (nixpkgs-fmt, alejandra)
+- [ ] Research syntax checkers (statix, deadnix)
+- [ ] Add to home.packages
+- [ ] Configure VSCodium integration
+- [ ] Create navi cheatsheets
 
 ---
 
-## 📝 Notes & Reminders
+## 📊 Repository Status Summary
 
-### Important Paths
-- **NixOS config:** `~/.config/nixos/`
-- **Home-manager:** `~/.config/my-home-manager-flake/`
-- **Session docs:** `~/my-modular-workspace-decoupling-home/docs/`
-- **Migration script:** `/home/mitso/migrate-full-home-as-root.sh`
+### home-manager (github.com/dtsioumas/home-manager)
+- **Status:** Active development, Generation #46
+- **Unstaged changes:** 1 file (home.nix)
+- **Untracked:** 6 new .nix files + 2 directories
+- **Action needed:** Commit and push
 
-### Key Commands
-```bash
-# Rebuild NixOS system
-sudo nixos-rebuild switch --flake ~/.config/nixos#shoshin
+### docs (github.com/dtsioumas/my-modular-workspace-docs)
+- **Status:** Archive cleanup in progress
+- **Unstaged changes:** Multiple deleted Archive files
+- **Action needed:** Commit deletions, push
 
-# Apply home-manager
-home-manager switch --flake ~/.config/my-home-manager-flake#mitsio@shoshin
+### ansible (github.com/dtsioumas/modular-workspace-ansible)
+- **Status:** Pre-commit setup complete, collection migration pending
+- **Unstaged changes:** Deleted files, modified playbooks, new files
+- **Action needed:** Review, commit, push
 
-# Update all packages
-nix flake update && home-manager switch --flake ...
-
-# Check home-manager status
-home-manager packages
-home-manager generations
-```
-
-### References
-- **ADR-001:** Architecture decisions (stable vs unstable)
-- **Skeleton:** HOME-MANAGER_REPO_SKELETON_DRAFT_1.md
-- **Summary:** SESSION_SUMMARY.md
+### nixos (hosts/shoshin/nixos/)
+- **Status:** Stable, decoupled from home-manager
+- **Last update:** 2025-11-22
+- **Action needed:** None immediate
 
 ---
 
-## ✅ Quick Start (Resume Session)
+## 📅 Timeline & Milestones
 
-**If resuming from saved state:**
+### Week 48 (Nov 24-30, 2025)
+- Complete all immediate priority tasks
+- Commit all pending changes across repos
+- Verify home-manager generation #46 stable
+- Begin MCP servers reorganization
 
-1. Load project state:
-   ```
-   Load project: my-modular-workspace-decoupling-home
-   ```
+### December 2025
+- Complete home-manager enhancements (Phases 1-3)
+- Finalize ansible repository setup
+- Complete rclone collection migration
+- Documentation updates
 
-2. Read documentation:
-   ```bash
-   cd ~/my-modular-workspace-decoupling-home/docs
-   cat SESSION_SUMMARY.md
-   cat TODO.md  # this file
-   ```
-
-3. Continue from current phase (check checkboxes above)
-
----
-
-**Last Updated:** 2025-11-17
-**Current Phase:** 1.5 - Migration & Testing
-**Next Action:** Run migration script as root, reboot, test home-manager
+### Q1 2026
+- Secrets management unification
+- Chezmoi migration planning
+- Fedora Atomic research and testing
+- Code quality tooling setup
 
 ---
 
-## 🎯 TODAY'S PRIORITY
+## 🔗 Quick Links
 
-1. ✅ **Reboot system** (DONE - 2025-11-17)
-2. ⏳ **Apply home-manager with node2nix** (IN PROGRESS)
-3. ⏳ **Convert npm packages to node2nix** (Next)
-4. ⏳ **Test all packages and services**
-5. 📋 **Mark items complete in this TODO**
+- **Project Root:** `/home/mitsio/.MyHome/MySpaces/my-modular-workspace/`
+- **Home-Manager Repo:** `home-manager/` → [github.com/dtsioumas/home-manager](https://github.com/dtsioumas/home-manager)
+- **Docs Repo:** `docs/` → [github.com/dtsioumas/my-modular-workspace-docs](https://github.com/dtsioumas/my-modular-workspace-docs)
+- **Ansible Repo:** `ansible/` → [github.com/dtsioumas/modular-workspace-ansible](https://github.com/dtsioumas/modular-workspace-ansible)
+- **NixOS Config:** `hosts/shoshin/nixos/` → [github.com/dtsioumas/shoshin-nixos](https://github.com/dtsioumas/shoshin-nixos)
 
-### 🆕 Node2nix Integration (2025-11-17)
-- [x] Add node2nix to home.packages
-- [x] Create npm-packages.json specification
-- [x] Document node2nix setup (see docs/NODE2NIX_INTEGRATION.md)
-- [x] Inventory all npm global packages (see docs/NPM_PACKAGES_INVENTORY.md)
-- [x] Update npm-packages.json with all 4 packages:
-  - @anthropic-ai/claude-code
-  - @just-every/mcp-read-website-fast
-  - @upstash/context7-mcp
-  - firecrawl-mcp
-- [ ] Generate Nix expressions with node2nix
-- [ ] Update home.nix to use generated expressions
-- [ ] Replace npm activation scripts with declarative packages
-- [ ] Test all binaries work (claude-code, MCP servers)
-- [ ] Commit generated files to git
-- [ ] Remove old npm global packages
+---
 
-### 🌊 Ephemeral Home Practices Research (2025-11-17)
-- [x] Research NixOS impermanence module and practices
-- [x] Document ephemeral practices (see docs/EPHEMERAL_HOME_PRACTICES.md)
-- [x] Compile resource URLs (see docs/EPHEMERAL_RESOURCES.md)
-- [x] Evaluate impermanence vs chezmoi for our use case
-- [ ] **Decision:** Impermanence or chezmoi approach?
-- [ ] Clean up mitso leftovers from /home/mitsio
-- [ ] Audit home directory for unnecessary files
-- [ ] Create ephemeral vs persistent file list
+## 📝 Notes
 
-**After completing Priority 1-4, all of Phase 1 is DONE! 🎉**
+- **Username:** mitsio
+- **Primary Workspace:** shoshin (初心 - "beginner's mind")
+- **Current OS:** NixOS 25.05
+- **Future OS:** Fedora Atomic (BlueBuild)
+- **Home-Manager Mode:** Standalone (not NixOS module)
+- **Package Strategy:** nixpkgs-unstable for user packages
+
+---
+
+**Last Review:** 2025-11-24 00:10
+**Next Review:** Weekly (every Sunday)
+**Maintained by:** Dimitris Tsioumas (Mitsio)
