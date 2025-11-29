@@ -193,6 +193,78 @@ Existing file '/home/mitsio/.bashrc' is in the way
 3. Retry switch
 4. Manually merge if needed
 
+### 6. nix-ld Required for uv/Python Tools (CRITICAL)
+
+**Error:**
+```
+error: Querying Python at `/home/mitsio/.local/share/uv/python/cpython-3.14.0-linux-x86_64-gnu/bin/python3.14` failed
+NixOS cannot run dynamically linked executables intended for generic linux environments out of the box.
+```
+
+**Cause:** `uv` downloads pre-compiled Python binaries that are dynamically linked. NixOS doesn't have `/lib64/ld-linux-x86-64.so.2` by default.
+
+**Solution:** Enable nix-ld in your **NixOS configuration** (NOT home-manager):
+
+```nix
+# In /etc/nixos/configuration.nix or your NixOS flake
+{
+  # Enable nix-ld for running dynamically linked executables (uv, pip wheels, etc.)
+  # See: https://wiki.nixos.org/wiki/Python_quickstart_using_uv
+  programs.nix-ld.enable = true;
+}
+```
+
+Then rebuild NixOS:
+```bash
+sudo nixos-rebuild switch --flake <your-nixos-flake>
+```
+
+**Reference:** https://wiki.nixos.org/wiki/Python_quickstart_using_uv
+
+### 7. Hash Mismatch in nixpkgs-unstable
+
+**Error:**
+```
+error: hash mismatch in fixed-output derivation '/nix/store/...-source.drv':
+         specified: sha256-LzPjvJ/...
+            got:    sha256-OYK86Ga...
+```
+
+**Cause:** Upstream source has changed but nixpkgs hasn't updated the hash yet. Common with nixpkgs-unstable.
+
+**Solution Options:**
+1. **Temporary:** Comment out the package in `home.packages` until nixpkgs fixes it
+2. **Wait:** nixpkgs-unstable usually fixes within 1-3 days
+3. **Override:** Use an overlay to fix the hash (advanced)
+
+**Example (temporary disable):**
+```nix
+home.packages = with pkgs; [
+  # kubectl-rook-ceph  # TEMPORARILY DISABLED - hash mismatch (2025-11-29)
+];
+```
+
+### 8. Symlink Backup Conflicts
+
+**Error:**
+```
+Existing file '/home/mitsio/MyVault' is in the way of '/nix/store/.../MyVault'
+```
+
+**Solution:** Use `-b backup` flag:
+```bash
+home-manager switch --flake .#mitsio@shoshin -b backup
+```
+
+Files are moved to `<filename>.backup`. Clean up old backups:
+```bash
+# Find all backup files
+find ~ -maxdepth 3 -name "*.backup" -type f 2>/dev/null
+
+# Remove specific backup
+rm ~/MyVault.backup
+```
+
 ---
 
 ## Maintenance
