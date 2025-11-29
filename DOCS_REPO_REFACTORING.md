@@ -1,11 +1,11 @@
 # Documentation Repository Refactoring Plan
 
 **Created:** 2025-11-29
-**Updated:** 2025-11-29 03:25 EET
-**Status:** IN PROGRESS (Phase 1 Complete)
+**Updated:** 2025-11-29 04:05 EET
+**Status:** IN PROGRESS (Phase 2 Complete)
 **Priority:** HIGH
 **Estimated Total Effort:** 3 hours
-**Version:** 3.0 - Comprehensive
+**Version:** 3.1 - Comprehensive + Standards
 
 ---
 
@@ -125,7 +125,7 @@ docs/
 | Phase | Name | Status | Est. Time | Risk Level |
 |-------|------|--------|-----------|------------|
 | 1 | Initial Cleanup | ✅ DONE | 10 min | Low |
-| 2 | Inventory & Analysis | ⏳ PENDING | 15 min | None |
+| 2 | Inventory & Analysis | ✅ DONE | 15 min | None |
 | 3 | Merge Tools Part 1 | ⏳ PENDING | 30 min | Medium |
 | 4 | Merge Tools Part 2 | ⏳ PENDING | 30 min | Medium |
 | 5 | Merge Sync Docs | ⏳ PENDING | 20 min | Medium |
@@ -136,6 +136,114 @@ docs/
 | 10 | Validation & Finalize | ⏳ PENDING | 10 min | None |
 
 **Total Estimated Time:** ~3 hours
+
+---
+
+## Pre-Phase Standards & Guidelines
+
+### Backup Strategy
+
+**CRITICAL: Create backup before starting Phase 3:**
+
+```bash
+# Create pre-refactor tag
+git tag v1.0-pre-refactor -m "Backup before docs restructure - 2025-11-29"
+
+# Create checkpoint tags after major phases
+# After Phase 3: git tag checkpoint-phase-3
+# After Phase 5: git tag checkpoint-phase-5
+# After Phase 7: git tag checkpoint-phase-7
+```
+
+### Content Priority Matrix
+
+| Priority | Content Type | Examples | Action |
+|----------|--------------|----------|--------|
+| CRITICAL | Core project docs | ADRs, README.md, TODO.md | PRESERVE exactly |
+| HIGH | Active tool guides | plasma-manager, kitty, vscodium | MERGE carefully |
+| MEDIUM | Setup/config docs | Installation, configuration | MERGE if current |
+| LOW | Session notes, prompts | SESSION_SUMMARY, NEXT_SESSION_PROMPT | ARCHIVE or discard |
+| DEPRECATED | Outdated guides | gnu-stow, old integrations | ARCHIVE with header |
+
+### Merge Template (Standard for All Tool Docs)
+
+Use this structure for all merged tool documentation:
+
+```markdown
+# [Tool Name] Guide
+
+**Last Updated:** YYYY-MM-DD
+**Sources Merged:** [List original files]
+**Maintainer:** Mitsos
+
+---
+
+## Table of Contents
+- [Overview](#overview)
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Troubleshooting](#troubleshooting)
+- [References](#references)
+
+---
+
+## Overview
+[Brief description of the tool and its purpose]
+
+## Quick Start
+[Minimal steps to get started]
+
+## Installation
+[Installation instructions - if applicable]
+
+## Configuration
+[Configuration details merged from multiple sources]
+
+## Usage
+[Common usage patterns and examples]
+
+## Troubleshooting
+[Common issues and solutions]
+
+## References
+- [Official docs](link)
+- [Related ADRs](link)
+```
+
+### Archive Deprecation Header
+
+Every file moved to archive/ MUST have this header:
+
+```markdown
+---
+status: DEPRECATED
+deprecated_date: YYYY-MM-DD
+reason: [Merged into X | Outdated | Superseded by Y]
+original_location: docs/path/to/original
+---
+
+# Original Title
+
+> ⚠️ **DEPRECATED:** This document has been archived. See [new-location.md](../path/new-location.md) for current documentation.
+
+[Original content below...]
+```
+
+### Phase Validation Checklist
+
+After EACH merge phase (3-7), verify:
+
+- [ ] All source files read before merge
+- [ ] Content priority applied (CRITICAL > HIGH > MEDIUM > LOW)
+- [ ] Word count comparison: `wc -w source/*.md` vs `wc -w target.md`
+- [ ] No content loss (merged file ≥ 80% of source word count)
+- [ ] Internal links updated to new paths
+- [ ] Cross-references fixed or documented as broken
+- [ ] Original files deleted ONLY after verification
+- [ ] Git commit with descriptive message
+- [ ] Checkpoint tag created (if major phase)
 
 ---
 
@@ -196,16 +304,91 @@ docs/nixos/building-flakes-docs/
   grep -r "\[.*\](.*\.md)" docs/commons/ --include="*.md" | head -30
   ```
 
-- [ ] **2.7** Document findings below the inventory table
+- [x] **2.7** Document findings below the inventory table
+
+---
+
+## Phase 2 Results: Inventory & Analysis (2025-11-29)
+
+### File Inventory Table
+
+| Directory | File Count | Target Action |
+|-----------|------------|---------------|
+| commons/toolbox | 17 | Merge to tools/ |
+| commons/integrations | 13 | Merge to sync/ |
+| commons/plasma-manager | 8 | Merge to tools/plasma-manager.md |
+| commons/tools | 6 | Merge to tools/continue-dev.md |
+| home-manager | 30 | Deduplicate & consolidate |
+| nixos | 13 | Merge flakes docs |
+| adrs | 4 | KEEP AS-IS |
+| ansible | 5 | KEEP AS-IS |
+| chezmoi | 11 | KEEP AS-IS |
+| plans | 9 | KEEP AS-IS |
+| archive | 1 | Collect deprecated docs |
+| sync | 1 | Add merged sync docs |
+| tools | 0 | Target for merged tools |
+| Root level | 3 | KEEP |
+| **TOTAL** | **121** | Target: ~40-50 |
+
+### Duplicates Identified
+
+**CRITICAL - Must resolve in Phase 7:**
+
+1. **Ephemeral docs (6 duplicates - 3 pairs):**
+   - `home-manager/EPHEMERAL_HOME_PRACTICES.md` ↔ `home-manager/ideas/ephemeral-home-practices/EPHEMERAL_HOME_PRACTICES.md`
+   - `home-manager/EPHEMERALITY_STRATEGY.md` ↔ `home-manager/ideas/ephemeral-home-practices/EPHEMERALITY_STRATEGY.md`
+   - `home-manager/EPHEMERAL_RESOURCES.md` ↔ `home-manager/ideas/ephemeral-home-practices/EPHEMERAL_RESOURCES.md`
+
+2. **GUI Apps doc (2 copies):**
+   - `home-manager/GUI_APPS_ADDED.md` ↔ `home-manager/installed-pkgs/GUI_APPS_ADDED.md`
+
+3. **Node2nix docs (2 copies each):**
+   - `home-manager/NODE2NIX_INTEGRATION.md` ↔ `home-manager/node2nix/NODE2NIX_INTEGRATION.md`
+   - `home-manager/NPM_PACKAGES_INVENTORY.md` ↔ `home-manager/node2nix/NPM_PACKAGES_INVENTORY.md`
+
+4. **Migration findings (2 copies - different contexts):**
+   - `home-manager/MIGRATION_FINDINGS.md` ↔ `home-manager/decoupling-from-nixos-config/MIGRATION_FINDINGS.md`
+
+### Broken Cross-References Found
+
+Files referencing non-existent files:
+- `02-syncthing-setup.md` → `03-rclone-setup.md` (missing)
+- `continue.dev/README.md` → `MODELS.md`, `TROUBLESHOOTING.md` (missing)
+- `backup-gdrive-home-dir-with-syncthing/README.md` → `01-architecture-overview.md`, `06-troubleshooting.md`, `07-best-practices.md` (missing)
+
+### Tools Breakdown (commons/toolbox)
+
+| Tool | Files | Files List |
+|------|-------|------------|
+| atuin | 1 | ATUIN.md |
+| copyq | 1 | COPYQ.md |
+| kde-connect | 2 | KDE_CONNECT_PLASMA_INTEGRATION_NOTE.md, QUICK_START_TROUBLESHOOTING.md |
+| kitty | 6 | README.md, KITTY_GUIDE.md, DOCUMENTATION.md, CONFIGURATION_SUGGESTIONS.md, SESSION_SUMMARY.md, TOOLS_INSTALLATION.md |
+| llm-cli | 1 | TOOLS_DOCUMENTATION.md |
+| navi | 1 | NAVI.md |
+| semantic-grep | 1 | README.md |
+| vscodium | 4 | README.md, PLAN.md, TODO.md, NEW_SESSION_PROMPT.md |
+
+### Integrations Breakdown (commons/integrations)
+
+| Integration | Files | Merge Target |
+|-------------|-------|--------------|
+| atuin-claude-code-bash-history | 2 | tools/atuin.md |
+| backup-gdrive-home-dir-with-syncthing | 8 | sync/syncthing.md |
+| rclone-gdrive-sync | 2 | sync/rclone-gdrive.md |
+| semantic-search-tools | 1 | archive/ |
+| CHROME_PLASMA_INTEGRATION | 1 | archive/ |
+
+---
 
 #### Commit
 No commit needed - this is analysis only.
 
 #### Success Criteria
-- [ ] Complete inventory table created
-- [ ] All directories catalogued
-- [ ] Cross-references documented
-- [ ] No files modified
+- [x] Complete inventory table created
+- [x] All directories catalogued
+- [x] Cross-references documented
+- [x] No files modified
 
 ---
 
