@@ -1,8 +1,8 @@
 # Master TODO - My Modular Workspace
 
 **Project:** my-modular-workspace
-**Last Updated:** 2025-11-26 02:00
-**Current Phase:** Continue.dev Integration Planning Complete
+**Last Updated:** 2025-11-29 21:50
+**Current Phase:** nix-ld & MCP Servers Fix Complete
 **Working Directory:** `/home/mitsio/.MyHome/MySpaces/my-modular-workspace/`
 
 ---
@@ -322,9 +322,23 @@ docs/home-manager/MIGRATION_FINDINGS.md
 - [x] Fix yamllint and pass quality checks
 - [x] Migrate systemd service wrapper to use ansible-playbook
 - [x] Add ansible + ansible-lint + yamllint to home.packages
-- [ ] Run home-manager switch to apply changes
+- [x] Run home-manager switch to apply changes (2025-11-29)
 - [ ] Test systemd service with ansible playbook
 - [ ] Migrate `gdrive-backup.yml` playbook (optional)
+
+#### nix-ld and MCP Servers Fix (COMPLETED 2025-11-29)
+
+**Summary:** `sessions/summaries/29-11-2025_SUMMARY_NIX_LD_MCP_SERVERS_FIX.md`
+
+- [x] Enable `programs.nix-ld.enable = true;` in NixOS configuration
+- [x] Run `sudo nixos-rebuild switch` to apply nix-ld
+- [x] Fix `sequential-thinking-mcp` package name in local-mcp-servers.nix
+- [x] Add `~/.local/bin` to sessionPath for uv tools
+- [x] Run successful home-manager switch with all MCP servers
+- [x] Update DEBUGGING_AND_MAINTENANCE.md with new error types (sections 6-8)
+- [ ] **kubectl-rook-ceph**: Re-enable when nixpkgs-unstable fixes hash mismatch
+- [ ] **MyVault.backup**: Clean up symlink backup conflicts
+- [ ] **gdrive-monthly-backup.service**: Investigate why service failed
 
 ### 6. Migration & Conflict Prevention
 
@@ -492,11 +506,30 @@ docs/home-manager/MIGRATION_FINDINGS.md
 
 ### 11. Chezmoi Migration
 
-- [ ] Audit current dotfiles under management
-- [ ] Create chezmoi templates for configs
-- [ ] Set up encryption for sensitive dotfiles
-- [ ] Test chezmoi apply workflow
-- [ ] Migrate from home-manager dotfile management to chezmoi where appropriate
+**Status:** IN PROGRESS (Week 48, 2025-11-29)
+**Documentation:**
+- ADR: `docs/adrs/ADR-005-CHEZMOI_MIGRATION_CRITERIA.md`
+- Status: `docs/chezmoi/MIGRATION_STATUS.md`
+
+#### Completed (2025-11-29)
+- [x] Audit current dotfiles under management
+- [x] Fix .chezmoiignore with comprehensive patterns
+- [x] Simplify repo structure (create `_staging/` directory)
+- [x] Remove duplicates and large files (FiraCode.zip, duplicate dirs)
+- [x] Migrate kitty config (Catppuccin Mocha theme)
+- [x] Migrate git config (dot_gitconfig.tmpl)
+- [x] Create ADR-005 for migration criteria
+- [x] Update README.md with current structure
+
+#### Pending
+- [ ] Push dotfiles repo changes to origin
+- [ ] Push docs repo changes to origin
+- [ ] Push home-manager repo changes to origin
+- [ ] Test chezmoi apply on fresh terminal
+- [ ] Migrate cline config (simple JSON, low effort)
+- [ ] Set up age encryption for sensitive dotfiles
+- [ ] Integrate KeePassXC with chezmoi templates
+- [ ] Consider migrating: Firefox settings, VSCodium settings
 
 ### 12. NixOS to Fedora Atomic Migration Planning
 
