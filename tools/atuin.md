@@ -1,18 +1,34 @@
 # Atuin - Modern Shell History
 
+**Last Updated:** 2025-11-29
+**Sources Merged:** ATUIN.md, CLAUDE_CODE_AND_ATUIN_INTEGRATION_TESTING_GUIDE.md
+**Maintainer:** Mitsos
+
 **Official:** https://atuin.sh/
 **GitHub:** https://github.com/atuinsh/atuin
 **Docs:** https://docs.atuin.sh/
 
 ---
 
-## What is Atuin?
+## Table of Contents
+
+- [Overview](#overview)
+- [Quick Start](#quick-start)
+- [Daily Usage](#daily-usage)
+- [Configuration](#configuration)
+- [Claude Code Integration](#claude-code-integration)
+- [Troubleshooting](#troubleshooting)
+- [References](#references)
+
+---
+
+## Overview
 
 Modern shell history manager that replaces `.bash_history` with:
-- 🔐 **Encrypted sync** across machines
-- 🔍 **Fuzzy search** with context (directory, exit code, duration)
-- 🌐 **Cross-machine** history
-- 🔒 **Privacy-focused** (end-to-end encrypted)
+- **Encrypted sync** across machines
+- **Fuzzy search** with context (directory, exit code, duration)
+- **Cross-machine** history
+- **Privacy-focused** (end-to-end encrypted)
 
 **Installation:** `home-manager/atuin.nix` (package only)
 **Configuration:** `dotfiles/dot_config/atuin/config.toml` (managed by chezmoi)
@@ -37,11 +53,7 @@ atuin import auto
 atuin sync
 ```
 
----
-
-## Restore on New Workspace
-
-When setting up a new machine with your dotfiles:
+### Restore on New Workspace
 
 ```bash
 # 1. Install atuin (via home-manager)
@@ -55,8 +67,6 @@ atuin sync
 
 # Done! Your entire shell history is now available
 ```
-
-**That's it!** All your command history from all machines is now available.
 
 ---
 
@@ -90,9 +100,7 @@ atuin history list
 atuin history list --limit 20
 ```
 
----
-
-## Search Filters
+### Search Filters
 
 ```bash
 # Commands from specific directory
@@ -110,28 +118,6 @@ atuin search --after "1 day ago"
 # Commands from specific host
 atuin search --host shoshin
 ```
-
----
-
-## Key Features
-
-### 1. Context-Aware Search
-See when/where/how each command was run:
-- Directory path
-- Exit code (success/failure)
-- Duration
-- Timestamp
-- Hostname
-
-### 2. Privacy & Security
-- **Local:** Stored in `~/.local/share/atuin/history.db`
-- **Remote:** End-to-end encrypted (server can't read your history)
-- **Key:** Encryption key in `~/.local/share/atuin/key` (backup this!)
-
-### 3. Multi-Machine Sync
-- Auto-syncs every 10 minutes (configurable)
-- All machines share same history
-- Works offline, syncs when online
 
 ---
 
@@ -154,27 +140,74 @@ programs.atuin = {
 };
 ```
 
-**To change settings:**
-1. Edit `atuin.nix`
-2. Run `home-manager switch`
-3. Reload shell
+### Key Features
+
+1. **Context-Aware Search** - See when/where/how each command was run
+2. **Privacy & Security** - End-to-end encrypted (server can't read history)
+3. **Multi-Machine Sync** - Auto-syncs every 10 minutes
+
+### Important Paths
+
+- **Local DB:** `~/.local/share/atuin/history.db`
+- **Encryption key:** `~/.local/share/atuin/key` (backup this!)
 
 ---
 
-## Useful Commands
+## Claude Code Integration
 
+Atuin integrates with Claude Code via the `bash-history-mcp` tool.
+
+### Architecture
+
+```
+Claude Code → Bash Tool → PostToolUse Hook → Atuin DB
+                                              ↑
+Claude Code ← bash-history MCP ← Atuin DB ───┘
+```
+
+### Configuration (Claude settings.json)
+
+**PostToolUse Hook** (Write to Atuin):
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{
+          "type": "command",
+          "command": "bunx github:nitsanavni/bash-history-mcp hook"
+        }]
+      }
+    ]
+  }
+}
+```
+
+**MCP Server** (Read from Atuin):
+```json
+{
+  "mcpServers": {
+    "bash-history": {
+      "command": "bunx",
+      "args": ["github:nitsanavni/bash-history-mcp", "mcp"]
+    }
+  }
+}
+```
+
+### Testing Integration
+
+**Test Write Path:**
 ```bash
-# Statistics
-atuin stats              # Show usage statistics
+# In Claude Code, run a command, then verify:
+atuin history search "test-from-claude"
+```
 
-# Export
-atuin history export     # Export all history
-
-# Delete
-atuin history delete <id>  # Delete specific command
-
-# Re-import
-atuin import auto        # Re-import bash history
+**Test Read Path:**
+```
+# Ask Claude Code:
+"Use the bash-history MCP tool to show my last 10 shell commands"
 ```
 
 ---
@@ -182,6 +215,7 @@ atuin import auto        # Re-import bash history
 ## Troubleshooting
 
 ### Sync Issues
+
 ```bash
 # Check status
 atuin sync --status
@@ -191,6 +225,7 @@ atuin sync --force
 ```
 
 ### Re-import History
+
 ```bash
 # If history seems incomplete
 atuin import auto
@@ -198,10 +233,21 @@ atuin sync
 ```
 
 ### Reset (DANGER)
+
 ```bash
 # Delete local database (will re-sync from server)
 rm ~/.local/share/atuin/history.db
 atuin sync
+```
+
+### Hook Not Running?
+
+```bash
+# Check if bunx works
+bunx --version
+
+# Test hook manually
+echo '{"tool":"Bash","command":"ls","exit_code":0}' | bunx github:nitsanavni/bash-history-mcp hook
 ```
 
 ---
@@ -212,23 +258,6 @@ atuin sync
 2. **Use context filters** - Search by directory/host for better results
 3. **Check failed commands** - `atuin search --exclude-exit 0` to debug
 4. **Regular sync** - Atuin auto-syncs, but you can force with `atuin sync`
-
----
-
-## Migration from .bash_history
-
-**After Atuin setup:**
-- `.bash_history` remains unchanged (backup)
-- New commands go to Atuin
-- `Ctrl+R` uses Atuin search
-- Regular arrow keys work for session history
-
-**Advantages over .bash_history:**
-- ✅ Sync across machines (encrypted)
-- ✅ Search with context
-- ✅ Never lose history (cloud backup)
-- ✅ No security risks (encrypted)
-- ✅ Better search (fuzzy, filters)
 
 ---
 
@@ -246,15 +275,12 @@ See: https://docs.atuin.sh/self-hosting/
 
 ---
 
-## Next Steps After Install
+## References
 
-1. ✅ Configured in `atuin.nix`
-2. ⏳ Run `home-manager switch`
-3. ⏳ Register: `atuin register -u mitsio -e dtsioumas0@gmail.com`
-4. ⏳ Import: `atuin import auto`
-5. ⏳ Test: Press `Ctrl+R` and search!
+- **Official Docs:** https://docs.atuin.sh/
+- **GitHub:** https://github.com/atuinsh/atuin
+- **bash-history-mcp:** https://github.com/nitsanavni/bash-history-mcp
 
 ---
 
-**Last Updated:** 2025-11-18
-**Config:** `home-manager/atuin.nix`
+*Migrated from docs/commons/toolbox/atuin/ and docs/commons/integrations/atuin-claude-code-bash-history/ on 2025-11-29*
