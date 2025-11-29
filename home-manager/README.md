@@ -1,90 +1,66 @@
-# My Home-Manager Flake
+# Home Manager Documentation
 
-**Portable, declarative user environment configuration**
-
+**Last Updated:** 2025-11-29
 **User:** mitsio
 **Strategy:** Standalone home-manager with unstable packages
-**Status:** Phase 1 - Monolithic (working), Phase 2 - Modular (planned)
+
+---
+
+## Available Guides
+
+| Guide | Description |
+|-------|-------------|
+| [ephemeral.md](ephemeral.md) | Ephemerality strategy & impermanence |
+| [node2nix.md](node2nix.md) | NPM package management with node2nix |
+| [DEBUGGING_AND_MAINTENANCE.md](DEBUGGING_AND_MAINTENANCE.md) | Build debugging guide |
+| [migration-findings.md](migration-findings.md) | NixOS to Home-Manager migration |
+| [migration-plan.md](migration-plan.md) | Migration plan details |
+| [git-hooks-integration.md](git-hooks-integration.md) | Pre-commit hooks setup |
+| [SYMLINK-QUICK-REFERENCE.md](SYMLINK-QUICK-REFERENCE.md) | Symlink management |
 
 ---
 
 ## Architecture
 
-See: [ADR-001: NixOS System (Stable) vs Home-Manager (Unstable)](../my-modular-workspace-decoupling-home/docs/ADR-001-nixpkgs-stable-vs-unstable.md)
-
 **System (NixOS - stable 25.05):**
 - Base system, NVIDIA, KDE Plasma
 - Virtualization/containerization daemons
-- Minimal, stable base
 
 **Home-Manager (unstable):**
 - ALL user packages (browsers, apps, dev tools)
-- Latest versions from unstable
-- ~100+ packages
-- Full portability
+- ~100+ packages, full portability
 
 ---
 
 ## Usage
 
-### Build & Apply
-
 ```bash
-# First time (generates flake.lock)
-cd ~/.config/my-home-manager-flake
-nix flake lock
-
 # Apply configuration
 home-manager switch --flake .#mitsio@shoshin
-```
 
-### Update All Packages
-
-```bash
-# Update flake inputs (all packages!)
+# Update all packages
 nix flake update
-
-# Apply updates
 home-manager switch --flake .#mitsio@shoshin
 ```
 
 ---
 
-## Hosts
+## Current Modules
 
-- **mitsio@shoshin** - NixOS desktop (current)
-- **mitsio@kinoite** - Fedora Kinoite (future)
-- **mitsio@wsl-workspace** - WSL (future)
-
----
-
-## Current State (Phase 1)
-
-**Monolithic structure:**
-- `flake.nix` - Standalone home-manager flake (unstable)
-- `home.nix` - Main entry (imports all modules)
-- `shell.nix` - Bash config, aliases
-- `claude-code.nix` - Claude Code CLI wrapper
-- `kitty.nix` - Kitty terminal
-- `vscodium.nix` - VSCodium settings
-- `keepassxc.nix` - KeePassXC + vault sync
-- `plasma.nix` - KDE Plasma user settings
-
-**Phase 2 (planned):** Modular refactor following skeleton pattern
+| Module | Purpose |
+|--------|---------|
+| `home.nix` | Main entry |
+| `shell.nix` | Bash config, aliases |
+| `kitty.nix` | Terminal config |
+| `vscodium.nix` | IDE settings |
+| `keepassxc.nix` | Password manager |
+| `syncthing-myspaces.nix` | File sync |
+| `rclone-gdrive.nix` | Cloud backup |
 
 ---
 
-## Session
+## Related Documentation
 
-**Date:** 2025-11-17
-**Session:** my-modular-workspace-decoupling-home
-**Docs:** `~/my-modular-workspace-decoupling-home/docs/`
-
----
-
-## Notes
-
-- Username changed: `mitso` → `mitsio`
-- All paths use `${config.home.homeDirectory}` (portable!)
-- No hardcoded paths
-- Ready for multi-OS deployment (NixOS, Fedora, etc.)
+- [../nixos/](../nixos/) - NixOS system configuration
+- [../tools/](../tools/) - Tool-specific guides
+- [../sync/](../sync/) - Synchronization setup
