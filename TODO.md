@@ -1,8 +1,8 @@
 # Master TODO - My Modular Workspace
 
 **Project:** my-modular-workspace
-**Last Updated:** 2025-11-30 17:45
-**Current Phase:** Home-Manager Enhancements (Week 48-49)
+**Last Updated:** 2025-12-01
+**Current Phase:** Kitty Terminal Enhancements + Home-Manager Enhancements (Week 48-49)
 **Working Directory:** `/home/mitsio/.MyHome/MySpaces/my-modular-workspace/`
 
 ---
@@ -445,7 +445,206 @@ docs/home-manager/MIGRATION_FINDINGS.md
 - [ ] **MyVault.backup**: Clean up symlink backup conflicts
 - [ ] **gdrive-monthly-backup.service**: Investigate why service failed
 
-### 6. Sync & Backup Infrastructure ✅
+### 6. Kitty Terminal Enhancements
+
+**Status:** PLANNED (Config exists but enhancements not implemented)
+**Goal:** Enhance kitty terminal with better usability and optional integrations
+**Estimated Time:** 30 mins - 3 hours (depending on scope)
+**Documentation:**
+- Plan (Basic): `docs/plans/kitty-enhancements-plan.md`
+- Plan (Zellij): `docs/plans/kitty-zellij-phase1-plan.md`
+- Integration (Autocomplete): `docs/integrations/kitty-autocomplete-integration.md`
+- Current Config: `dotfiles/dot_config/kitty/kitty.conf`
+
+**Current State:**
+- ✅ Kitty installed with Catppuccin Mocha theme
+- ✅ Configured with transparency (0.95), blur (32)
+- ✅ Managed via chezmoi at `dotfiles/dot_config/kitty/`
+- ❌ Basic enhancements marked complete but NOT implemented in config
+
+---
+
+#### Phase 1: Basic Kitty Enhancements (30-45 mins) 🎯 NEXT
+
+**Priority:** HIGH (Quick win, immediate usability improvement)
+**Risk:** LOW (non-breaking additions)
+**Reference:** `docs/plans/kitty-enhancements-plan.md`
+
+##### 1.1 Add Right-Click Paste
+- [ ] Backup current kitty.conf: `cp ~/.config/kitty/kitty.conf ~/.config/kitty/kitty.conf.backup.$(date +%Y%m%d)`
+- [ ] Edit `dotfiles/dot_config/kitty/kitty.conf`
+- [ ] Add to MOUSE section: `mouse_map right press ungrabbed paste_from_clipboard`
+- [ ] Document: Comment added (2025-12-01)
+
+##### 1.2 Add Ctrl+Alt+Arrow Window Navigation
+- [ ] Edit `dotfiles/dot_config/kitty/kitty.conf`
+- [ ] Add to Window Management section:
+  ```conf
+  # Directional window navigation (Mitso addition 2025-12-01)
+  map ctrl+alt+left neighboring_window left
+  map ctrl+alt+right neighboring_window right
+  map ctrl+alt+up neighboring_window up
+  map ctrl+alt+down neighboring_window down
+  ```
+
+##### 1.3 Apply and Test Changes
+- [ ] Apply via chezmoi: `cd dotfiles && chezmoi apply`
+- [ ] Reload kitty config: `Ctrl+Shift+F5` in kitty
+- [ ] Test right-click paste
+- [ ] Test Ctrl+Alt+Arrow navigation (create splits first)
+- [ ] Verify existing shortcuts still work
+
+##### 1.4 Commit Changes
+- [ ] Stage changes: `git add dot_config/kitty/kitty.conf`
+- [ ] Commit: `git commit -m "feat(kitty): Add right-click paste and Ctrl+Alt+Arrow window navigation"`
+- [ ] Push to remote: `git push origin main`
+
+**Success Criteria:**
+- [ ] Right-click paste works
+- [ ] Ctrl+Alt+Arrow navigation works
+- [ ] Existing functionality unchanged
+- [ ] Changes committed to dotfiles repo
+
+---
+
+#### Phase 2: Zellij Terminal Multiplexer Integration (2-3 hours) 📋 OPTIONAL
+
+**Priority:** MEDIUM (Powerful enhancement for SRE workflows)
+**Risk:** LOW (well-planned, step-by-step)
+**Reference:** `docs/plans/kitty-zellij-phase1-plan.md`
+
+**What it includes:**
+- Terminal multiplexer (like tmux, but modern)
+- zjstatus beautiful status bar
+- Catppuccin Mocha theme matching kitty
+- Session persistence (detach/reattach)
+- Custom layouts (dev, ops)
+
+##### 2.1 Install Zellij via Home-Manager
+- [ ] Create `home-manager/zellij.nix`:
+  ```nix
+  { config, pkgs, ... }:
+  {
+    home.packages = with pkgs; [ zellij ];
+  }
+  ```
+- [ ] Import in `home-manager/home.nix`
+- [ ] Build: `home-manager build --flake .#mitsio@shoshin`
+- [ ] Switch: `home-manager switch --flake .#mitsio@shoshin`
+- [ ] Verify: `which zellij && zellij --version`
+
+##### 2.2 Configure Zellij with Catppuccin Theme
+- [ ] Create `~/.config/zellij/config.kdl` with theme
+- [ ] Create `~/.config/zellij/layouts/default.kdl`
+- [ ] Test launch: `zellij`
+- [ ] Add configs to chezmoi: `chezmoi add ~/.config/zellij/`
+
+##### 2.3 Install zjstatus Plugin
+- [ ] Download: `curl -L https://github.com/dj95/zjstatus/releases/latest/download/zjstatus.wasm -o ~/.config/zellij/plugins/zjstatus.wasm`
+- [ ] Configure in `config.kdl` with Catppuccin Mocha colors
+- [ ] Update default layout to use zjstatus
+- [ ] Test status bar appearance
+- [ ] Add plugin to chezmoi
+
+##### 2.4 Create Custom Layouts (Optional)
+- [ ] Create `~/.config/zellij/layouts/dev.kdl` (editor + terminal)
+- [ ] Create `~/.config/zellij/layouts/ops.kdl` (logs + monitor + shell)
+- [ ] Test layouts
+- [ ] Add to chezmoi
+
+##### 2.5 Create Navi Cheatsheets
+- [ ] Create `dotfiles/dot_local/share/navi/cheats/zellij.cheat`
+- [ ] Update `dotfiles/dot_local/share/navi/cheats/kitty.cheat` with new shortcuts
+- [ ] Add to chezmoi
+
+##### 2.6 Commit All Changes
+- [ ] Commit home-manager changes
+- [ ] Commit dotfiles changes (zellij configs + cheatsheets)
+- [ ] Push all repos
+
+**Success Criteria:**
+- [ ] Zellij installed and launches
+- [ ] zjstatus status bar working with correct colors
+- [ ] Custom layouts functional
+- [ ] Navi cheatsheets created
+- [ ] All changes committed
+
+---
+
+#### Phase 3: Autocomplete.sh AI Integration (1-2 hours) 🤖 OPTIONAL
+
+**Priority:** LOW (Nice-to-have, requires API keys)
+**Risk:** MEDIUM (external dependencies, API costs)
+**Reference:** `docs/integrations/kitty-autocomplete-integration.md`
+
+**What it includes:**
+- AI-powered command completion (double TAB for LLM suggestions)
+- Secure API key management via KeePassXC
+- Support for OpenAI, Anthropic, Groq, or local Ollama
+- Natural language to command translation
+
+##### 3.1 Install autocomplete.sh
+- [ ] Download: `wget -qO- https://autocomplete.sh/install.sh | bash`
+- [ ] Or manual review before install
+- [ ] Verify: `which autocomplete && autocomplete --version`
+
+##### 3.2 Setup API Keys in KeePassXC
+- [ ] Obtain API key (OpenAI/Anthropic/Groq)
+- [ ] Store in KeePassXC vault (Development/APIs/ group)
+- [ ] Store in secret-tool: `secret-tool store --label="OpenAI API Key" service openai key apikey`
+- [ ] Verify: `secret-tool lookup service openai key apikey`
+
+##### 3.3 Configure Bash via Chezmoi
+- [ ] Edit `dotfiles/dot_bashrc.tmpl`
+- [ ] Add autocomplete.sh configuration section:
+  - API key retrieval from secret-tool
+  - Model selection (gpt-4o-mini, llama-3.1-8b-instant, codellama)
+  - Context limits and security settings
+- [ ] Apply chezmoi: `chezmoi apply`
+- [ ] Reload bash: `source ~/.bashrc`
+
+##### 3.4 Configure Kitty Shortcuts (Optional)
+- [ ] Edit `dotfiles/dot_config/kitty/kitty.conf`
+- [ ] Add autocomplete.sh integration shortcuts:
+  - `Ctrl+Shift+A, U` - usage stats
+  - `Ctrl+Shift+A, M` - model selection
+  - `Ctrl+Shift+A, C` - config view
+- [ ] Apply chezmoi
+
+##### 3.5 Test Integration
+- [ ] Test basic completion: `git push<TAB><TAB>`
+- [ ] Test natural language: `# find all python files modified today<TAB><TAB>`
+- [ ] Test complex workflow suggestions
+- [ ] Verify API key security (not in plaintext)
+
+##### 3.6 Commit Changes
+- [ ] Commit dotfiles changes (bashrc template, kitty config)
+- [ ] Push to remote
+
+**Success Criteria:**
+- [ ] autocomplete.sh installed
+- [ ] API keys stored securely in KeePassXC
+- [ ] Double TAB triggers AI suggestions
+- [ ] No secrets in git
+- [ ] Configuration managed via chezmoi
+
+---
+
+**Overall Success Criteria:**
+- [ ] Phase 1 (Basic): Right-click paste + Ctrl+Alt+Arrow working
+- [ ] Phase 2 (Zellij): Terminal multiplexer integrated (if pursued)
+- [ ] Phase 3 (Autocomplete): AI completions working (if pursued)
+- [ ] All changes committed and pushed
+- [ ] Documentation updated with completion status
+
+**Related Documentation:**
+- Kitty Tool Guide: `docs/tools/kitty.md`
+- Kitty + Zellij Integration: `docs/integrations/kitty-zellij-integration.md`
+- Implementation Plans: `docs/plans/kitty-*.md`
+
+---
+
+### 7. Sync & Backup Infrastructure ✅
 
 **Status:** IN PROGRESS (Documentation ✅ Complete)
 **Goal:** Improve reliability, monitoring, and Android integration
