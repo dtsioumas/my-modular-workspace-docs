@@ -4,7 +4,7 @@
 **User:** mitsio
 **Strategy:** Standalone flake with nixpkgs-unstable
 **Last Updated:** 2025-11-30
-**Files:** 14 documents
+**Files:** 15 documents
 
 ---
 
@@ -58,7 +58,8 @@ When migrating to Fedora: **This configuration stays the same!**
 |-------|-------------|
 | [ephemeral.md](ephemeral.md) | Ephemerality strategy & impermanence |
 | [node2nix.md](node2nix.md) | NPM package management with node2nix |
-| [SYMLINK-QUICK-REFERENCE.md](SYMLINK-QUICK-REFERENCE.md) | Symlink management |
+| [SYMLINK-QUICK-REFERENCE.md](SYMLINK-QUICK-REFERENCE.md) | Symlink quick reference |
+| [symlink-research.md](symlink-research.md) | Declarative symlink tools research |
 | [git-hooks-integration.md](git-hooks-integration.md) | Pre-commit hooks setup |
 
 ### Maintenance
