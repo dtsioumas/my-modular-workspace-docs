@@ -1,19 +1,19 @@
 # Documentation Repository Refactoring Plan
 
 **Created:** 2025-11-29
-**Updated:** 2025-11-30 03:52 EET
-**Status:** Phase 2 Planning Complete
+**Updated:** 2025-11-30 18:20 EET
+**Status:** Phase 2 IN PROGRESS
 **Priority:** HIGH
-**Version:** 4.0 - Phase 2 Compaction
+**Version:** 5.0 - Phase 2 Partial Execution
 
 ---
 
 ## Quick Navigation
 
 - [Phase 1 Summary](#phase-1-summary-complete)
-- [Phase 2 Plan](#phase-2-further-compaction)
-- [Target Structure](#phase-2-target-structure)
-- [Detailed Phases](#phase-2-detailed-phases)
+- [Phase 2 Progress](#phase-2-progress)
+- [Remaining Work](#remaining-phase-2-work)
+- [Current Structure](#current-structure)
 
 ---
 
@@ -22,38 +22,75 @@
 ### Phase 1 (Complete - 2025-11-29)
 Reduced 121 files to 82 files. Merged tools/, sync/, created archive/.
 
-### Phase 2 (This Plan - 2025-11-30)
-Further compaction: **76 → ~57 files** (-19 files)
+### Phase 2 (In Progress - 2025-11-30)
 
-**Key Goals:**
-1. Archive dated plans (17-11-2025)
-2. Expand integrations/ with KeePassXC content
-3. Compact chezmoi/ (11 → 6 files)
-4. Compact home-manager/ (14 → 9 files)
-5. Clean up URL lists and duplicates
+**Completed Today:**
+- ✅ Removed duplicate home-manager plans (-3,233 lines)
+- ✅ Updated READMEs with architecture diagrams
+- ✅ Integrated session content into TODO.md
+- ✅ Cleaned up archive/ (removed sessions/, moved research docs)
+- ✅ Added sync/ documentation (4 new files)
+- ✅ Moved semantic-search plan to plans/
+- ✅ Moved symlink research to home-manager/
+
+**Still TODO:**
+- [ ] Compact chezmoi/ (11 → 6 files)
+- [ ] Compact home-manager/ migration files
+- [ ] Remove URL lists (NIXOS_URLS.md, USEFULL_URLS.md)
 
 ---
 
-## Phase 1 Summary (Complete)
+## Phase 2 Progress
 
-**Commits:**
-- `7ec38c5` - Remove duplicates, consolidate home-manager plans (-3,233 lines)
-- `66c580b` - Update READMEs
-- Previous phases: 10 total
+### Commits Today (2025-11-30)
 
-**Current State (76 files):**
+| Commit | Description |
+|--------|-------------|
+| `7ec38c5` | Remove duplicates, consolidate home-manager plans |
+| `3646218` | Add Phase 2 compaction plan |
+| `4047cad` | Clarify system vs user configuration scope |
+| `bcce7e2` | Integrate home-manager enhancements session into TODO.md |
+| `57596d0` | Clean up archive/, move files to proper directories |
+| (pending) | Add sync/ documentation, update plan |
+
+### Archive Cleanup (Done)
+
+**Before:** 10 files, 3 subdirectories
+**After:** 5 files, 1 subdirectory (nixos-experiments/)
+
+| Action | File | New Location |
+|--------|------|--------------|
+| DELETE | archive/sessions/* | (integrated into TODO.md) |
+| DELETE | archive/plans/continue-dev-*.md | (superseded by tools/) |
+| MOVE | DECLARATIVE_SYMLINK_TOOLS_RESEARCH.md | home-manager/symlink-research.md |
+| MOVE | SEMANTRIC_SEARCH_AND_CLAUDE_EXPORTER_INTEGRATION_PLAN.md | plans/semantic-search-integration.md |
+| CREATE | archive/README.md | (policy doc) |
+
+### Sync Documentation (Added)
+
+| New File | Description |
+|----------|-------------|
+| sync/deployment.md | Deployment guide |
+| sync/disaster-recovery.md | Rollback procedures |
+| sync/ansible-playbooks.md | Playbook reference |
+| sync/monitoring.md | Health checks |
+
+---
+
+## Current Structure
+
 ```
-docs/
-├── tools/           # 12 files - DONE
-├── sync/            # 4 files - DONE
+docs/                           # ~80 files
+├── tools/           # 12 files ✅
+├── sync/            # 8 files ✅ (+4 new)
 ├── nixos/           # 6 files
-├── home-manager/    # 14 files - NEEDS COMPACTION
-├── chezmoi/         # 11 files - NEEDS COMPACTION
+├── home-manager/    # 15 files (+1 symlink-research.md)
+├── chezmoi/         # 11 files - TODO: compact to 6
 ├── ansible/         # 5 files
-├── adrs/            # 5 files - KEEP
-├── archive/         # 8 files
-├── plans/           # 7 files - NEEDS CLEANUP
-├── integrations/    # 1 file - NEEDS EXPANSION
+├── adrs/            # 5 files ✅
+├── archive/         # 5 files ✅ (cleaned)
+├── plans/           # 8 files (+1 semantic-search)
+├── integrations/    # 1 file
 └── root             # 3 files
 ```
 

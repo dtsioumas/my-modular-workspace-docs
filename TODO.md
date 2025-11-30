@@ -445,22 +445,166 @@ docs/home-manager/MIGRATION_FINDINGS.md
 - [ ] **MyVault.backup**: Clean up symlink backup conflicts
 - [ ] **gdrive-monthly-backup.service**: Investigate why service failed
 
-### 6. Migration & Conflict Prevention
+### 6. Sync & Backup Infrastructure ✅
 
-**Purpose:** Track items needing migration to avoid conflicts
+**Status:** IN PROGRESS (Documentation ✅ Complete)
+**Goal:** Improve reliability, monitoring, and Android integration
+**Estimated Time:** 6-8 hours total
+**Documentation:** [docs/sync/](sync/) - Comprehensive guides created 2025-11-30
 
-#### Completed Cleanup (2025-11-23)
-- [x] Removed `vscode-extensions-update` service/timer
-- [x] Removed `cline-update` service/timer
-- [x] Resolved symlink conflicts with `-b backup`
-- [x] Backed up `~/MyVault` and Firefox profiles
+---
 
-#### Pending Migrations
-- [ ] `claude-code-update` service → node2nix derivation
-- [ ] `claude-code` activation script → proper Nix derivation
-- [ ] Verify all `symlinks.nix` targets exist in `~/.MyHome/`
-- [ ] Review Firefox/VSCodium configs for chezmoi migration
-- [ ] Document npm global packages migration strategy
+#### ✅ Phase 7: Documentation (COMPLETED 2025-11-30)
+- [x] Create docs/sync/deployment.md
+- [x] Create docs/sync/disaster-recovery.md
+- [x] Create docs/sync/ansible-playbooks.md
+- [x] Create docs/sync/monitoring.md
+- [x] Create docs/adrs/ADR-006-REJECT-ROLEHIPPIE-RCLONE.md
+- [x] Enhance docs/sync/conflicts.md with prevention strategies
+- [x] Update docs/sync/README.md navigation
+- [x] Create session index: sessions/sync-integration/README.md
+- [x] Create git recovery case study: archives/issues/2025-11-17-git-repository-recovery/
+- [x] Clean up sessions/sync-integration/ directory
+
+---
+
+#### Phase 1: Android Syncthing Setup (HIGH - 30 min)
+- [ ] Install Syncthing app on Android (xiaomi-poco-x6)
+- [ ] Get desktop Syncthing device ID: `syncthing -device-id`
+- [ ] Add desktop device on Android
+- [ ] Get Android device ID from Syncthing app
+- [ ] Add Android to NixOS config: `modules/workspace/syncthing-myspaces.nix`
+- [ ] Rebuild NixOS: `sudo nixos-rebuild switch`
+- [ ] Accept connection on desktop (Web GUI: http://localhost:8384)
+- [ ] Test bidirectional sync (create test files)
+
+**Priority:** 🔴 HIGH
+**Benefit:** Real-time sync to mobile device
+
+---
+
+#### Phase 2: Conflict Resolution (HIGH - 15 min)
+- [x] ~~Delete 12 Obsidian workspace.json conflicts~~ ✅ Resolved 2025-11-30
+- [x] ~~Rename 2 KeePassXC conflicts as backups~~ ✅ Archived 2025-11-30
+- [ ] Review KeePassXC backups after 30 days (delete if identical)
+- [ ] Update docs/sync/conflicts.md status (mark as resolved)
+
+**Priority:** 🔴 HIGH (mostly done)
+**Status:** Obsidian conflicts resolved, KeePassXC archived
+
+---
+
+#### Phase 3: Fix Backup Playbook (HIGH - 1 hour)
+- [ ] Investigate gdrive-backup.yml failure
+- [ ] Read log: `/var/log/ansible/gdrive-backup-2025-11-21.log`
+- [ ] Diagnose root cause
+- [ ] Fix playbook errors
+- [ ] Test monthly backup workflow
+- [ ] Document fix in docs/sync/ansible-playbooks.md
+
+**Priority:** 🔴 HIGH
+**Issue:** Monthly backup currently failing
+
+---
+
+#### Phase 4: Logging Infrastructure (MEDIUM - 1-2 hours)
+- [ ] Create log directories via home-manager:
+  ```nix
+  home.activation.createAnsibleLogs = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    mkdir -p $HOME/.logs/ansible/rclone-gdrive-sync
+    mkdir -p $HOME/.logs/ansible/gdrive-backup
+    chmod 700 $HOME/.logs/ansible
+  '';
+  ```
+- [ ] Update `ansible/playbooks/rclone-gdrive-sync.yml` log path
+- [ ] Update `ansible/playbooks/gdrive-backup.yml` log path
+- [ ] Implement log rotation (systemd-tmpfiles or logrotate)
+- [ ] Configure 30-day retention
+- [ ] Migrate existing logs from `~/.cache/rclone/`
+
+**Priority:** 🟡 MEDIUM
+**Benefit:** Centralized logging with rotation
+
+---
+
+#### Phase 5: Enhanced Notifications (MEDIUM - 1 hour)
+- [ ] Add conflict file list to desktop notifications
+  ```yaml
+  {% if conflict_files %}
+  Conflicts:
+  {% for file in conflict_files %}
+  - {{ file }}
+  {% endfor %}
+  {% endif %}
+  ```
+- [ ] Add error preview from logs (first 5 lines)
+- [ ] Include log file path in all notifications
+- [ ] Test notification appearance
+
+**Priority:** 🟡 MEDIUM
+**Benefit:** Better awareness of sync issues
+
+---
+
+#### Phase 6: Monitoring & Health Checks (MEDIUM - 2-3 hours)
+
+##### 6.1 Google Drive Health Check Playbook
+- [ ] Create `ansible/playbooks/gdrive-health-check.yml`
+- [ ] Run `rclone check` between local and remote
+- [ ] Detect file corruption (checksum mismatches)
+- [ ] Check quota: `rclone about GoogleDrive-dtsioumas0:`
+- [ ] Log results to `~/.logs/maintenance/gdrive-health-YYYY-MM-DD.jsonl`
+- [ ] Desktop notification with results summary
+- [ ] Schedule: Daily (09:00) via systemd timer
+
+##### 6.2 Conflict Hunter Playbook
+- [ ] Create `ansible/playbooks/conflict-hunter.yml`
+- [ ] Find all `.conflictN` files in bisync workdir
+- [ ] Find all "conflicted copy" files in Google Drive
+- [ ] Analyze conflict age (how old are they?)
+- [ ] Group conflicts by file type (.md, .json, workspace.json, etc.)
+- [ ] Generate resolution recommendations
+- [ ] Log to `~/.logs/maintenance/gdrive-conflicts-YYYY-MM-DD.jsonl`
+- [ ] Desktop notification: "Found X conflicts. Age: oldest=Y, newest=Z"
+- [ ] Schedule: Daily (09:15) via systemd timer
+
+##### 6.3 Home-Manager Health Check (Optional)
+- [ ] Create `ansible/playbooks/home-manager-health-check.yml`
+- [ ] Check home-manager state version compatibility
+- [ ] Verify activation scripts completed successfully
+- [ ] Check symlinks integrity (`~/.config/`, `~/` dotfiles)
+- [ ] Verify systemd user services running
+- [ ] Check flake.lock freshness (warn if >30 days old)
+- [ ] Schedule: Weekly (Sunday 09:00)
+
+##### 6.4 NixOS System Health Check (Optional)
+- [ ] Create `ansible/playbooks/nixos-health-check.yml`
+- [ ] Check `/etc/nixos/` git status
+- [ ] Verify system generation matches expected version
+- [ ] Check for failed systemd services (system-level)
+- [ ] Check disk space on `/` and `/nix/store`
+- [ ] Schedule: Weekly (Sunday 10:00)
+
+**Priority:** 🟡 MEDIUM
+**Benefit:** Automated monitoring and early issue detection
+
+---
+
+**Success Criteria:**
+- [ ] Android syncing in real-time
+- [ ] All conflicts resolved
+- [ ] Monthly backup working
+- [ ] Centralized logging with rotation
+- [ ] Automated health checks running
+- [x] Complete documentation suite ✅
+
+**Related Documentation:**
+- **Deployment:** [docs/sync/deployment.md](sync/deployment.md)
+- **Monitoring:** [docs/sync/monitoring.md](sync/monitoring.md)
+- **Playbooks:** [docs/sync/ansible-playbooks.md](sync/ansible-playbooks.md)
+- **Conflicts:** [docs/sync/conflicts.md](sync/conflicts.md)
+- **Recovery:** [docs/sync/disaster-recovery.md](sync/disaster-recovery.md)
+- **ADR-006:** [docs/adrs/ADR-006-REJECT-ROLEHIPPIE-RCLONE.md](adrs/ADR-006-REJECT-ROLEHIPPIE-RCLONE.md)
 
 ---
 

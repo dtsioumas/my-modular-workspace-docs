@@ -1,19 +1,49 @@
-# RClone Bisync - Conflicts Review
+# RClone Bisync - Conflict Resolution & Prevention
 
-**Last Updated:** 2025-11-29 01:00
-**Previous Review:** 2025-11-21 22:17-22:18
+**Last Updated:** 2025-11-30
+**Previous Review:** 2025-11-29 01:00
 **Sync:** `~/.MyHome/` ↔ `GoogleDrive-dtsioumas0:MyHome/`
-**Status:** ✅ **Bisync Working** - Last sync: Nov 29 00:42 EET
+**Status:** ✅ **Bisync Working**
 
 ---
 
-## 🔴 CURRENT CONFLICTS (2025-11-29)
+## Table of Contents
 
-### Summary
-| Type | Count | Risk | Action |
-|------|-------|------|--------|
-| Obsidian workspace.json | 12 files | LOW | DELETE ALL |
-| KeePassXC vault backups | 2 files | MEDIUM | KEEP AS BACKUP |
+- [Current Conflicts](#current-conflicts-2025-11-29)
+- [Conflict Prevention Strategies](#conflict-prevention-strategies)
+- [Recommended Workflows](#recommended-workflows)
+- [How to Review Conflicts](#how-to-review-conflicts)
+- [Historical Conflicts](#historical-conflicts-previous-review)
+- [Automated Conflict Detection](#automated-conflict-detection)
+
+---
+
+## ✅ CONFLICT STATUS (Last Checked: 2025-11-30)
+
+### Current State
+
+**All conflicts resolved!** ✅
+
+| Type | Previous Count | Status | Action Taken |
+|------|----------------|--------|--------------|
+| Obsidian workspace.json | 12 files | ✅ RESOLVED | Deleted (safe - ephemeral files) |
+| KeePassXC vault backups | 2 files | ✅ ARCHIVED | Renamed as `.conflict-backup.kdbx` |
+
+**Check for new conflicts:**
+```bash
+find ~/.MyHome -name "*.conflict*" -type f
+# Currently: Only 2 archived KeePassXC backups
+```
+
+---
+
+## 📜 HISTORICAL CONFLICTS (2025-11-29 Review)
+
+### Summary from Nov 29
+| Type | Count | Risk | Resolution |
+|------|-------|------|------------|
+| Obsidian workspace.json | 12 files | LOW | ✅ Deleted Nov 30 |
+| KeePassXC vault backups | 2 files | MEDIUM | ✅ Archived as backups |
 
 ---
 
@@ -190,39 +220,266 @@ rm ~/.MyHome/.obsidian/workspace.json.conflict7
 
 ---
 
-## 🛡️ How to Avoid Conflicts in the Future
+## Conflict Prevention Strategies
 
-### 1. **Σταμάτα να κάνεις αλλαγές σε πολλές συσκευές ταυτόχρονα**
-- Κάνε changes μόνο στο local
-- Άφησε το bisync να συγχρονίσει
-- ΜΕΤΑ κάνε changes σε άλλη συσκευή
+### Understanding Conflict Causes
 
-### 2. **Σταμάτα να επεξεργάζεσαι αρχεία απευθείας στο Google Drive Web UI**
-- Το bisync δεν μπορεί να ξέρει ότι άλλαξες κάτι στο web
-- Κάνε ΟΛΑ τα edits locally και άφησε το bisync να τα στείλει
+**A conflict occurs when:**
+- Same file modified on BOTH local and remote since last sync
+- bisync cannot determine which version is "correct"
+- Both versions are preserved as `.conflictN` files
 
-### 3. **Σταμάτα να δουλεύεις με το ίδιο αρχείο σε >1 μηχάνημα**
-- Αν ΠΡΕΠΕΙ, χρησιμοποίησε **Syncthing για real-time sync**
-- Το bisync είναι για **backup**, όχι για **concurrent editing**
+**Common scenarios:**
+1. Editing on multiple devices without syncing first
+2. Editing in Google Drive web UI
+3. Using same file on >1 machine simultaneously
+4. Syncthing + bisync both modifying files
 
-### 4. **Κάνε bisync ΠΡΙΝ ξεκινήσεις δουλειά**
+---
+
+### Prevention Strategy 1: Sequential Editing
+
+**Rule:** Only edit on ONE device at a time
+
+**Workflow:**
+1. Sync BEFORE starting work: `sync-gdrive`
+2. Edit files locally
+3. Sync AFTER finishing work: `sync-gdrive`
+4. THEN switch to another device
+
+**Why this works:**
+- Each device gets latest version before editing
+- No overlapping modifications
+- bisync can determine file history
+
+---
+
+### Prevention Strategy 2: Never Edit in Google Drive Web UI
+
+**Rule:** ALL edits must be local
+
+**Why:**
+- Google Drive web edits happen "between" syncs
+- bisync sees remote changes without local history
+- Creates artificial conflicts
+
+**Exception:** Read-only access is fine
+
+---
+
+### Prevention Strategy 3: Use Syncthing for Active Work
+
+**Rule:** Real-time work → Syncthing, Backup → bisync
+
+**Setup:**
+```
+Active work files (editing now):
+  ~/.MyHome/MySpaces/my-modular-workspace/
+  ↓ Syncthing (real-time, P2P)
+  Android, Laptop
+
+All files (backup):
+  ~/.MyHome/
+  ↓ rclone bisync (hourly)
+  Google Drive
+```
+
+**Why this works:**
+- Syncthing handles concurrent edits gracefully
+- bisync only sees "finished" work
+- No conflicts from active editing
+
+---
+
+### Prevention Strategy 4: Sync Before Starting Work
+
+**Habit:** Always sync before opening files
+
 ```bash
-# Πριν αρχίσεις να δουλεύεις, τράβα τις αλλαγές από Google Drive
-systemctl --user start rclone-gdrive-sync.service
-# Wait for sync to complete
+# Morning workflow
+sync-gdrive          # Pull latest from Google Drive
+# WAIT for sync to complete
 # THEN start working
 ```
 
-### 5. **Enable automated sync με timer**
+**Automate with shell alias:**
 ```bash
-# Κάθε 1 ώρα (όχι κάθε 4h)
-systemctl --user enable rclone-gdrive-sync.timer
-systemctl --user start rclone-gdrive-sync.timer
+alias work='sync-gdrive && echo "✅ Synced. Ready to work!"'
 ```
 
-### 6. **Use Syncthing for real-time sync**
-- Για αρχεία που επεξεργάζεσαι ενεργά, χρησιμοποίησε **Syncthing** (real-time P2P)
-- Άφησε το **bisync** για **cloud backup μόνο**
+---
+
+### Prevention Strategy 5: Use Exclude Patterns
+
+**For files that change frequently on multiple devices:**
+
+Create `~/.config/rclone/bisync-filter.txt`:
+```
+# Exclude ephemeral Obsidian files
+- .obsidian/workspace.json
+- .obsidian/workspace-mobile.json
+- .obsidian/.trash/**
+
+# Exclude IDE state
+- .vscode/settings.json
+- .idea/workspace.xml
+
+# Exclude temp files
+- *.tmp
+- *.swp
+- *~
+```
+
+**Apply in playbook:**
+```yaml
+- name: Run bisync
+  command: |
+    rclone bisync ... \
+      --filters-file ~/.config/rclone/bisync-filter.txt
+```
+
+---
+
+### Prevention Strategy 6: Hourly Automatic Sync
+
+**Already configured!** Timer runs hourly.
+
+**Why this helps:**
+- Reduces window for conflicts (1h max)
+- Catches changes quickly
+- Less time between sync = less chance of overlap
+
+**Verify:**
+```bash
+systemctl list-timers rclone-bisync.timer
+```
+
+---
+
+## Recommended Workflows
+
+### Workflow 1: Single-Device User
+
+**Best for:** Working primarily on one machine (shoshin)
+
+```
+Morning:
+1. sync-gdrive (pull latest)
+2. Work on shoshin all day
+3. Automatic syncs happen hourly
+4. Evening: verify sync-gdrive-status
+
+Occasional laptop use:
+1. sync-gdrive on laptop
+2. Work on laptop
+3. sync-gdrive when done
+4. Switch back to shoshin
+5. sync-gdrive on shoshin
+```
+
+**Conflict risk:** 🟢 LOW
+
+---
+
+### Workflow 2: Multi-Device with Syncthing
+
+**Best for:** Frequent switching between devices
+
+```
+Setup:
+- Syncthing syncs MySpaces/ in real-time
+- bisync backs up ALL of MyHome/ hourly
+
+Daily use:
+1. Work on any device (Syncthing handles sync)
+2. Files sync within seconds
+3. bisync backs up to cloud hourly
+4. No manual intervention needed
+```
+
+**Conflict risk:** 🟢 VERY LOW
+
+---
+
+### Workflow 3: Mobile + Desktop
+
+**Best for:** Note-taking on phone, serious work on desktop
+
+```
+Phone (Syncthing):
+- Quick notes in Obsidian
+- Syncthing syncs to shoshin instantly
+
+Desktop (shoshin):
+- All serious work
+- Syncthing keeps phone updated
+- bisync backs up to cloud
+
+Google Drive:
+- Backup only (never edit here)
+```
+
+**Conflict risk:** 🟢 VERY LOW
+
+---
+
+## When to Use Which Tool
+
+| Scenario | Tool | Why |
+|----------|------|-----|
+| Real-time editing | Syncthing | Handles concurrent edits |
+| Cloud backup | rclone bisync | Reliable, automatic |
+| Mobile access | Syncthing | Real-time, works offline |
+| Cross-platform sync | Syncthing | Works everywhere |
+| Long-term archive | Google Drive (via bisync) | Cloud storage |
+
+---
+
+## Conflict-Free Architecture
+
+```
+┌─────────────────────────────────────────┐
+│  SYNCTHING P2P (Real-time, <1s)         │
+│  shoshin ↔ laptop ↔ Android             │
+│                                          │
+│  Folder: MySpaces/                       │
+│  Conflicts: Auto-resolved with versions │
+└─────────────────────────────────────────┘
+             │
+             │ (shoshin is hub)
+             ▼
+┌─────────────────────────────────────────┐
+│  RCLONE BISYNC (Hourly backup)          │
+│  shoshin → Google Drive                 │
+│                                          │
+│  Folder: MyHome/ (all files)            │
+│  Conflicts: Rare (only shoshin writes)  │
+└─────────────────────────────────────────┘
+```
+
+**Why this works:**
+- Syncthing handles all device synchronization
+- Only shoshin writes to Google Drive (via bisync)
+- No overlapping modifications to Google Drive
+- Conflicts only if you edit in Google Drive web UI (don't!)
+
+---
+
+## Best Practices Summary
+
+✅ **DO:**
+- Sync before starting work
+- Use Syncthing for active files
+- Let hourly timer run automatically
+- Review conflicts weekly
+- Delete obsolete conflicts after resolving
+
+❌ **DON'T:**
+- Edit same file on >1 device without syncing
+- Edit files in Google Drive web UI
+- Work during sync (wait for completion)
+- Ignore conflict notifications
+- Disable automatic timer
 
 ---
 

@@ -1,6 +1,7 @@
 # Sync Documentation
 
-**Last Updated:** 2025-11-29
+**Last Updated:** 2025-11-30
+**Files:** 8 documents
 
 This directory contains documentation for file synchronization tools.
 
@@ -8,9 +9,13 @@ This directory contains documentation for file synchronization tools.
 
 | Guide | Description |
 |-------|-------------|
+| [deployment.md](deployment.md) | Complete deployment guide for sync infrastructure |
+| [rclone-gdrive.md](rclone-gdrive.md) | Google Drive bisync backup reference |
 | [syncthing.md](syncthing.md) | P2P real-time sync between devices |
-| [rclone-gdrive.md](rclone-gdrive.md) | Google Drive bisync backup |
-| [conflicts.md](conflicts.md) | Conflict resolution procedures |
+| [ansible-playbooks.md](ansible-playbooks.md) | Ansible playbook reference and usage |
+| [monitoring.md](monitoring.md) | Health checks and monitoring procedures |
+| [conflicts.md](conflicts.md) | Conflict resolution and prevention |
+| [disaster-recovery.md](disaster-recovery.md) | Rollback and recovery procedures |
 
 ## Architecture
 

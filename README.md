@@ -2,7 +2,7 @@
 
 **Last Updated:** 2025-11-30
 **Status:** Active Development
-**Total Files:** 76 markdown documents
+**Total Files:** 80 markdown documents
 
 Documentation for a portable, declarative workspace configuration system built with NixOS, Home Manager, and modern tools.
 
@@ -32,14 +32,14 @@ Documentation for a portable, declarative workspace configuration system built w
 | Directory | Files | Description | README |
 |-----------|-------|-------------|--------|
 | [nixos/](nixos/) | 6 | **Root system** config (drivers, DE, sudo) | [nixos/README.md](nixos/README.md) |
-| [home-manager/](home-manager/) | 14 | **User environment** (portable, no sudo) | [home-manager/README.md](home-manager/README.md) |
+| [home-manager/](home-manager/) | 15 | **User environment** (portable, no sudo) | [home-manager/README.md](home-manager/README.md) |
 | [tools/](tools/) | 12 | Tool guides (atuin, kitty, navi, etc.) | [tools/README.md](tools/README.md) |
-| [sync/](sync/) | 4 | Syncthing + rclone sync guides | [sync/README.md](sync/README.md) |
+| [sync/](sync/) | 8 | Syncthing + rclone sync guides | [sync/README.md](sync/README.md) |
 | [chezmoi/](chezmoi/) | 11 | Dotfile management guides | [chezmoi/README.md](chezmoi/README.md) |
 | [ansible/](ansible/) | 5 | Automation playbook docs | [ansible/README.md](ansible/README.md) |
-| [adrs/](adrs/) | 5 | Architecture Decision Records | - |
-| [archive/](archive/) | 8 | Historical/deprecated docs | - |
-| [plans/](plans/) | 7 | Implementation plans | [plans/README.md](plans/README.md) |
+| [adrs/](adrs/) | 6 | Architecture Decision Records | - |
+| [archive/](archive/) | 5 | Historical/deprecated docs | [archive/README.md](archive/README.md) |
+| [plans/](plans/) | 8 | Implementation plans | [plans/README.md](plans/README.md) |
 
 ---
 
