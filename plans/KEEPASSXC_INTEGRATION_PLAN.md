@@ -1,7 +1,7 @@
 # KeePassXC Central Secret Manager - Implementation Plan
 
 **Created:** 2025-11-29
-**Status:** Phase 1-2 Complete ✅ | Phases 3-5 Pending
+**Status:** Phase 1-3 Complete ✅ | Phases 4-5 Pending
 **Author:** Mitsio + Claude Code (Planner Role)
 **Ultrathink Duration:** 7+ minutes (15 sequential thoughts)
 **Project:** my-modular-workspace
@@ -1530,9 +1530,129 @@ sk-ant-api03-Ck5de0J... ✅
 
 #### Next Phase Prerequisites
 
-Phase 3 (rclone Integration) can begin:
+Phase 3 (systemd Environment Integration - MODIFIED APPROACH) can begin:
 - [x] secret-tool working with KeePassXC entries
 - [x] .bashrc successfully loading secrets
-- [ ] Create rclone-config-password entry in KeePassXC
-- [ ] Encrypt rclone.conf with password
-- [ ] Update rclone systemd services
+- [x] Research authorization prompt issue (KeePassXC limitation identified)
+- [x] Design systemd-based solution
+
+---
+
+### Phase 3 Completion - 2025-12-01
+
+**Completed by:** Mitsio + Claude Code
+**Duration:** ~3 hours (including research and ultrathink)
+**Date:** 2025-12-01 01:30 EET
+
+#### Problem Discovered
+
+**Original Issue:**
+- Every terminal opening triggered KeePassXC authorization prompt
+- User wanted to keep `ConfirmAccessItem=true` and `ShowNotification=true` for security
+- But wanted KeePassXC to "remember" the authorization
+
+**Root Cause:**
+- **KeePassXC does NOT have a "remember this app" feature** for Secret Service
+- Each `secret-tool lookup` is treated as a new authorization request
+- Authorization decisions are NOT persisted (confirmed in GitHub Issue #9255)
+
+#### Solution: systemd User Environment Loading
+
+**Changed Approach:** Instead of loading secrets in `.bashrc` (runs for EVERY terminal), implemented systemd user service that runs ONCE at login.
+
+**Architecture:**
+```
+Login → graphical-session.target → load-keepassxc-secrets.service
+  ↓ (ONE authorization prompt)
+Secrets loaded into systemd user environment
+  ↓
+All terminals inherit environment variables automatically
+```
+
+#### Tasks Completed
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Research KeePassXC authorization behavior | ✅ | Used Web Research Workflow + Ultrathink |
+| Identify KeePassXC limitation (no app memory) | ✅ | Confirmed in v2.7.11 |
+| Design systemd environment solution | ✅ | Ultrathink analysis of 5 alternatives |
+| Implement load-keepassxc-secrets.service | ✅ | systemd oneshot service |
+| Simplify .bashrc to use systemd environment | ✅ | Removed complex caching logic |
+| Test and verify single prompt behavior | ✅ | Working perfectly |
+| Document systemd approach | ✅ | Created KEEPASSXC_SYSTEMD_SECRET_LOADING.md |
+
+#### Files Modified
+
+| File | Action | Description |
+|------|--------|-------------|
+| `home-manager/keepassxc.nix` | Modified | Added `load-keepassxc-secrets.service` systemd service |
+| `~/.local/share/chezmoi/dot_bashrc.tmpl` | Simplified | Removed tmpfs cache logic, just export systemd vars |
+| `docs/integrations/KEEPASSXC_SYSTEMD_SECRET_LOADING.md` | Created | Full documentation of systemd solution |
+
+#### systemd Service Implementation
+
+New service added to `home-manager/keepassxc.nix`:
+- Runs after `graphical-session.target`
+- Waits for KeePassXC Secret Service (max 30 seconds)
+- Loads secrets via `secret-tool lookup`
+- Sets environment variables with `systemctl --user set-environment`
+- Shows success notification
+- Service enabled and runs on every login
+
+#### Verification Results
+
+```bash
+# Service status
+$ systemctl --user status load-keepassxc-secrets.service
+● load-keepassxc-secrets.service
+     Active: active (exited)
+    Process: ExecStart=.../load-secrets.sh (status=0/SUCCESS)
+
+# Secrets in systemd environment
+$ systemctl --user show-environment | grep ANTHROPIC
+ANTHROPIC_API_KEY=sk-ant-api03-...
+
+# Works in all terminals
+$ bash -c 'echo ${ANTHROPIC_API_KEY:0:20}...'
+sk-ant-api03-Ck5de0J...
+```
+
+#### Issues Encountered & Resolutions
+
+1. **KeePassXC authorization prompt on every terminal**
+   - Root cause: KeePassXC doesn't remember app authorization decisions
+   - Solution: Load secrets ONCE via systemd at login, not in .bashrc
+
+2. **home-manager switch file conflict**
+   - Error: `/home/mitsio/bin/get-anthropic-key.sh` would be clobbered
+   - Solution: Used `-b backup` flag or manual backup
+
+3. **Service not created after home-manager switch**
+   - Issue: Activation didn't complete (file conflict)
+   - Solution: Manually backed up file, re-ran activation
+
+#### Architecture Decisions
+
+**Why systemd environment over alternatives:**
+
+| Alternative | Prompts | Security | Complexity | Chosen? |
+|-------------|---------|----------|------------|---------|
+| tmpfs cache (initial) | 1 per session | Medium | Medium | ❌ |
+| systemd environment | 1 per session | Medium | Low | ✅ |
+| Lazy loading | N per command | High | Low | ❌ |
+| ConfirmAccessItem=false | 0 | Low | Lowest | ❌ |
+
+**Benefits of systemd approach:**
+- Single point of truth (systemd user session)
+- Native systemd environment management
+- Easy debugging (`systemctl --user show-environment`)
+- Automatic cleanup on logout
+- Extensible (easy to add more secrets)
+
+#### Next Phase Prerequisites
+
+Phase 4 (Ansible Integration) can begin:
+- [x] Secrets available in systemd environment
+- [x] All processes can access secrets
+- [ ] Update Ansible playbooks to use environment variables
+- [ ] Test Ansible with systemd-loaded secrets
