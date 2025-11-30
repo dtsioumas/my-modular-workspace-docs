@@ -1,10 +1,10 @@
 # KeePassXC as Central Secret Manager for Modular Workspace
 
 **Created:** 2025-11-29
-**Status:** Phase 1 Complete ✅ | Phases 2-5 Pending
+**Status:** Phase 1-2 Complete ✅ | Phases 3-5 Pending
 **Author:** Mitsio + Claude Code
 **Project:** my-modular-workspace
-**Last Updated:** 2025-11-30
+**Last Updated:** 2025-11-30 (Phase 2 completed)
 
 ---
 
@@ -587,6 +587,7 @@ secret-tool lookup service rclone key config-password
 |------|--------|
 | 2025-11-29 | Initial document created from research session |
 | 2025-11-30 | **Phase 1 Complete**: libsecret installed, KDE Wallet disabled, FdoSecrets verified, helper scripts created |
+| 2025-11-30 | **Phase 2 Complete**: Chezmoi config added, API key entries created, .bashrc integration working |
 
 ---
 
@@ -641,8 +642,94 @@ secret-tool lookup service rclone key config-password
 
 ---
 
+## Phase 2 Implementation Details (2025-11-30)
+
+### What Was Done
+
+1. **Configured Chezmoi for KeePassXC**
+   - Updated `home-manager/chezmoi.nix`
+   - Added KeePassXC database path to `chezmoi.toml`
+   - Preserved existing chezmoi settings (git, diff, merge, data)
+
+2. **Created KeePassXC Entries**
+   - **Anthropic** entry: `service=anthropic`, `key=apikey`
+   - **GitHub-PAT** entry: `service=github`, `key=pat`
+   - **Important Discovery**: Entries must be in **root** of "Workspace Secrets", not subgroups!
+
+3. **Migrated .bashrc Secrets**
+   - **Architecture Decision**: Use home-manager instead of chezmoi for .bashrc
+   - Added KeePassXC secret retrieval to `home-manager/shell.nix`
+   - Uses `secret-tool lookup` (FdoSecrets) instead of `keepassxc` function (TTY issues)
+   - Graceful degradation: silent failure if database locked or tool missing
+
+4. **Created Bootstrap Guide**
+   - `~/.local/share/chezmoi/KEEPASSXC_BOOTSTRAP.md`
+   - Documents fresh install procedure
+   - Includes troubleshooting and recovery steps
+
+5. **Claude Code Settings** (SKIPPED)
+   - User uses Claude Code subscription, not API mode
+   - No `apiKey` needed in settings.json
+   - ANTHROPIC_API_KEY in .bashrc reserved for future CLI tools
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `home-manager/chezmoi.nix` | Added KeePassXC database config to chezmoi.toml |
+| `home-manager/shell.nix` | Added API key retrieval from KeePassXC via secret-tool |
+| `~/.local/share/chezmoi/dot_bashrc.tmpl` | Updated (but not used - kept home-manager approach) |
+| `~/.local/share/chezmoi/KEEPASSXC_BOOTSTRAP.md` | Created bootstrap guide |
+| `docs/plans/KEEPASSXC_INTEGRATION_PLAN.md` | Updated status, added Phase 2 log |
+
+### Architecture Decisions
+
+**Why home-manager instead of chezmoi for .bashrc?**
+- Chezmoi's `keepassxc` function requires TTY for password prompts
+- `secret-tool` works perfectly in bash init scripts (non-interactive)
+- All shell config stays in one place
+- Simpler integration, no conflicts
+
+**Why secret-tool instead of keepassxc function?**
+- No password prompt when database already unlocked
+- Works in non-interactive contexts (systemd services, scripts)
+- Direct FdoSecrets integration
+
+### Verification Results
+
+```bash
+# Secret Service access
+$ secret-tool lookup service anthropic key apikey
+sk-ant-api03-... ✅
+
+$ secret-tool lookup service github key pat
+github_pat_... ✅
+
+# Shell integration
+$ source ~/.bashrc
+$ echo ${ANTHROPIC_API_KEY:0:20}
+sk-ant-api03-... ✅
+```
+
+### Issues Resolved
+
+1. **Chezmoi TTY Errors**: `keepassxc` function requires interactive terminal
+   - Solution: Use `secret-tool` with FdoSecrets instead
+
+2. **.bashrc Management Conflict**: Both home-manager and chezmoi managing .bashrc
+   - Solution: Keep .bashrc in home-manager, add KeePassXC integration there
+
+3. **Entries in Subgroups Not Accessible**: FdoSecrets only exposes root-level entries
+   - Solution: Move entries to root of "Workspace Secrets" group
+
+4. **Claude Code API vs Subscription**: Confusion about which mode to use
+   - Solution: User confirmed subscription → skip apiKey in settings.json
+
+---
+
 **Next Steps:**
 1. ~~Review this plan with Mitsio~~ ✅
-2. Create ADR for secret management decision
+2. ~~Create ADR for secret management decision~~ (Phase 5)
 3. ~~Begin Phase 1 implementation~~ ✅
-4. **Begin Phase 2**: Add API keys to KeePassXC, configure chezmoi templates
+4. ~~Begin Phase 2: Add API keys to KeePassXC, configure chezmoi templates~~ ✅
+5. **Begin Phase 3**: rclone integration (HIGH PRIORITY - cleartext OAuth tokens!)

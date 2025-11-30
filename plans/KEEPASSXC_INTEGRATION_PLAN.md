@@ -1,11 +1,11 @@
 # KeePassXC Central Secret Manager - Implementation Plan
 
 **Created:** 2025-11-29
-**Status:** Phase 1 Complete ✅ | Phases 2-5 Pending
+**Status:** Phase 1-2 Complete ✅ | Phases 3-5 Pending
 **Author:** Mitsio + Claude Code (Planner Role)
 **Ultrathink Duration:** 7+ minutes (15 sequential thoughts)
 **Project:** my-modular-workspace
-**Last Updated:** 2025-11-30 (Phase 1 completed)
+**Last Updated:** 2025-11-30 (Phase 2 completed)
 
 ---
 
@@ -1448,4 +1448,91 @@ Phase 2 (Chezmoi Integration) can begin immediately:
 - [x] libsecret/secret-tool available
 - [x] FdoSecrets working
 - [x] Workspace Secrets group exposed
-- [ ] Create entries for API keys (Anthropic, GitHub-PAT) in Workspace Secrets
+- [x] Create entries for API keys (Anthropic, GitHub-PAT) in Workspace Secrets
+
+---
+
+### Phase 2 Completion - 2025-11-30
+
+**Completed by:** Mitsio + Claude Code
+**Duration:** ~2 hours
+**Date:** 2025-11-30 23:45 EET
+
+#### Tasks Completed
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Task 2.1: Configure Chezmoi for KeePassXC | ✅ | Added database path to chezmoi.toml |
+| Task 2.2: Create KeePassXC Entries | ✅ | Created Anthropic and GitHub-PAT entries |
+| Task 2.3: Migrate .bashrc secrets | ✅ | Migrated to home-manager shell.nix (not chezmoi) |
+| Task 2.4: Migrate Claude Code settings | ⏭️ | Skipped - using subscription, not API |
+| Task 2.5: Edge cases & bootstrap | ✅ | Created KEEPASSXC_BOOTSTRAP.md |
+
+#### Files Modified
+
+| File | Action | Description |
+|------|--------|-------------|
+| `home-manager/chezmoi.nix` | Modified | Added keepassxc database config to chezmoi.toml |
+| `home-manager/shell.nix` | Modified | Disabled programs.bash, migrated management to chezmoi |
+| `home-manager/shell.nix` | Reverted | Re-enabled for .bashrc, added KeePassXC integration |
+| `~/.local/share/chezmoi/dot_bashrc.tmpl` | Modified | Added KeePassXC secret retrieval via secret-tool |
+| `~/.local/share/chezmoi/KEEPASSXC_BOOTSTRAP.md` | Created | Bootstrap guide for fresh installs |
+
+#### KeePassXC Entries Created
+
+| Entry | Location | Attributes | Status |
+|-------|----------|------------|--------|
+| Anthropic | Workspace Secrets (root) | service=anthropic, key=apikey | ✅ |
+| GitHub-PAT | Workspace Secrets (root) | service=github, key=pat | ✅ |
+
+**Important Discovery:** Entries must be in the **root** of "Workspace Secrets", not in subgroups, for FdoSecrets to expose them.
+
+#### Verification Results
+
+```bash
+# secret-tool access
+$ secret-tool lookup service anthropic key apikey
+sk-ant-api03-Ck5de0J... ✅
+
+# .bashrc integration
+$ source ~/.bashrc
+$ echo ${ANTHROPIC_API_KEY:0:20}
+sk-ant-api03-Ck5de0J... ✅
+```
+
+#### Issues Encountered & Resolutions
+
+1. **Chezmoi TTY errors**: `keepassxc` function requires interactive password prompt
+   - Resolution: Used `secret-tool` with FdoSecrets instead
+
+2. **.bashrc management conflict**: Both home-manager and chezmoi tried to manage .bashrc
+   - Resolution: Initially disabled programs.bash in shell.nix
+   - **Final decision:** Keep .bashrc in home-manager, add KeePassXC integration there
+
+3. **Entries in subgroups not accessible**: Created entries in "API Keys" subgroup
+   - Resolution: Moved entries to root of "Workspace Secrets" group
+
+4. **Claude Code API vs Subscription confusion**
+   - Resolution: User confirmed using subscription → skipped apiKey in settings.json
+
+#### Architecture Decisions
+
+**Why home-manager instead of chezmoi for .bashrc?**
+- Simpler integration (no TTY issues)
+- All shell config in one place
+- secret-tool works perfectly in bash init scripts
+- Chezmoi still manages other dotfiles successfully
+
+**Why secret-tool instead of keepassxc function?**
+- No password prompt needed when database unlocked
+- Works in non-interactive contexts
+- Direct FdoSecrets integration
+
+#### Next Phase Prerequisites
+
+Phase 3 (rclone Integration) can begin:
+- [x] secret-tool working with KeePassXC entries
+- [x] .bashrc successfully loading secrets
+- [ ] Create rclone-config-password entry in KeePassXC
+- [ ] Encrypt rclone.conf with password
+- [ ] Update rclone systemd services
