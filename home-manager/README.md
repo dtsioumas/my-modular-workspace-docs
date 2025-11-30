@@ -1,9 +1,43 @@
-# Home Manager Documentation
+# Home-Manager User Environment
 
-**Last Updated:** 2025-11-30
+**Scope:** User-level configuration (no sudo required)
 **User:** mitsio
-**Strategy:** Standalone home-manager with unstable packages
+**Strategy:** Standalone flake with nixpkgs-unstable
+**Last Updated:** 2025-11-30
 **Files:** 14 documents
+
+---
+
+## What This Covers
+
+This directory documents the **user environment** - portable configuration that works on any Linux distro with Nix installed:
+
+| Category | Examples |
+|----------|----------|
+| **Packages** | Browsers, editors, CLI tools (~160 packages) |
+| **Dotfiles** | Shell config, aliases, environment variables |
+| **User Services** | Syncthing, rclone sync, KeePassXC vault |
+| **Desktop Settings** | KDE Plasma user preferences (via plasma-manager) |
+
+> **Note:** System-level configuration (drivers, DE enablement, Docker) is managed by [NixOS](../nixos/) and requires `sudo`.
+
+---
+
+## Key Benefit: Distro-Agnostic
+
+```
+┌─────────────────────────────────────────────────────────┐
+│              HOME-MANAGER USER ENVIRONMENT               │
+│  No sudo | Works on: NixOS, Fedora, Ubuntu, WSL, macOS  │
+├─────────────────────────────────────────────────────────┤
+│  • User packages (browsers, dev tools, CLI)             │
+│  • User services (syncthing, rclone, keepassxc)         │
+│  • Dotfiles (shell, git, editor configs)                │
+│  • Desktop settings (Plasma user preferences)           │
+└─────────────────────────────────────────────────────────┘
+```
+
+When migrating to Fedora: **This configuration stays the same!**
 
 ---
 
@@ -36,15 +70,16 @@
 
 ---
 
-## Architecture
+## Architecture Comparison
 
-**System (NixOS - stable 25.05):**
-- Base system, NVIDIA, KDE Plasma
-- Virtualization/containerization daemons
+| Layer | Managed By | Requires sudo | Portable |
+|-------|------------|---------------|----------|
+| **System** | NixOS (→ [../nixos/](../nixos/)) | Yes | No (NixOS only) |
+| **User** | Home-Manager (this) | No | Yes (any distro) |
 
-**Home-Manager (unstable):**
+**Home-Manager (unstable packages):**
 - ALL user packages (browsers, apps, dev tools)
-- ~100+ packages, full portability
+- ~160 packages, full portability across distros
 
 ---
 

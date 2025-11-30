@@ -8,14 +8,33 @@ Documentation for a portable, declarative workspace configuration system built w
 
 ---
 
+## Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              ROOT SYSTEM (NixOS) - requires sudo            │
+│  Hardware drivers, DE enablement, system services          │
+│  → docs/nixos/                                              │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│         USER ENVIRONMENT (Home-Manager) - no sudo          │
+│  Packages, dotfiles, user services - PORTABLE to any OS    │
+│  → docs/home-manager/                                       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## Repository Structure
 
 | Directory | Files | Description | README |
 |-----------|-------|-------------|--------|
+| [nixos/](nixos/) | 6 | **Root system** config (drivers, DE, sudo) | [nixos/README.md](nixos/README.md) |
+| [home-manager/](home-manager/) | 14 | **User environment** (portable, no sudo) | [home-manager/README.md](home-manager/README.md) |
 | [tools/](tools/) | 12 | Tool guides (atuin, kitty, navi, etc.) | [tools/README.md](tools/README.md) |
 | [sync/](sync/) | 4 | Syncthing + rclone sync guides | [sync/README.md](sync/README.md) |
-| [nixos/](nixos/) | 6 | NixOS configuration & flakes | [nixos/README.md](nixos/README.md) |
-| [home-manager/](home-manager/) | 14 | Home Manager guides & migration | [home-manager/README.md](home-manager/README.md) |
 | [chezmoi/](chezmoi/) | 11 | Dotfile management guides | [chezmoi/README.md](chezmoi/README.md) |
 | [ansible/](ansible/) | 5 | Automation playbook docs | [ansible/README.md](ansible/README.md) |
 | [adrs/](adrs/) | 5 | Architecture Decision Records | - |
@@ -26,19 +45,19 @@ Documentation for a portable, declarative workspace configuration system built w
 
 ## Quick Navigation
 
-### Core Components
+### Configuration Layers
+
+| Layer | Directory | Scope | Portable |
+|-------|-----------|-------|----------|
+| **System** | [nixos/](nixos/) | Drivers, DE, Docker (sudo required) | NixOS only |
+| **User** | [home-manager/](home-manager/) | Packages, configs, services | Any distro |
+
+### Supporting Documentation
 
 | Component | Purpose | Key Docs |
 |-----------|---------|----------|
-| **Home Manager** | User packages & configs | [README](home-manager/README.md), [Architecture](home-manager/decoupling-architecture.md), [Ephemeral](home-manager/ephemeral.md) |
-| **NixOS** | System configuration | [README](nixos/README.md), [Flakes Guide](nixos/flakes-guide.md) |
 | **Sync** | File synchronization | [README](sync/README.md), [Syncthing](sync/syncthing.md), [rclone](sync/rclone-gdrive.md) |
 | **Tools** | Development tools | [README](tools/README.md), [Atuin](tools/atuin.md), [Kitty](tools/kitty.md) |
-
-### Supporting Systems
-
-| Component | Purpose | Key Docs |
-|-----------|---------|----------|
 | **Chezmoi** | Cross-platform dotfiles | [README](chezmoi/README.md), [Migration](chezmoi/02-migration-strategy.md) |
 | **Ansible** | Bootstrap automation | [README](ansible/README.md) |
 | **ADRs** | Architecture decisions | [ADR-001](adrs/ADR-001-NIXPKGS_UNSTABLE_ON_HOME_MANAGER_AND_STABLE_ON_NIXOS.md) |
