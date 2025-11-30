@@ -1,8 +1,8 @@
 # Master TODO - My Modular Workspace
 
 **Project:** my-modular-workspace
-**Last Updated:** 2025-11-29 21:50
-**Current Phase:** nix-ld & MCP Servers Fix Complete
+**Last Updated:** 2025-11-30 17:45
+**Current Phase:** Home-Manager Enhancements (Week 48-49)
 **Working Directory:** `/home/mitsio/.MyHome/MySpaces/my-modular-workspace/`
 
 ---
@@ -263,46 +263,151 @@ docs/home-manager/MIGRATION_FINDINGS.md
 
 ---
 
-### 5. Home-Manager Enhancements (Week 48)
+### 5. Home-Manager Enhancements (Week 48-49)
 
-**Session:** `sessions/home-manager-enchantments-week-48/`
-**Detailed Plan:** `sessions/home-manager-enchantments-week-48/PLAN.md`
+**Status:** IN PROGRESS
+**Goal:** Integrate tools, MCPs, and quality assurance into home-manager declaratively
+**Estimated Time:** 8-13 hours total
 
-#### Phase 1: Semantic-Grep Installation
+---
+
+#### Phase 1: Semantic-Grep Installation (2-3 hours)
+
+**Tool:** https://github.com/arunsupe/semantic-grep
+**Binary:** `w2vgrep`
+**Nix File:** `home-manager/semantic-grep.nix`
+
+##### 1.1 Create Nix Derivation
 - [x] Create `semantic-grep.nix` with buildGoModule derivation
 - [x] Set up word embedding model download automation
-- [ ] Get correct hashes from build output
-- [ ] Update hashes in `semantic-grep.nix`
-- [ ] Test semantic-grep (w2vgrep command)
-- [ ] Create documentation at `docs/tools/semantic-grep/`
-- [ ] Create navi cheatsheets
+- [ ] Get correct hashes from build output (run build once)
+- [ ] Update sha256/vendorHash in derivation
+- [ ] Import in home.nix
 
-#### Phase 2: MCP Servers Reorganization
-- [ ] Research node2nix for npm-based MCPs
-- [ ] Create `mcps/` directory structure
-- [ ] Convert npm MCPs to node2nix derivations:
-  - [ ] context7-mcp
-  - [ ] firecrawl-mcp
-  - [ ] mcp-read-website-fast
-- [ ] Create Go MCP derivations:
-  - [ ] git-mcp-go
-  - [ ] mcp-filesystem-server
-  - [ ] mcp-shell
-- [ ] Handle Python/uv MCPs:
-  - [ ] mcp-server-fetch
-  - [ ] mcp-server-time
-  - [ ] sequential-thinking
-- [ ] Install all to `~/.local-mcp-servers/<mcp-name>/`
-- [ ] Update Claude Desktop config
-- [ ] Test all MCPs
+##### 1.2 Model Management
+- [ ] Download GoogleNews-slim word embedding model
+- [ ] Store in `~/.config/semantic-grep/models/`
+- [ ] Create config.json with model path
+- [ ] Verify activation script downloads model
 
-#### Phase 3: Pre-commit Hooks Setup
-- [ ] Add pre-commit-hooks.nix to home.nix imports
-- [ ] Configure nixfmt/alejandra formatter
-- [ ] Configure statix linter
-- [ ] Configure deadnix detector
-- [ ] Test pre-commit workflow
-- [ ] Document in README
+##### 1.3 Testing & Documentation
+- [ ] Test: `home-manager build --flake .#mitsio@shoshin`
+- [ ] Verify `w2vgrep` command available after switch
+- [ ] Test semantic search functionality
+- [ ] Document in `docs/tools/semantic-grep.md` (already exists)
+- [ ] Create navi cheatsheets in chezmoi repo
+
+---
+
+#### Phase 2: MCP Servers Reorganization (4-6 hours)
+
+**Goal:** Move ALL MCP installations to home-manager, organized in `~/.local-mcp-servers/`
+**Architecture Doc:** Create `docs/integrations/mcp-servers.md`
+
+##### 2.1 Directory Setup
+- [ ] Create `home-manager/mcps/` directory for derivations
+- [ ] Create activation script for `~/.local-mcp-servers/` structure
+- [ ] Create `mcps/default.nix` to import all MCPs
+
+##### 2.2 npm-based MCPs (node2nix)
+- [ ] Research node2nix workflow
+- [ ] **context7-mcp** (`@upstash/context7-mcp`)
+  - [ ] Generate node-packages.nix
+  - [ ] Create derivation
+  - [ ] Test functionality
+- [ ] **firecrawl-mcp**
+  - [ ] Generate node-packages.nix
+  - [ ] Handle API key configuration
+  - [ ] Test functionality
+- [ ] **mcp-read-website-fast** (`@just-every/mcp-read-website-fast`)
+  - [ ] Generate node-packages.nix
+  - [ ] Test functionality
+
+##### 2.3 Go-based MCPs (buildGoModule)
+- [ ] **git-mcp-go** (github.com/tak-bro/git-mcp-go)
+  - [ ] Create derivation with vendorHash
+  - [ ] Test with git repositories
+- [ ] **mcp-filesystem-server** (github.com/mark3labs/mcp-filesystem-server)
+  - [ ] Create derivation
+  - [ ] Configure allowed directories
+- [ ] **mcp-shell** (github.com/punkpeye/mcp-shell)
+  - [ ] Create derivation
+  - [ ] Configure security.yaml
+
+##### 2.4 Python/uv-based MCPs
+- [ ] **mcp-server-fetch** - buildPythonPackage or uv wrapper
+- [ ] **mcp-server-time** - Configure timezone (Europe/Athens)
+- [ ] **sequential-thinking** - Test thinking process
+
+##### 2.5 Rust-based MCPs (buildRustPackage)
+- [ ] **rust-mcp-filesystem** (optional - compare with Go version)
+
+##### 2.6 Integration
+- [ ] Update `claude_desktop_config.json` with new paths
+- [ ] All paths use `~/.local-mcp-servers/<mcp>/bin/`
+- [ ] Verify paths use `mitsio` not `mitso`
+- [ ] Test all MCPs in Claude Desktop
+
+---
+
+#### Phase 3: Pre-commit Hooks Setup (1-2 hours)
+
+**Goal:** Automatic Nix code quality checks on commit
+**Reference:** https://github.com/cachix/git-hooks.nix
+
+##### 3.1 Implementation
+- [ ] Add pre-commit-hooks.nix to flake inputs
+- [ ] Create pre-commit.nix configuration
+- [ ] Configure formatters:
+  - [ ] nixfmt OR alejandra (evaluate both)
+- [ ] Configure linters:
+  - [ ] statix (antipattern checker)
+  - [ ] deadnix (dead code finder)
+
+##### 3.2 Testing
+- [ ] Run `pre-commit install`
+- [ ] Test on sample Nix file with issues
+- [ ] Verify auto-formatting works
+- [ ] Verify linting catches issues
+
+##### 3.3 Documentation
+- [ ] Update home-manager/README.md
+- [ ] Document pre-commit commands
+- [ ] Add troubleshooting section
+
+---
+
+#### Phase 4: Claude Desktop Config Management (1-2 hours)
+
+**Goal:** Make Claude Desktop config declarative via chezmoi
+
+##### 4.1 Chezmoi Template
+- [ ] Create `.config/Claude/` in chezmoi source
+- [ ] Convert config to template (`claude_desktop_config.json.tmpl`)
+- [ ] Parameterize MCP paths with chezmoi variables
+- [ ] Ensure all paths use `mitsio`
+
+##### 4.2 Secrets Management
+- [ ] Extract API keys (Firecrawl, Context7)
+- [ ] Store in KeePassXC vault
+- [ ] Create chezmoi script to fetch from vault
+- [ ] Test secret retrieval
+
+##### 4.3 Verification
+- [ ] Apply chezmoi template
+- [ ] Verify generated config is valid JSON
+- [ ] Test Claude Desktop launches
+- [ ] Test all MCPs load correctly
+
+---
+
+**Success Criteria:**
+- [ ] Semantic-grep installed and working (`w2vgrep` available)
+- [ ] All MCPs installed via home-manager in `~/.local-mcp-servers/`
+- [ ] Claude Desktop working with new MCP paths
+- [ ] Pre-commit hooks running on Nix files
+- [ ] Configuration reproducible via `home-manager switch`
+- [ ] All changes committed to git
 
 ### 5. Ansible Repository Setup
 
