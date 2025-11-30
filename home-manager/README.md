@@ -1,22 +1,38 @@
 # Home Manager Documentation
 
-**Last Updated:** 2025-11-29
+**Last Updated:** 2025-11-30
 **User:** mitsio
 **Strategy:** Standalone home-manager with unstable packages
+**Files:** 14 documents
 
 ---
 
 ## Available Guides
 
+### Architecture & Migration
+
+| Guide | Description |
+|-------|-------------|
+| [decoupling-architecture.md](decoupling-architecture.md) | Target architecture for standalone home-manager |
+| [migration-plan.md](migration-plan.md) | File-by-file migration tracking |
+| [migration-findings.md](migration-findings.md) | Migration discoveries & notes |
+| [NIXOS_CONFIG_MIGRATION.md](NIXOS_CONFIG_MIGRATION.md) | NixOS → Home-Manager migration status |
+
+### Practices & Features
+
 | Guide | Description |
 |-------|-------------|
 | [ephemeral.md](ephemeral.md) | Ephemerality strategy & impermanence |
 | [node2nix.md](node2nix.md) | NPM package management with node2nix |
-| [DEBUGGING_AND_MAINTENANCE.md](DEBUGGING_AND_MAINTENANCE.md) | Build debugging guide |
-| [migration-findings.md](migration-findings.md) | NixOS to Home-Manager migration |
-| [migration-plan.md](migration-plan.md) | Migration plan details |
-| [git-hooks-integration.md](git-hooks-integration.md) | Pre-commit hooks setup |
 | [SYMLINK-QUICK-REFERENCE.md](SYMLINK-QUICK-REFERENCE.md) | Symlink management |
+| [git-hooks-integration.md](git-hooks-integration.md) | Pre-commit hooks setup |
+
+### Maintenance
+
+| Guide | Description |
+|-------|-------------|
+| [DEBUGGING_AND_MAINTENANCE.md](DEBUGGING_AND_MAINTENANCE.md) | Build debugging guide |
+| [DEPRECATION_FIXES.md](DEPRECATION_FIXES.md) | Fixing deprecated options |
 
 ---
 

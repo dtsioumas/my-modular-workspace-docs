@@ -1,10 +1,11 @@
 # KeePassXC Central Secret Manager - Implementation Plan
 
 **Created:** 2025-11-29
-**Status:** Ready for Implementation
+**Status:** Phase 1 Complete ✅ | Phases 2-5 Pending
 **Author:** Mitsio + Claude Code (Planner Role)
 **Ultrathink Duration:** 7+ minutes (15 sequential thoughts)
 **Project:** my-modular-workspace
+**Last Updated:** 2025-11-30 (Phase 1 completed)
 
 ---
 
@@ -1376,3 +1377,75 @@ echo "=== Results: $PASS passed, $FAIL failed ==="
 | **Total Issues** | **43** |
 
 **Recommendation:** Apply critical fixes before starting implementation. Add new tasks to each phase as specified above.
+
+---
+
+## Appendix D: Implementation Log
+
+### Phase 1 Completion - 2025-11-30
+
+**Completed by:** Mitsio + Claude Code
+**Duration:** ~2.5 hours (including troubleshooting)
+**Date:** 2025-11-30 02:58 EET
+
+#### Tasks Completed
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Task 1.0: Pre-flight Verification | ✅ | Verified KeePassXC, vault path, Dropbox |
+| Task 1.1: Update keepassxc.nix | ✅ | Added libsecret, helper scripts, activation hook |
+| Task 1.2: Disable GNOME Keyring | ⏭️ | Skipped - not present on system |
+| Task 1.2.5: Disable KDE Wallet | ✅ | Created kwalletrc with Enabled=false |
+| Task 1.3: Configure Database Structure | ✅ | Workspace Secrets group already existed |
+| Task 1.4: Verify FdoSecrets | ✅ | All diagnostic tests passed |
+| Task 1.5: Paper Backup | ⏸️ | Deferred to user |
+
+#### Files Modified
+
+| File | Action | Description |
+|------|--------|-------------|
+| `home-manager/keepassxc.nix` | Modified | Added libsecret, helper scripts, removed keepassxc.ini |
+| `~/.local/share/chezmoi/dot_config/keepassxc/keepassxc.ini` | Created | Migrated from home-manager to chezmoi |
+| `~/.config/kwalletrc` | Created | Managed by home-manager, disables KDE Wallet |
+
+#### Helper Scripts Created
+
+- `~/bin/secret-service-check.sh` - Diagnostic script for Secret Service
+- `~/bin/rclone-secure.sh` - Secure rclone wrapper with Secret Service
+- `~/bin/keepassxc-unlock-prompt.sh` - Desktop notification for unlock prompts
+
+#### Verification Results
+
+```
+=== Secret Service Diagnostic ===
+1. secret-tool installed: YES
+2. D-Bus Secret Service: AVAILABLE (provider: .keepassxc-wrap)
+3. KeePassXC owns service: YES
+4. Store/Lookup test: OK
+=== Diagnostic Complete ===
+```
+
+#### Issues Encountered & Resolutions
+
+1. **KDE Wallet conflict**: `ksecretd` was providing `org.freedesktop.secrets`
+   - Resolution: Created `~/.config/kwalletrc` with `Enabled=false`, killed ksecretd
+
+2. **keepassxc.ini read-only**: Home-manager created symlink to nix store
+   - Resolution: Migrated to chezmoi management for mutable config
+
+3. **FdoSecrets not accessible in UI**: Yellow warning in Database Settings
+   - Resolution: Enable in Tools → Settings → Secret Service Integration first
+
+#### Migration Notes
+
+- KDE Wallet contents reviewed before disabling (Brave keys, kshaskpass GitHub creds)
+- Browser encryption keys will regenerate automatically
+- GitHub PAT already in KeePassXC, kshaskpass cache not needed
+
+#### Next Phase Prerequisites
+
+Phase 2 (Chezmoi Integration) can begin immediately:
+- [x] libsecret/secret-tool available
+- [x] FdoSecrets working
+- [x] Workspace Secrets group exposed
+- [ ] Create entries for API keys (Anthropic, GitHub-PAT) in Workspace Secrets

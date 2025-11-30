@@ -1,9 +1,10 @@
 # KeePassXC as Central Secret Manager for Modular Workspace
 
 **Created:** 2025-11-29
-**Status:** Planning
+**Status:** Phase 1 Complete ✅ | Phases 2-5 Pending
 **Author:** Mitsio + Claude Code
 **Project:** my-modular-workspace
+**Last Updated:** 2025-11-30
 
 ---
 
@@ -428,14 +429,16 @@ Add to `home-manager/chezmoi.nix`:
 
 ## Implementation Plan
 
-### Phase 1: Foundation (Week 1)
+### Phase 1: Foundation ✅ COMPLETE (2025-11-30)
 
-- [ ] Add `libsecret` to home-manager packages
-- [ ] Verify FdoSecrets is working: `secret-service-check.sh`
-- [ ] Create "Workspace Secrets" group in KeePassXC
-- [ ] Enable Secret Service for that group
-- [ ] Disable GNOME Keyring if conflicting
-- [ ] Test with: `secret-tool store --label="test" service test key test`
+- [x] Add `libsecret` to home-manager packages
+- [x] Verify FdoSecrets is working: `secret-service-check.sh`
+- [x] Create "Workspace Secrets" group in KeePassXC (already existed)
+- [x] Enable Secret Service for that group
+- [x] Disable KDE Wallet (was conflicting with KeePassXC)
+- [x] Test with: `secret-tool store --label="test" service test key test`
+- [x] Create helper scripts (`secret-service-check.sh`, `rclone-secure.sh`, `keepassxc-unlock-prompt.sh`)
+- [x] Migrate `keepassxc.ini` from home-manager to chezmoi (for mutable config)
 
 ### Phase 2: Chezmoi Integration (Week 2)
 
@@ -583,10 +586,63 @@ secret-tool lookup service rclone key config-password
 | Date | Change |
 |------|--------|
 | 2025-11-29 | Initial document created from research session |
+| 2025-11-30 | **Phase 1 Complete**: libsecret installed, KDE Wallet disabled, FdoSecrets verified, helper scripts created |
+
+---
+
+## Phase 1 Implementation Details (2025-11-30)
+
+### What Was Done
+
+1. **Added libsecret to home-manager** (`keepassxc.nix`)
+   - Provides `secret-tool` CLI for Secret Service access
+
+2. **Disabled KDE Wallet**
+   - Created `~/.config/kwalletrc` with `Enabled=false`
+   - KDE Wallet's `ksecretd` was previously owning `org.freedesktop.secrets`
+
+3. **Created Helper Scripts** in `~/bin/`:
+   - `secret-service-check.sh` - Comprehensive diagnostic script
+   - `rclone-secure.sh` - rclone wrapper with Secret Service password retrieval
+   - `keepassxc-unlock-prompt.sh` - Desktop notification for unlock prompts
+
+4. **Migrated keepassxc.ini to chezmoi**
+   - Home-manager's symlink to nix store was read-only
+   - Now managed by chezmoi at `~/.local/share/chezmoi/dot_config/keepassxc/keepassxc.ini`
+   - Allows KeePassXC to modify its own settings
+
+5. **Verified FdoSecrets Integration**
+   ```
+   === Secret Service Diagnostic ===
+   1. secret-tool installed: YES
+   2. D-Bus Secret Service: AVAILABLE (provider: .keepassxc-wrap)
+   3. KeePassXC owns service: YES
+   4. Store/Lookup test: OK
+   ```
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `home-manager/keepassxc.nix` | Added libsecret, helper scripts, kwalletrc; removed keepassxc.ini |
+| `~/.local/share/chezmoi/dot_config/keepassxc/keepassxc.ini` | Created (migrated from home-manager) |
+| `~/.config/kwalletrc` | Created by home-manager to disable KDE Wallet |
+
+### Issues Resolved
+
+1. **KDE Wallet Conflict**: `ksecretd` was providing Secret Service
+   - Solution: Disable KDE Wallet via kwalletrc
+
+2. **Read-only Config**: Home-manager symlinks are immutable
+   - Solution: Migrate to chezmoi for mutable configs
+
+3. **FdoSecrets UI Greyed Out**: Needed to enable at application level first
+   - Solution: Tools → Settings → Secret Service Integration
 
 ---
 
 **Next Steps:**
-1. Review this plan with Mitsio
+1. ~~Review this plan with Mitsio~~ ✅
 2. Create ADR for secret management decision
-3. Begin Phase 1 implementation
+3. ~~Begin Phase 1 implementation~~ ✅
+4. **Begin Phase 2**: Add API keys to KeePassXC, configure chezmoi templates

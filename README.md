@@ -1,7 +1,8 @@
 # My Modular Workspace - Documentation
 
-**Last Updated:** 2025-11-29
+**Last Updated:** 2025-11-30
 **Status:** Active Development
+**Total Files:** 76 markdown documents
 
 Documentation for a portable, declarative workspace configuration system built with NixOS, Home Manager, and modern tools.
 
@@ -9,43 +10,38 @@ Documentation for a portable, declarative workspace configuration system built w
 
 ## Repository Structure
 
-```
-docs/
-├── tools/           # Tool guides (11 files)
-├── sync/            # Syncthing + rclone (3 files)
-├── nixos/           # NixOS configuration (6 files)
-├── home-manager/    # Home Manager guides (17 files)
-├── chezmoi/         # Dotfile management
-├── ansible/         # Automation playbooks
-├── adrs/            # Architecture decisions
-├── archive/         # Historical documentation
-├── integrations/    # Integration guides
-└── plans/           # Implementation plans
-```
+| Directory | Files | Description | README |
+|-----------|-------|-------------|--------|
+| [tools/](tools/) | 12 | Tool guides (atuin, kitty, navi, etc.) | [tools/README.md](tools/README.md) |
+| [sync/](sync/) | 4 | Syncthing + rclone sync guides | [sync/README.md](sync/README.md) |
+| [nixos/](nixos/) | 6 | NixOS configuration & flakes | [nixos/README.md](nixos/README.md) |
+| [home-manager/](home-manager/) | 14 | Home Manager guides & migration | [home-manager/README.md](home-manager/README.md) |
+| [chezmoi/](chezmoi/) | 11 | Dotfile management guides | [chezmoi/README.md](chezmoi/README.md) |
+| [ansible/](ansible/) | 5 | Automation playbook docs | [ansible/README.md](ansible/README.md) |
+| [adrs/](adrs/) | 5 | Architecture Decision Records | - |
+| [archive/](archive/) | 8 | Historical/deprecated docs | - |
+| [plans/](plans/) | 7 | Implementation plans | [plans/README.md](plans/README.md) |
 
 ---
 
 ## Quick Navigation
 
-### Tools
-Development and productivity tools: atuin, kitty, navi, kde-connect, vscodium, continue-dev, and more.
-→ [tools/README.md](tools/README.md)
+### Core Components
 
-### Sync
-File synchronization with Syncthing (P2P) and rclone (Google Drive backup).
-→ [sync/README.md](sync/README.md)
+| Component | Purpose | Key Docs |
+|-----------|---------|----------|
+| **Home Manager** | User packages & configs | [README](home-manager/README.md), [Architecture](home-manager/decoupling-architecture.md), [Ephemeral](home-manager/ephemeral.md) |
+| **NixOS** | System configuration | [README](nixos/README.md), [Flakes Guide](nixos/flakes-guide.md) |
+| **Sync** | File synchronization | [README](sync/README.md), [Syncthing](sync/syncthing.md), [rclone](sync/rclone-gdrive.md) |
+| **Tools** | Development tools | [README](tools/README.md), [Atuin](tools/atuin.md), [Kitty](tools/kitty.md) |
 
-### NixOS
-System configuration, flakes guide, debugging, and maintenance.
-→ [nixos/README.md](nixos/README.md)
+### Supporting Systems
 
-### Home Manager
-User environment management, ephemeral practices, node2nix, migrations.
-→ [home-manager/README.md](home-manager/README.md)
-
-### Architecture Decisions
-Documented decisions (ADRs) for the project.
-→ [adrs/](adrs/)
+| Component | Purpose | Key Docs |
+|-----------|---------|----------|
+| **Chezmoi** | Cross-platform dotfiles | [README](chezmoi/README.md), [Migration](chezmoi/02-migration-strategy.md) |
+| **Ansible** | Bootstrap automation | [README](ansible/README.md) |
+| **ADRs** | Architecture decisions | [ADR-001](adrs/ADR-001-NIXPKGS_UNSTABLE_ON_HOME_MANAGER_AND_STABLE_ON_NIXOS.md) |
 
 ---
 
