@@ -352,20 +352,23 @@ dotfiles/dot_config/autostart/copyq.desktop
 
 ## Current Autostart Inventory (As of 2025-12-01)
 
-**Known Autostart Applications:**
+**Migrated Autostart Applications:**
 
-| Application | Current Location | Migration Status | Target Home-Manager Module |
-|-------------|------------------|------------------|---------------------------|
-| CopyQ | chezmoi (dot_config/autostart/) | ⏳ Pending | `xdg.configFile."autostart/copyq.desktop"` |
-| (Add more as discovered) | | | |
+| Application | Home-Manager Module | Implementation | Status |
+|-------------|---------------------|----------------|--------|
+| CopyQ | `autostart.nix` | `home.file.".config/autostart/copyq.desktop"` | ✅ Complete |
+| KeePassXC | `autostart.nix` | `home.file.".config/autostart/org.keepassxc.KeePassXC.desktop"` | ✅ Complete |
 
 **Migration Checklist:**
-- [ ] Identify all autostart in chezmoi
-- [ ] Identify all manual autostart in `~/.config/autostart/`
-- [ ] Migrate CopyQ to home-manager
-- [ ] Remove CopyQ from chezmoi
-- [ ] Document migration in `docs/home-manager/autostart-guide.md`
-- [ ] Verify no remaining autostart in chezmoi
+- [x] Identify all autostart in chezmoi
+- [x] Identify all manual autostart in `~/.config/autostart/`
+- [x] Migrate CopyQ to home-manager
+- [x] Migrate KeePassXC to home-manager
+- [x] Create `autostart.nix` module
+- [x] Remove autostart directory from chezmoi
+- [x] Update `.chezmoiignore` to exclude autostart
+- [x] Verify no remaining autostart in chezmoi
+- [x] Update MIGRATION_STATUS.md
 
 ---
 
@@ -427,4 +430,4 @@ dotfiles/dot_config/autostart/copyq.desktop
 ---
 
 **Decision:** ✅ Accepted
-**Status:** Implementation Pending
+**Status:** ✅ Implemented (2025-12-01)
