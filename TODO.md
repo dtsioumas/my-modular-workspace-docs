@@ -447,12 +447,12 @@ docs/home-manager/MIGRATION_FINDINGS.md
 
 ### 6. Kitty Terminal Enhancements
 
-**Status:** PHASE A & B COMPLETE ✅ - Phase C Optional
-**Last Completed:** 2025-12-01 02:15 (Phase B)
-**Last Updated:** 2025-12-01 (Session continuation - documentation updates)
-**Goal:** Enhance kitty terminal with better usability and optional integrations
-**Time Spent:** ~2.5 hours (Phase A: 30 mins, Phase B: 2 hours)
-**Remaining:** 1-2 hours (Phase C - Optional)
+**Status:** PHASE A & B ✅ COMPLETE | PHASE C.1 ✅ COMPLETE | PHASE C.2 🔬 RESEARCH COMPLETE - Awaiting Clarifications
+**Last Completed:** 2025-12-01 20:00 (Phase C.2 research)
+**Last Updated:** 2025-12-01 20:00 (Comprehensive session context documented)
+**Goal:** Enhance kitty terminal with advanced features and workflow improvements
+**Time Spent:** ~5 hours (Phase A: 30m, Phase B: 2h, Phase C.1: 1h, Research: 2h)
+**Remaining:** 3-5 hours (Phase C.2 implementation pending user clarifications)
 **Documentation:**
 - **Plan (Kittens):** `docs/plans/kitty-kittens-enhancements-plan.md` ⭐ PRIMARY
 - Plan (Basic): `docs/plans/kitty-enhancements-plan.md`
@@ -461,13 +461,17 @@ docs/home-manager/MIGRATION_FINDINGS.md
 - Current Config: `dotfiles/dot_config/kitty/kitty.conf`
 - Tool Guide: `docs/tools/kitty.md`
 
-**Current State (2025-12-01):**
-- ✅ Kitty installed with Catppuccin Mocha theme
-- ✅ Configured with transparency (30% - very transparent), blur (32)
+**Current State (2025-12-01 20:00):**
+- ✅ Kitty 0.42.1 with Dracula theme (switched from Catppuccin Mocha)
+- ✅ Configured with transparency (15% = 85% transparent - very transparent), blur (32)
 - ✅ Managed via chezmoi at `dotfiles/dot_config/kitty/`
 - ✅ **Phase A Complete:** Basic enhancements (right-click paste, navigation, transparency)
 - ✅ **Phase B Complete:** Essential kittens (search, git diff, shell integration, ssh)
-- ⏸️ **Phase C Paused:** Optional features (panel kitten, icat, custom kittens)
+- ✅ **Phase C.1 Complete:** Panel kitten (F12), theme cycling (Ctrl+Shift+F9)
+- ✅ **Tab Navigation Complete:** 4 shortcut options (Alt+Left/Right recommended)
+- ✅ **Terminal Helpers Complete:** Navi cheatsheets (kh, khe, ks), daily reminder
+- 🔬 **Phase C.2 Research Complete:** Scrollbar, status bar, autocomplete, history export
+- ⏳ **Phase C.2 Pending:** Awaiting user clarifications before implementation
 
 ---
 
@@ -525,7 +529,120 @@ docs/home-manager/MIGRATION_FINDINGS.md
 
 ---
 
-#### Phase 2: Zellij Terminal Multiplexer Integration (2-3 hours) 📋 OPTIONAL
+#### Phase 1 (C.1): Panel Kitten & Theme Enhancements ✅ COMPLETE (2025-12-01 04:45)
+
+**Completed:** 2025-12-01 04:45
+
+##### Implemented Features:
+- [x] Panel kitten configured with F12 for dropdown terminal
+- [x] Theme cycling browser (Ctrl+Shift+F9) with 300+ themes
+- [x] Dracula theme applied (switched from Catppuccin Mocha)
+- [x] Enhanced transparency (0.15 = 85% transparent)
+- [x] Alternative panel examples documented
+- [ ] F12 panel kitten debugging (USER TO TEST - platform-dependent)
+
+---
+
+#### Phase 1 (C.2): Enhanced Terminal Experience 🔬 RESEARCH COMPLETE (2025-12-01 20:00)
+
+**Status:** Research complete, awaiting user clarifications before implementation
+**Scope:** Scrollbar, status bar, right-click, autocomplete, history export, Ctrl+H overlay
+**Reference:** `docs/sessions/summaries/01-12-2025_KITTY_SESSION_CONTINUATION_CONTEXT.md`
+
+##### C.2.1: Tab Navigation Enhancements ✅ COMPLETE
+- [x] Alt+Left/Right (browser-style) - RECOMMENDED
+- [x] Alt+H/L (vim-style)
+- [x] Ctrl+PageUp/PageDown (firefox-style)
+- [x] Ctrl+Shift+Left/Right (original, kept for compatibility)
+- [x] Extended to 9 tabs (Ctrl+Alt+1-9)
+- **Status:** Complete, user approved
+
+##### C.2.2: Terminal Shortcuts Helper ✅ COMPLETE
+- [x] Navi cheatsheets (basic + extended)
+- [x] Bashrc helpers (kh, khe, ks, kitty-shortcuts)
+- [x] Daily reminder (non-intrusive, once per day)
+- [x] All changes committed
+- **Status:** Complete and documented
+
+##### C.2.3: Interactive Scrollbar ✅ READY TO IMPLEMENT
+- [x] Research complete (native support confirmed)
+- [ ] Enable interactive scrollbar
+- [ ] Configure appearance (transparency, colors)
+- [ ] Test clickability and drag functionality
+- **Estimate:** 15 mins
+- **Status:** Native support, ready to implement
+
+##### C.2.4: Enhanced Tab Bar / Status Display ⏳ NEEDS CLARIFICATION
+- [x] Research complete (use tab bar at bottom)
+- [ ] User to specify what info to show (tab, dir, git, time, etc.)
+- [ ] Move tab bar to bottom
+- [ ] Add custom template
+- [ ] Optional: Git branch detection script
+- **Estimate:** 30-45 mins
+- **Status:** Waiting for user clarification
+
+##### C.2.5: Terminal History Export 🔬 NEEDS DESIGN
+- [ ] User to specify format preferences
+- [ ] Design export format (markdown with timestamps)
+- [ ] Create export script/kitten
+- [ ] Add keyboard shortcut (Ctrl+Shift+H suggested)
+- [ ] Test with large scrollback buffers
+- **Estimate:** 1 hour
+- **Status:** Waiting for user clarification
+
+##### C.2.6: Panel Kitten Debugging (F12) 🐛 NEEDS USER TESTING
+- [x] Research complete (platform-dependent)
+- [ ] User to test F12 and report results
+- [ ] Debug if not working
+- [ ] Document platform-specific limitations (KDE Plasma partial support)
+- **Estimate:** 30 mins
+- **Status:** Waiting for user test results
+- **Known:** KDE Plasma has partial support, clicks outside may hide panel
+
+##### C.2.7: Right-Click Menu ❌ NOT POSSIBLE
+- [x] Research complete (NOT SUPPORTED by design)
+- [x] Documented keyboard shortcuts as alternative
+- [ ] User to decide: Keep right-click = paste, or customize?
+- **Status:** Cannot implement (kitty philosophy: keyboard-first)
+- **Alternative:** Custom mouse_map actions available
+
+##### C.2.8: Autocomplete.sh Integration 🔬 NEEDS DEEP RESEARCH
+- [x] Initial research (Atuin integration exists)
+- [ ] Web research for best integration approach
+- [ ] Test autocomplete.sh with Atuin history
+- [ ] Configure LLM backend (requires API keys)
+- [ ] Integrate with kitty shell integration
+- **Estimate:** 2-3 hours
+- **Status:** Needs dedicated research session
+- **Repository:** TIAcode/LLMShellAutoComplete
+
+##### C.2.9: Fix Theme Browser Issue 🐛 NEEDS INFO
+- [ ] User to describe what broke
+- [ ] Fix configuration error
+- [ ] Test theme persistence
+- **Estimate:** 15-30 mins
+- **Status:** Waiting for user to describe the issue
+
+##### C.2.10: Ctrl+H Shortcuts Overlay 📋 PLANNED FOR ZELLIJ PHASE
+- [ ] Planned for Zellij Phase 2 (Phase D)
+- [ ] Will use zellij floating pane
+- [ ] Arrow navigation (up/down = scroll, left/right = switch cheatsheets)
+- **Estimate:** 1-2 hours (after zellij setup)
+- **Status:** Noted for future zellij integration
+- **Alternative:** Temporary split window workaround if needed now
+
+**Phase C.2 Success Criteria:**
+- [ ] User provides clarifications
+- [ ] Scrollbar implemented and working
+- [ ] Status bar/tab bar configured per user preferences
+- [ ] History export functional
+- [ ] F12 panel kitten debugged (if issues found)
+- [ ] Theme issue resolved
+- [ ] All limitations documented
+
+---
+
+#### Phase 2 (Phase D): Zellij Integration (FUTURE - 2-3 hours) 📋 PLANNED
 
 **Priority:** MEDIUM (Powerful enhancement for SRE workflows)
 **Risk:** LOW (well-planned, step-by-step)

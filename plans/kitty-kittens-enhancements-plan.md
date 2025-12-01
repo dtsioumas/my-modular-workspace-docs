@@ -1,12 +1,12 @@
 # Kitty Kittens & Advanced Enhancements Plan
 
 **Created:** 2025-12-01
-**Updated:** 2025-12-01 04:45
-**Status:** PHASE B ✅ COMPLETE | PHASE C.1 ✅ COMPLETE - Phase C.2/C.3 Optional
-**Session:** kitty-configuration-phase2
-**Priority:** MEDIUM
-**Time Spent:** ~2 hours (Phase B)
-**Remaining:** 1-2 hours (Phase C - Optional)
+**Updated:** 2025-12-01 20:00
+**Status:** PHASE B ✅ | PHASE C.1 ✅ | PHASE C.2 🔬 RESEARCH COMPLETE - Ready for Implementation
+**Session:** kitty-configuration-phase2-continuation-extended
+**Priority:** MEDIUM → HIGH (New features requested)
+**Time Spent:** ~5 hours (Phase B: 2h, Phase C.1: 1h, Research: 2h)
+**Remaining:** 3-5 hours (Phase C.2 implementation)
 
 ---
 
@@ -428,20 +428,132 @@ fi
 - [ ] Test Quake-style behavior (USER TODO)
 - [ ] Configure additional panels (system monitor, notes) - Optional
 
-#### C.2: Image Display Setup
+#### C.2: Enhanced Terminal Experience 🔬 RESEARCH COMPLETE (2025-12-01 20:00)
+
+**Status:** Research complete, awaiting user clarifications before implementation
+
+**Scope:** Scrollbar, status bar, right-click, autocomplete, history export
+
+##### C.2.1: Interactive Scrollbar ✅ READY
+- [x] Research native scrollbar support (FOUND: Fully supported!)
+- [ ] Enable interactive scrollbar
+- [ ] Configure appearance (transparency, colors)
+- [ ] Test clickability and drag functionality
+- **Estimate:** 15 mins
+- **Status:** Native support confirmed, ready to implement
+
+##### C.2.2: Enhanced Tab Bar (Status Display) ⏳ AWAITING CLARIFICATION
+- [x] Research status bar options (FOUND: Use tab bar at bottom)
+- [ ] Move tab bar to bottom
+- [ ] Add custom template showing: tab number, current directory
+- [ ] Optional: Git branch detection script
+- **Estimate:** 30-45 mins
+- **Status:** Waiting for user to specify what info to show
+
+##### C.2.3: Terminal History Export 🔬 NEEDS DESIGN
+- [ ] Design export format (markdown with timestamps)
+- [ ] Create export script/kitten
+- [ ] Add keyboard shortcut (Ctrl+Shift+H suggested)
+- [ ] Test with large scrollback buffers
+- **Estimate:** 1 hour
+- **Status:** Waiting for user clarification on format preferences
+
+##### C.2.4: Panel Kitten Debugging 🐛 IN PROGRESS
+- [x] Research panel kitten issues (Platform-dependent!)
+- [ ] Debug F12 not spawning panel
+- [ ] Test on KDE Plasma (user's environment)
+- [ ] Document platform-specific limitations
+- **Estimate:** 30 mins
+- **Status:** Waiting for user to test F12 and report results
+- **Known Issue:** KDE Plasma has partial support (clicks outside may hide panel)
+
+##### C.2.5: Right-Click Menu ❌ NOT SUPPORTED
+- [x] Research right-click context menu (NOT POSSIBLE - by design)
+- [x] Document keyboard shortcuts as alternative
+- [ ] Customize mouse_map if user wants different right-click behavior
+- **Estimate:** N/A (cannot implement)
+- **Status:** Documented limitations, suggest keyboard shortcuts
+- **Alternative:** Custom mouse_map actions available
+
+##### C.2.6: Autocomplete.sh Integration 🔬 RESEARCH PHASE
+- [x] Research autocomplete.sh architecture
+- [x] Confirm Atuin integration exists
+- [ ] Web research for best integration approach
+- [ ] Test autocomplete.sh with Atuin history
+- [ ] Configure LLM backend (requires API keys)
+- [ ] Integrate with kitty shell integration
+- **Estimate:** 2-3 hours
+- **Status:** Needs deep research + testing
+- **Repository:** TIAcode/LLMShellAutoComplete
+
+##### C.2.7: Fix Theme Browser Issue 🐛 NEEDS INFO
+- [ ] Understand what broke (user to clarify)
+- [ ] Fix configuration error
+- [ ] Test theme persistence
+- **Estimate:** 15-30 mins
+- **Status:** Waiting for user to describe the issue
+
+##### C.2.8: Tab Navigation Enhancements ✅ COMPLETE
+- [x] Add Alt+Left/Right shortcuts (browser-style)
+- [x] Add Alt+H/L shortcuts (vim-style)
+- [x] Add Ctrl+PageUp/PageDown (firefox-style)
+- [x] Extend to 9 tabs (Ctrl+Alt+1-9)
+- **Status:** Complete, user approved current logic
+
+##### C.2.9: Terminal Shortcuts Helper ✅ COMPLETE
+- [x] Create navi cheatsheets (basic + extended)
+- [x] Add bashrc helpers (kh, khe, ks)
+- [x] Implement daily reminder (non-intrusive)
+- **Status:** Complete and documented
+
+**Phase C.2 Success Criteria:**
+- [ ] Scrollbar is clickable and visually pleasing
+- [ ] Status bar shows relevant info at bottom
+- [ ] Terminal history export works reliably
+- [ ] F12 panel kitten functioning
+- [ ] Autocomplete.sh integrated with Atuin
+- [ ] Theme issue resolved
+- [ ] All limitations documented
+
+---
+
+#### C.3: Image Display Setup (OPTIONAL)
 - [ ] Test icat with sample images
 - [ ] Create alias for quick image preview
 - [ ] Document use cases
 
-#### C.3: Custom Kittens (Advanced)
+#### C.4: Custom Kittens (ADVANCED - OPTIONAL)
 - [ ] Explore custom kitten creation
 - [ ] Consider creating SRE-specific kittens (log analysis, etc.)
 
 ---
 
-### **Phase D: Environment Variables** (5-10 mins)
+### **Phase D: Zellij Integration (FUTURE - 2-3 hours)**
 
-Add to `~/.bashrc` via chezmoi:
+**Note:** Planned for separate Zellij integration session
+
+#### D.1: Ctrl+H Shortcuts Overlay 📋 PLANNED
+- [ ] Install and configure zellij
+- [ ] Create zellij layout for shortcuts display
+- [ ] Map Ctrl+H to spawn floating pane with navi cheatsheets
+- [ ] Arrow navigation: Up/Down = scroll, Left/Right = switch basic ↔ extended
+- [ ] Auto-hide on Esc or Ctrl+H again
+- **Estimate:** 1-2 hours (after zellij setup)
+- **Status:** Noted for Zellij Phase 2
+- **Alternative:** Temporary workaround with split window (if needed now)
+
+#### D.2: Session Persistence (FUTURE)
+- [ ] Zellij sessions for persistent terminal state
+- [ ] Can attach from different kitty instances
+- [ ] "Merge" instances by attaching to same session
+- **Estimate:** 1 hour
+- **Status:** Planned for Zellij Phase
+
+---
+
+### **Phase E: Environment Variables** (5-10 mins) ✅ COMPLETE
+
+Already configured in bashrc:
 ```bash
 # ============ Editor Configuration ============
 export VISUAL="codium"
