@@ -1,6 +1,6 @@
 # Chezmoi Migration Status
 
-**Last Updated:** 2025-11-29
+**Last Updated:** 2025-12-01
 **Purpose:** Track what's managed by chezmoi vs home-manager
 
 ---
@@ -12,22 +12,23 @@
 | Config | Location | Status | Notes |
 |--------|----------|--------|-------|
 | Atuin | `dot_config/atuin/` | ✅ Active | Shell history sync |
-| CopyQ | `dot_config/copyq/` | ✅ Active | Clipboard manager |
+| CopyQ | `dot_config/copyq/` | ✅ Active | Clipboard manager config |
 | Git | `dot_gitconfig.tmpl` | ✅ Active | Cross-platform template |
 | KeePassXC | `dot_config/keepassxc/` | ✅ Active | App settings only |
 | Kitty | `dot_config/kitty/` | ✅ Active | Catppuccin Mocha theme |
 | Navi | `dot_config/navi/` + `dot_local/share/navi/` | ✅ Active | Cheatsheets |
 | Claude settings | `private_dot_claude/` | ✅ Active | Templated |
 | Bashrc additions | `dot_bashrc.tmpl` | ✅ Active | Templated |
-| Autostart | `dot_config/autostart/` | ✅ Active | Desktop apps |
+| **VSCodium settings** | `dot_config/VSCodium/User/settings.json` | ✅ Active | User preferences (NEW!) |
 
 ### Managed by Home-Manager
 
 | Module | Purpose | Why Not Chezmoi |
 |--------|---------|-----------------|
 | `shell.nix` | Bash/env vars | System integration |
+| `autostart.nix` | XDG autostart files | Systemd integration (NEW!) |
 | `claude-code.nix` | npm CLI install | Package management |
-| `vscodium.nix` | Extensions | Complex activation scripts |
+| `vscodium.nix` | Package + product.json | Package management + marketplace |
 | `brave.nix` | Browser + NVIDIA | Package overlays |
 | `rclone-gdrive.nix` | Sync service | systemd timers |
 | `syncthing-myspaces.nix` | P2P sync | systemd service |
