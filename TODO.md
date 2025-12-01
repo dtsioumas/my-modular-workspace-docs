@@ -447,63 +447,81 @@ docs/home-manager/MIGRATION_FINDINGS.md
 
 ### 6. Kitty Terminal Enhancements
 
-**Status:** PLANNED (Config exists but enhancements not implemented)
+**Status:** PHASE A & B COMPLETE ✅ - Phase C Optional
+**Last Completed:** 2025-12-01 02:15 (Phase B)
+**Last Updated:** 2025-12-01 (Session continuation - documentation updates)
 **Goal:** Enhance kitty terminal with better usability and optional integrations
-**Estimated Time:** 30 mins - 3 hours (depending on scope)
+**Time Spent:** ~2.5 hours (Phase A: 30 mins, Phase B: 2 hours)
+**Remaining:** 1-2 hours (Phase C - Optional)
 **Documentation:**
+- **Plan (Kittens):** `docs/plans/kitty-kittens-enhancements-plan.md` ⭐ PRIMARY
 - Plan (Basic): `docs/plans/kitty-enhancements-plan.md`
 - Plan (Zellij): `docs/plans/kitty-zellij-phase1-plan.md`
 - Integration (Autocomplete): `docs/integrations/kitty-autocomplete-integration.md`
 - Current Config: `dotfiles/dot_config/kitty/kitty.conf`
+- Tool Guide: `docs/tools/kitty.md`
 
-**Current State:**
+**Current State (2025-12-01):**
 - ✅ Kitty installed with Catppuccin Mocha theme
-- ✅ Configured with transparency (0.95), blur (32)
+- ✅ Configured with transparency (30% - very transparent), blur (32)
 - ✅ Managed via chezmoi at `dotfiles/dot_config/kitty/`
-- ❌ Basic enhancements marked complete but NOT implemented in config
+- ✅ **Phase A Complete:** Basic enhancements (right-click paste, navigation, transparency)
+- ✅ **Phase B Complete:** Essential kittens (search, git diff, shell integration, ssh)
+- ⏸️ **Phase C Paused:** Optional features (panel kitten, icat, custom kittens)
 
 ---
 
-#### Phase 1: Basic Kitty Enhancements (30-45 mins) 🎯 NEXT
+#### Phase 1 (A): Basic Kitty Enhancements ✅ COMPLETE (2025-12-01)
 
-**Priority:** HIGH (Quick win, immediate usability improvement)
-**Risk:** LOW (non-breaking additions)
+**Completed:** 2025-12-01
 **Reference:** `docs/plans/kitty-enhancements-plan.md`
 
-##### 1.1 Add Right-Click Paste
-- [ ] Backup current kitty.conf: `cp ~/.config/kitty/kitty.conf ~/.config/kitty/kitty.conf.backup.$(date +%Y%m%d)`
-- [ ] Edit `dotfiles/dot_config/kitty/kitty.conf`
-- [ ] Add to MOUSE section: `mouse_map right press ungrabbed paste_from_clipboard`
-- [ ] Document: Comment added (2025-12-01)
+##### Implemented Features:
+- [x] Right-click paste from clipboard
+- [x] Ctrl+Alt+Arrow directional window navigation
+- [x] Transparency set to 30% (very transparent glass effect)
+- [x] Ctrl+/-  for quick transparency adjustment
+- [x] Window splitting: Ctrl+Alt+H (horizontal), Ctrl+Alt+V (vertical)
+- [x] Window cycling: Ctrl+Tab / Ctrl+Shift+Tab
+- [x] VSCodium as default editor
+- [x] Enhanced hints kitten (URLs, paths, files, line numbers)
+- [x] All changes committed to dotfiles repo
 
-##### 1.2 Add Ctrl+Alt+Arrow Window Navigation
-- [ ] Edit `dotfiles/dot_config/kitty/kitty.conf`
-- [ ] Add to Window Management section:
-  ```conf
-  # Directional window navigation (Mitso addition 2025-12-01)
-  map ctrl+alt+left neighboring_window left
-  map ctrl+alt+right neighboring_window right
-  map ctrl+alt+up neighboring_window up
-  map ctrl+alt+down neighboring_window down
-  ```
+---
 
-##### 1.3 Apply and Test Changes
-- [ ] Apply via chezmoi: `cd dotfiles && chezmoi apply`
-- [ ] Reload kitty config: `Ctrl+Shift+F5` in kitty
-- [ ] Test right-click paste
-- [ ] Test Ctrl+Alt+Arrow navigation (create splits first)
-- [ ] Verify existing shortcuts still work
+#### Phase 1 (B): Essential Kittens & Integrations ✅ COMPLETE (2025-12-01)
 
-##### 1.4 Commit Changes
-- [ ] Stage changes: `git add dot_config/kitty/kitty.conf`
-- [ ] Commit: `git commit -m "feat(kitty): Add right-click paste and Ctrl+Alt+Arrow window navigation"`
-- [ ] Push to remote: `git push origin main`
+**Completed:** 2025-12-01 02:15
+**Reference:** `docs/plans/kitty-kittens-enhancements-plan.md`
 
-**Success Criteria:**
-- [ ] Right-click paste works
-- [ ] Ctrl+Alt+Arrow navigation works
-- [ ] Existing functionality unchanged
-- [ ] Changes committed to dotfiles repo
+##### B.1: Search Kitten (Incremental Scrollback Search) ✅
+- [x] Installed from github.com/trygveaa/kitty-kitten-search
+- [x] Keybinding: Ctrl+Shift+/ for incremental search
+- [x] Replaces tmux's `/` search functionality
+- [ ] Test: Use Ctrl+Shift+/ in kitty (USER TODO)
+
+##### B.2: Shell Integration ✅
+- [x] Enabled full shell integration (changed from no-rc to enabled)
+- [x] Ctrl+Shift+Z - Jump to previous command prompt
+- [x] Ctrl+Shift+X - Jump to next command prompt
+- [x] Ctrl+Shift+G - Show last command output
+- [ ] Test: Run commands and use prompt navigation (USER TODO)
+
+##### B.3: Git Diff Integration ✅
+- [x] Configured kitty as git difftool
+- [x] Side-by-side diffs with syntax highlighting
+- [x] Git editor updated to codium
+- [ ] Test: Run `git difftool` (USER TODO)
+
+##### B.4: SSH Kitten ✅
+- [x] Alias: `ssh="kitty +kitten ssh"`
+- [x] Auto-copies terminfo to remote servers
+- [x] Fixes "unknown term type" errors
+- [ ] Test: SSH to a server (USER TODO)
+
+**Phase B Success Criteria:**
+- [x] All features implemented and committed ✅
+- [ ] User testing complete (PENDING USER ACTION)
 
 ---
 
