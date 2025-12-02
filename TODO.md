@@ -400,6 +400,45 @@ exclude_patterns:
 
 ---
 
+#### 4.5 Plasma System Tray Widget for GDrive Sync Status 🆕 INVESTIGATE
+
+**Status:** 💡 IDEA - To Be Investigated
+**Priority:** LOW
+**Estimated Time:** 4-6 hours (research + implementation)
+
+**Use Case:**
+User wants real-time visibility of GDrive sync status in the taskbar:
+- Last sync time and result (success/failure)
+- Current conflict count
+- Quick access to sync logs
+- Visual indicator (green/yellow/red) based on health
+
+**Research Topics:**
+- [ ] Plasma 6 custom plasmoid development
+- [ ] System tray script-based indicators
+- [ ] Command Output Widget for panel
+- [ ] KDE notification integration with persistent status
+- [ ] Scriptinator widget for custom scripts
+
+**Potential Approaches:**
+1. **Custom Plasmoid (QML)** - Native look, full control, steeper learning curve
+2. **System Tray Script** - Simpler, uses icons + tooltip, bash-based
+3. **Command Output Widget** - Existing widget, shows script output on panel
+4. **Persistent Notification** - Use notify-send with replace-id for updating status
+
+**Information to Display:**
+- Last sync: `2025-12-02 23:45` ✅
+- Conflicts: `3 files`
+- Next sync: `in 25 min`
+- Click to open log file
+
+**Dependencies:**
+- Sync status written to file by ansible playbook
+- JSON/text status file updated after each sync
+- Script to read status and format for widget
+
+---
+
 ### 5. KeePassXC Authorization Persistence Investigation 🔴 🆕
 
 **Status:** 🔴 CRITICAL INVESTIGATION NEEDED
