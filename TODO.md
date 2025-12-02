@@ -752,7 +752,9 @@ exclude_patterns:
 
 ### 6. Kitty Terminal Enhancements
 
-**Status:** PHASE A & B ✅ COMPLETE | PHASE C.1 ✅ COMPLETE | PHASE C.2 🔬 RESEARCH COMPLETE - Awaiting Clarifications
+**Status:** PHASE A & B ✅ COMPLETE | PHASE C.1 ✅ COMPLETE | PHASE C.2 🚀 IN PROGRESS | PHASE C.2 ADVANCED 📋 PLANNED
+
+**Latest Session:** 2025-12-01 22:30-23:30 (1 hour planning + research session)
 **Last Completed:** 2025-12-01 20:00 (Phase C.2 research)
 **Last Updated:** 2025-12-01 20:00 (Comprehensive session context documented)
 **Goal:** Enhance kitty terminal with advanced features and workflow improvements
@@ -766,17 +768,40 @@ exclude_patterns:
 - Current Config: `dotfiles/dot_config/kitty/kitty.conf`
 - Tool Guide: `docs/tools/kitty.md`
 
-**Current State (2025-12-01 20:00):**
+**Current State (2025-12-01 23:30):**
 - ✅ Kitty 0.42.1 with Dracula theme (switched from Catppuccin Mocha)
-- ✅ Configured with transparency (15% = 85% transparent - very transparent), blur (32)
+- ✅ Configured with transparency (15% = 85% transparent), blur (32)
+- ✅ Theme-adaptive bash prompt (shows mitsio@shoshin:path$)
 - ✅ Managed via chezmoi at `dotfiles/dot_config/kitty/`
 - ✅ **Phase A Complete:** Basic enhancements (right-click paste, navigation, transparency)
 - ✅ **Phase B Complete:** Essential kittens (search, git diff, shell integration, ssh)
 - ✅ **Phase C.1 Complete:** Panel kitten (F12), theme cycling (Ctrl+Shift+F9)
 - ✅ **Tab Navigation Complete:** 4 shortcut options (Alt+Left/Right recommended)
 - ✅ **Terminal Helpers Complete:** Navi cheatsheets (kh, khe, ks), daily reminder
-- 🔬 **Phase C.2 Research Complete:** Scrollbar, status bar, autocomplete, history export
-- ⏳ **Phase C.2 Pending:** Awaiting user clarifications before implementation
+- ✅ **Interactive Scrollbar Complete:** Clickable, draggable, auto-hide
+- 🔬 **Phase C.2 Advanced Research Complete:** Comprehensive findings (0.87 confidence)
+- 📋 **Phase C.2 Advanced Planned:** Full implementation plan created
+- ⏳ **Phase C.2 Advanced Pending:** User scheduled for next session
+
+**Session 2025-12-01 Completed Items:**
+- [x] Fixed bash prompt to show user@hostname with theme-adaptive colors
+- [x] Implemented interactive clickable scrollbar
+- [x] Documented scrollbar in kitty guide
+- [x] Comprehensive web research on advanced kitty features (0.87 confidence)
+- [x] Documented all user preferences and requirements
+- [x] Created detailed implementation plan (6-8 hours estimated)
+- [x] Updated TODO.md with all Phase C.2 Advanced tasks
+- [x] All changes committed to dotfiles repo (4 commits)
+
+**Session 2025-12-01 Pending Items:**
+- [ ] User review and approve implementation plan
+- [ ] User schedule implementation sessions (3 sessions recommended)
+- [ ] Implement custom tab_bar.py with system metrics (4 hours)
+- [ ] Configure window splitting (15 mins)
+- [ ] Configure mouse actions (30 mins)
+- [ ] Configure tab management (45 mins)
+- [ ] Implement history export kitten (1.5 hours)
+- [ ] Debug F12 panel kitten issue (30 mins)
 
 ---
 
@@ -869,13 +894,15 @@ exclude_patterns:
 - [x] All changes committed
 - **Status:** Complete and documented
 
-##### C.2.3: Interactive Scrollbar ✅ READY TO IMPLEMENT
+##### C.2.3: Interactive Scrollbar ✅ COMPLETE (2025-12-01 23:00)
 - [x] Research complete (native support confirmed)
-- [ ] Enable interactive scrollbar
-- [ ] Configure appearance (transparency, colors)
-- [ ] Test clickability and drag functionality
+- [x] Enable interactive scrollbar
+- [x] Configure appearance (transparency, colors)
+- [x] Documented in kitty guide
+- [x] Committed: `8fed456` - "feat: Add interactive clickable scrollbar"
+- [ ] Test clickability and drag functionality (USER TODO)
 - **Estimate:** 15 mins
-- **Status:** Native support, ready to implement
+- **Status:** Implemented, ready for user testing
 
 ##### C.2.4: Enhanced Tab Bar / Status Display ⏳ NEEDS CLARIFICATION
 - [x] Research complete (use tab bar at bottom)
@@ -1656,11 +1683,12 @@ kitty @ get-text --extent=all     # All scrollback
 
 ### 10. Plasma Desktop Dotfiles Migration to Chezmoi (Multi-Phase) 🆕
 
-**Status:** PLANNING
+**Status:** PHASE 0-2 COMPLETE ✅ | Phase 3 Pending (Next Session)
 **Priority:** MEDIUM
 **Estimated Time:** 12-18 hours (across 3-5 sessions)
 **Goal:** Systematically investigate, document, and migrate all KDE Plasma configuration files to chezmoi
-**Documentation:** To be created in `docs/chezmoi/plasma/`
+**Documentation:** `docs/dotfiles/plasma/` (session-context.md, local-investigation.md, research-findings.md)
+**Session Summary:** `sessions/summaries/2025-12-02_PLASMA_DOTFILES_MIGRATION_PLANNING_PHASES_0_2.md`
 
 **Prerequisites:**
 - Read all existing plasma and home-manager documentation
@@ -1668,95 +1696,94 @@ kitty @ get-text --extent=all     # All scrollback
 - Technical Researcher role for web research
 - Planner role for migration planning
 
-#### Phase 0: Documentation Consolidation & Cleanup (2-3 hours)
+#### Phase 0: Documentation Consolidation & Cleanup ✅ COMPLETE (2025-12-02)
+
 **Goal:** Establish clean documentation baseline before investigation
 
-- [ ] Read all existing documentation files:
-  - [ ] Read `docs/commons/plasma-manager/` (all files)
-  - [ ] Read `docs/home-manager/plasma*.md` files
-  - [ ] Read any plasma-related files in `docs/chezmoi/`
-  - [ ] Read `home-manager/plasma*.nix` modules
-  - [ ] Document current state of plasma configuration
-- [ ] Consolidate and merge documentation:
-  - [ ] Identify duplicate/overlapping content
-  - [ ] Merge complementary information
-  - [ ] Note deprecated approaches (plasmarc vs plasma-manager)
-  - [ ] Create unified understanding of current setup
-- [ ] Archive deprecated content:
-  - [ ] Create `docs/archives/plasmarc/` directory
-  - [ ] Move deprecated plasmarc-related documentation
-  - [ ] Add README.md explaining why archived
-  - [ ] Keep only active/relevant plasma docs in main areas
-- [ ] Create session context document:
-  - [ ] Create `docs/chezmoi/plasma/SESSION_CONTEXT.md`
-  - [ ] Document findings from consolidation
-  - [ ] List active plasma configurations
-  - [ ] Note gaps in current documentation
+- [x] Read all existing documentation files:
+  - [x] Read `docs/tools/plasma-manager.md` (already consolidated on 2025-11-29)
+  - [x] Read `docs/chezmoi/` guides (01-07)
+  - [x] Read `docs/adrs/ADR-005-CHEZMOI_MIGRATION_CRITERIA.md`
+  - [x] Read `home-manager/plasma*.nix` modules
+  - [x] Document current state of plasma configuration
+- [x] Consolidate and merge documentation:
+  - [x] Identified that plasma-manager docs already consolidated (no duplicates)
+  - [x] Confirmed plasma-manager uses merge approach, not overwrite
+  - [x] Noted plasma-manager writes to ~/.config/ directly (not Nix store symlinks)
+  - [x] Created unified understanding of current setup
+- [x] Archive deprecated content:
+  - [x] No deprecated plasmarc docs found to archive (already cleaned up 2025-11-29)
+- [x] Create session context document:
+  - [x] Created `docs/dotfiles/plasma/session-context.md` (400+ lines)
+  - [x] Documented findings from consolidation
+  - [x] Listed active plasma configurations
+  - [x] Noted gaps in current documentation
 
-#### Phase 1: Local Investigation (3-4 hours)
+#### Phase 1: Local Investigation ✅ COMPLETE (2025-12-02)
+
 **Goal:** Discover and categorize all plasma-related dotfiles in home directory
 
-**Guidelines:** Before investigation, ensure Phase 0 complete. Discuss findings with user before proceeding to web research.
+- [x] Investigate plasma config files in home directory:
+  - [x] Listed all files under `~/.config/` matching plasma/kde/kwin patterns
+  - [x] Listed all files under `~/.local/share/plasma-manager/` (tracking files)
+  - [x] Checked kdeglobals, kwinrc, plasmashellrc, etc.
+  - [x] Identified session management files
+  - [x] Found theme and appearance configs
+  - [x] Located widget/plasmoid configurations (plasma-org.kde.plasma.desktop-appletsrc)
+  - [x] Discovered keyboard shortcut configs (kglobalshortcutsrc)
+  - [x] Found window management (KWin) settings (kwinrc, kwinoutputconfig.json)
+- [x] Categorize findings:
+  - [x] Grouped by function: Core Plasma (13), KDE Apps (16+)
+  - [x] Prioritized: HIGH (6), MEDIUM (10+), LOW, IGNORE
+  - [x] Identified auto-generated (kded5rc/6rc, ksplashrc) vs user-modified
+  - [x] Determined version control strategy per category
+- [x] Document local investigation:
+  - [x] Created `docs/dotfiles/plasma/local-investigation.md` (600+ lines)
+  - [x] Listed all 40+ discovered files with paths, sizes, dates
+  - [x] Analyzed plasma-manager coverage
+  - [x] Created migration decision matrix
+  - [x] Flagged hardware-specific configs (kwinoutputconfig.json)
+- [x] **User approval received** to proceed to Phase 2
 
-- [ ] Investigate plasma config files in home directory:
-  - [ ] List all files under `~/.config/` matching `*plasma*`, `*kde*`, `*kwin*`
-  - [ ] List all files under `~/.local/share/` matching `*plasma*`, `*kde*`
-  - [ ] Check `~/.config/kdeglobals`, `~/.config/kdedefaults`
-  - [ ] Identify session management files
-  - [ ] Find theme and appearance configs
-  - [ ] Locate widget/plasmoid configurations
-  - [ ] Discover keyboard shortcut configs
-  - [ ] Find window management (KWin) settings
-- [ ] Categorize findings:
-  - [ ] Group by function (appearance, behavior, shortcuts, widgets)
-  - [ ] Identify critical vs optional configs
-  - [ ] Note which are auto-generated vs user-modified
-  - [ ] Determine which should be version-controlled
-- [ ] Document local investigation:
-  - [ ] Create `docs/chezmoi/plasma/LOCAL_INVESTIGATION.md`
-  - [ ] List all discovered files with paths
-  - [ ] Note file sizes and modification dates
-  - [ ] Identify dependencies between files
-  - [ ] Flag files that might contain secrets/machine-specific data
-- [ ] **STOP HERE:** Discuss findings with user before web research
+#### Phase 2: Web Research (Technical Researcher Role) ✅ COMPLETE (2025-12-02)
 
-#### Phase 2: Web Research (Technical Researcher Role) (3-4 hours)
 **Goal:** Gather authoritative information on KDE Plasma dotfiles and migration best practices
 
-**Prerequisites:** Phase 1 complete, user approval to proceed
+**Research Confidence Achieved:** 0.87 (Band C - HIGH)
 
-**Guidelines:**
-- Use Technical Researcher role throughout
-- Follow web_research_workflow for all external context
-- Target topic_research_confidence ≥ 0.85 for each subtopic
+- [x] Research plasma dotfiles structure (Topic 1): **c=0.85**
+  - [x] Researched KDE Plasma 6 config structure (same as Plasma 5)
+  - [x] Identified stable vs volatile sections (window pos, recent files = volatile)
+  - [x] Documented safe version control patterns
+  - [x] Found INI file format details and templating strategies
+- [x] Research plasma-manager integration (Topic 2): **c=0.90**
+  - [x] Confirmed plasma-manager MERGES configs (doesn't overwrite)
+  - [x] Discovered plasma-manager writes to ~/.config/ (not Nix store symlinks)
+  - [x] Understood immutability options ([$i] suffix)
+  - [x] Identified gaps: volatile sections still need filtering
+- [x] Research chezmoi + KDE best practices (Topic 3): **c=0.88**
+  - [x] **🌟 MAJOR DISCOVERY:** chezmoi_modify_manager tool for filtering INI sections
+  - [x] Found community patterns: simple configs → plain chezmoi, complex → modify_manager
+  - [x] Documented .chezmoiignore patterns (**/*.src.ini, plasma-manager/, etc.)
+  - [x] Identified templating strategy for hardware-specific configs
+- [x] Synthesize research findings:
+  - [x] Created `docs/dotfiles/plasma/research-findings.md` (600+ lines)
+  - [x] Categorized by management approach (hybrid: plasma-manager + chezmoi + chezmoi_modify_manager)
+  - [x] Documented best practices with real-world examples
+  - [x] Listed authoritative sources (KDE docs, plasma-manager GitHub, community examples)
+- [x] **User approval received** - Ready for Phase 3
 
-- [ ] Research plasma dotfiles structure (Topic 1):
-  - [ ] Web search: "KDE Plasma 6 configuration files structure 2025"
-  - [ ] Web search: "KDE dotfiles complete list explanation"
-  - [ ] Find official KDE documentation on config file format
-  - [ ] Identify stable vs volatile config files
-  - [ ] Document which files are safe to version control
-- [ ] Research plasma-manager integration (Topic 2):
-  - [ ] Web search: "plasma-manager NixOS home-manager guide"
-  - [ ] Review plasma-manager GitHub repo documentation
-  - [ ] Understand what plasma-manager handles vs manual configs
-  - [ ] Identify gaps where chezmoi is still needed
-- [ ] Research chezmoi + KDE best practices (Topic 3):
-  - [ ] Web search: "managing KDE Plasma dotfiles with chezmoi"
-  - [ ] Look for community examples and patterns
-  - [ ] Find recommended .chezmoiignore patterns for KDE
-  - [ ] Identify common pitfalls and solutions
-- [ ] Synthesize research findings:
-  - [ ] Create `docs/chezmoi/plasma/RESEARCH_FINDINGS.md`
-  - [ ] Categorize configs by management approach:
-    - plasma-manager handles
-    - chezmoi manages
-    - should be ignored (auto-generated)
-  - [ ] Document best practices and warnings
-  - [ ] List helpful URLs and references
-- [ ] **STOP HERE:** Review research with user, clarify any gaps
+**📁 Documentation Reorganization (End of Session 2025-12-02):**
+- [x] Created `docs/dotfiles/` structure
+- [x] Moved `docs/plasma/` → `docs/dotfiles/plasma/`
+- [x] Moved `docs/chezmoi/` → `docs/dotfiles/chezmoi/`
+- [x] Renamed all documentation files to lowercase
+- [x] Created `docs/dotfiles/readme.md` (hybrid approach overview)
+- [x] Created session summary: `sessions/summaries/2025-12-02_PLASMA_DOTFILES_MIGRATION_PLANNING_PHASES_0_2.md`
 
-#### Phase 3: Migration Planning (Planner Role) (2-3 hours)
+---
+
+#### Phase 3: Migration Planning (Planner Role) ⏳ NEXT SESSION (2-3 hours)
 **Goal:** Design a 3-5 phase migration plan for plasma dotfiles to chezmoi
 
 **Prerequisites:** Phase 0, 1, 2 complete with user approval
@@ -2108,3 +2135,40 @@ kitty @ get-text --extent=all     # All scrollback
 **Last Review:** 2025-12-01 23:30
 **Next Review:** Weekly (every Sunday)
 **Maintained by:** Dimitris Tsioumas (Mitsio)
+
+---
+
+## 🚨 CRITICAL ADDITIONS (2025-12-02)
+
+### Claude Secrets Management (HIGH PRIORITY)
+
+**Context:** User wants Claude Desktop and Claude Code API keys managed via KeePassXC integration
+
+**Tasks:**
+- [ ] 🚨 CRITICAL: Design KeePassXC secrets integration strategy for Claude configs
+  - [ ] Identify KeePassXC systemd service (user mentioned but unsure of name)
+  - [ ] Research how to access KeePassXC vault programmatically
+  - [ ] Design template strategy for chezmoi to use KeePassXC
+  - [ ] Document in `docs/security/CLAUDE_SECRETS_KEEPASSXC.md`
+
+- [ ] 🚨 CRITICAL: Migrate ~/.config/Claude/ API keys to KeePassXC
+  - [ ] Inventory all secrets in ~/.config/Claude/
+  - [ ] Create KeePassXC entries for Claude Desktop API keys
+  - [ ] Update chezmoi templates to fetch from KeePassXC
+  - [ ] Test secret retrieval and Claude Desktop functionality
+
+- [ ] 🚨 CRITICAL: Migrate ~/.claude.json API keys to KeePassXC
+  - [ ] Inventory all secrets in ~/.claude.json (MCP configs, API keys)
+  - [ ] Create KeePassXC entries for Claude Code credentials
+  - [ ] Update chezmoi template to use KeePassXC integration
+  - [ ] Test Claude Code functionality after migration
+
+- [ ] Document backup strategy for _staging/ directory
+  - [ ] Rule: All backup files go to dotfiles/_staging/
+  - [ ] Update chezmoi best practices
+  - [ ] Add to `docs/chezmoi/04-best-practices.md`
+
+**Priority:** 🔴 HIGH - Must be completed before Claude configs can be safely managed
+**Blocking:** Dotfiles migration for Claude Desktop and Claude Code
+**Related:** Section 8 (Secrets Management Integration)
+
