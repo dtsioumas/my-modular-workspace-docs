@@ -1179,6 +1179,31 @@ docs/home-manager/MIGRATION_FINDINGS.md
 - Fedora Atomic research and testing
 - Code quality tooling setup
 
+### 14. Plasma Desktop Dotfiles Migration to Chezmoi 🆕
+
+**Status:** PHASE 0-2 COMPLETE ✅ | Phase 3 Pending
+**Priority:** MEDIUM
+**Documentation:** `docs/dotfiles/plasma/`
+**Session Summary:** `sessions/summaries/2025-12-02_PLASMA_DOTFILES_MIGRATION_PLANNING_PHASES_0_2.md`
+
+#### Phase 0: Documentation Consolidation ✅ COMPLETE (2025-12-02)
+- [x] Created `docs/dotfiles/plasma/session-context.md` (400+ lines)
+- [x] Consolidated existing documentation
+
+#### Phase 1: Local Investigation ✅ COMPLETE (2025-12-02)
+- [x] Discovered 40+ plasma files, categorized by priority
+- [x] Created `docs/dotfiles/plasma/local-investigation.md` (600+ lines)
+
+#### Phase 2: Web Research ✅ COMPLETE (2025-12-02)
+- [x] Research confidence: 0.87 (Band C - HIGH)
+- [x] Discovered chezmoi_modify_manager tool
+- [x] Created `docs/dotfiles/plasma/research-findings.md` (600+ lines)
+
+#### Phase 3: Migration Planning ⏳ NEXT SESSION
+- [ ] Use Planner role + Sequential Thinking MCP
+- [ ] Design 3-5 migration phases
+- [ ] Create `docs/dotfiles/plasma/migration-plan.md`
+
 ---
 
 ## 🔗 Quick Links
