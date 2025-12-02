@@ -28,8 +28,7 @@
 **Transparency:** 0.15 (85% transparent - very transparent)
 **Font:** JetBrains Mono Nerd Font, size 12
 **Management:** Chezmoi (`dotfiles/dot_config/kitty/`)
-**Scrollbar:** Interactive & Clickable (Phase C.2.1)
-**Last Major Update:** 2025-12-01 (Phase C.2.1 - Scrollbar)
+**Last Major Update:** 2025-12-01 (Phase B & C.1 completion)
 
 ### Customization Philosophy
 
@@ -106,66 +105,6 @@ kitty +kitten themes --reload-in=all Dracula
 
 # Theme is saved to current-theme.conf automatically
 ```
-
----
-
-## Interactive Scrollbar
-
-**Status:** ✅ Implemented (Phase C.2.1 - 2025-12-01)
-
-Kitty has **native support** for a fully interactive, GPU-accelerated scrollbar.
-
-### Features
-
-- **Interactive** - Click, drag, and scroll with mouse
-- **Smart visibility** - Appears when scrolling, hidden when idle
-- **Clickable** - Click anywhere to jump to that position
-- **Draggable** - Grab and drag the handle
-- **Customizable** - Adjust width, opacity, colors
-- **GPU-accelerated** - Smooth and fast
-
-### Configuration
-
-```conf
-# Show scrollbar when scrolling (hidden when idle)
-scrollbar scrolled
-
-# Make scrollbar interactive (clickable and draggable)
-scrollbar_interactive yes
-
-# Jump to clicked location immediately
-scrollbar_jump_on_click yes
-
-# Scrollbar width (in cells, 0.5 = half a character width)
-scrollbar_width 0.5
-
-# Scrollbar handle transparency (0.0 = invisible, 1.0 = opaque)
-scrollbar_handle_opacity 0.6
-
-# Scrollbar track transparency
-scrollbar_track_opacity 0.3
-```
-
-### Usage
-
-- **Show scrollbar** - Scroll up/down (mouse wheel or keyboard)
-- **Click to jump** - Click anywhere on the scrollbar track
-- **Drag handle** - Click and drag the scrollbar handle
-- **Hide scrollbar** - Automatically hides when at bottom (idle)
-
-### Customization Options
-
-**Visibility modes:**
-- `scrollbar always` - Always visible
-- `scrollbar never` - Never visible
-- `scrollbar scrolled` - Show when scrolling (recommended)
-
-**Appearance:**
-- `scrollbar_width` - Width in character cells (0.5-2.0)
-- `scrollbar_handle_opacity` - Handle transparency (0.0-1.0)
-- `scrollbar_track_opacity` - Track transparency (0.0-1.0)
-
-**Location:** Scrollbar appears on the right edge by default (matches theme colors automatically)
 
 ---
 
