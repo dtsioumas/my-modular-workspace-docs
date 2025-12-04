@@ -271,31 +271,101 @@ docs/home-manager/MIGRATION_FINDINGS.md
 
 ---
 
-#### Phase 1: Semantic-Grep Installation (2-3 hours)
+#### Phase 1: Semantic Search Tools Installation (3-5 hours total)
+
+**Goal:** Install 3 semantic search tools for local code/docs discovery
+**Status:** NOT INSTALLED (config files exist but not activated)
+**Plan:** `docs/plans/plan-installing-semantic-tools.md`
+**Session:** `sessions/local-semantic-tools-week-49/`
+**Tool Docs:** `docs/tools/{semtools,semantic-grep,ck}.md`
+
+**Installation Order:** semtools → semantic-grep → evaluate ck
+
+---
+
+##### 1.1 Semtools Installation (HIGH Priority - 30-45 min)
+
+**Tool:** https://github.com/run-llama/semtools
+**Binary:** `search`, `workspace`, `parse`, `ask`
+**Status:** ❌ NOT INSTALLED
+**Docs:** `docs/tools/semtools.md`
+
+**Tasks:**
+- [ ] Create `home-manager/semtools.nix` module
+- [ ] Add semtools package (v1.2.0 from nixpkgs)
+- [ ] Configure SEMTOOLS_WORKSPACE=myspaces environment variable
+- [ ] Add shell aliases: search-docs, search-code
+- [ ] Create .semtools_config.json (empty, for future API keys)
+- [ ] Import in home.nix
+- [ ] Apply: `home-manager switch --flake .`
+- [ ] Verify: `which semtools && semtools --version`
+- [ ] Initialize workspace: `workspace use myspaces`
+- [ ] Test basic search on MySpaces docs
+- [ ] Update `.claude/CLAUDE.md` with semtools integration
+
+**Success Criteria:**
+- Binary in PATH, version check passes
+- Workspace initialized and active
+- Basic semantic search works on docs
+
+---
+
+##### 1.2 Semantic-Grep Installation (MEDIUM Priority - 45-60 min)
 
 **Tool:** https://github.com/arunsupe/semantic-grep
 **Binary:** `w2vgrep`
-**Nix File:** `home-manager/semantic-grep.nix`
+**Status:** ⚠️ CONFIG EXISTS but NOT IMPORTED
+**Nix File:** `home-manager/semantic-grep.nix` (exists, needs vendorHash fix)
+**Docs:** `docs/tools/semantic-grep.md`
 
-##### 1.1 Create Nix Derivation
-- [x] Create `semantic-grep.nix` with buildGoModule derivation
-- [x] Set up word embedding model download automation
-- [ ] Get correct hashes from build output (run build once)
-- [ ] Update sha256/vendorHash in derivation
-- [ ] Import in home.nix
-
-##### 1.2 Model Management
-- [ ] Download GoogleNews-slim word embedding model
-- [ ] Store in `~/.config/semantic-grep/models/`
-- [ ] Create config.json with model path
-- [ ] Verify activation script downloads model
-
-##### 1.3 Testing & Documentation
-- [ ] Test: `home-manager build --flake .#mitsio@shoshin`
-- [ ] Verify `w2vgrep` command available after switch
-- [ ] Test semantic search functionality
-- [ ] Document in `docs/tools/semantic-grep.md` (already exists)
+**Tasks:**
+- [ ] Fix vendorHash in `semantic-grep.nix:26` (currently `lib.fakeHash`)
+  - Option A: Run trial build, get correct hash from error
+  - Option B: Use `vendorHash = null;` temporarily
+- [ ] Import `./semantic-grep.nix` in home.nix
+- [ ] Apply: `home-manager switch --flake .`
+- [ ] Verify 350MB model downloads to `~/.config/semantic-grep/models/`
+- [ ] Test: `which w2vgrep && w2vgrep --help`
+- [ ] Test basic search: `echo "error" | w2vgrep -t 0.6 failure`
+- [ ] Test on MySpaces: `w2vgrep -C 2 -t 0.6 deployment docs/**/*.md`
+- [ ] Update `.claude/CLAUDE.md` with w2vgrep integration
 - [ ] Create navi cheatsheets in chezmoi repo
+
+**Success Criteria:**
+- Binary works, model loaded (~350MB)
+- Semantic word-level matching functional
+- Threshold tuning tested (0.5-0.7)
+
+---
+
+##### 1.3 CK Evaluation & Optional Installation (LOW Priority - 20-30 min if needed)
+
+**Tool:** https://github.com/BeaconBay/ck
+**Binary:** `ck`
+**Status:** ❌ NOT INSTALLED (not in nixpkgs, cargo-only)
+**Docs:** `docs/tools/ck.md`
+
+**Evaluation Criteria (answer BEFORE installing):**
+- [ ] Do semtools + semantic-grep cover your needs?
+- [ ] Do you need interactive TUI search?
+- [ ] Do you need hybrid search (semantic + BM25)?
+- [ ] Do you want built-in MCP server?
+
+**If YES to TUI/hybrid/MCP:**
+- [ ] Install via cargo: `cargo install ck-search`
+- [ ] Index MySpaces: `cd ~/.MyHome/MySpaces/my-modular-workspace && ck --index .`
+- [ ] Test semantic: `ck --sem "kubernetes" docs/`
+- [ ] Test hybrid: `ck --hybrid "ansible playbook" .`
+- [ ] Test TUI: `ck --tui`
+- [ ] Update `.claude/CLAUDE.md` with ck integration
+
+**If NO to above criteria:**
+- [ ] SKIP CK - semtools + semantic-grep sufficient
+
+**Success Criteria (if installed):**
+- All 3 search modes work (sem/hybrid/regex)
+- TUI launches and is navigable
+- Index builds and persists in `.ck/` directories
 
 ---
 
