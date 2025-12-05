@@ -283,30 +283,38 @@ docs/home-manager/MIGRATION_FINDINGS.md
 
 ---
 
-##### 1.1 Semtools Installation (HIGH Priority - 30-45 min)
+##### 1.1 Semtools Installation (HIGH Priority - 30-45 min) ⚠️ BLOCKED
 
 **Tool:** https://github.com/run-llama/semtools
-**Binary:** `search`, `workspace`, `parse`, `ask`
-**Status:** ❌ NOT INSTALLED
+**Binary:** `search`, `parse` (nixpkgs v1.2.0 - `workspace` and `ask` only in upstream v1.5.0)
+**Status:** ✅ INSTALLED - ⚠️ UNTESTED (Model Download Blocked)
 **Docs:** `docs/tools/semtools.md`
+**Phase Status:** `sessions/local-semantic-tools-week-49/PHASE1_SEMTOOLS_STATUS.md`
 
 **Tasks:**
-- [ ] Create `home-manager/semtools.nix` module
-- [ ] Add semtools package (v1.2.0 from nixpkgs)
-- [ ] Configure SEMTOOLS_WORKSPACE=myspaces environment variable
-- [ ] Add shell aliases: search-docs, search-code
-- [ ] Create .semtools_config.json (empty, for future API keys)
-- [ ] Import in home.nix
-- [ ] Apply: `home-manager switch --flake .`
-- [ ] Verify: `which semtools && semtools --version`
-- [ ] Initialize workspace: `workspace use myspaces`
-- [ ] Test basic search on MySpaces docs
-- [ ] Update `.claude/CLAUDE.md` with semtools integration
+- [x] Create `home-manager/semtools.nix` module
+- [x] Add semtools package (v1.2.0 from nixpkgs)
+- [x] Configure SEMTOOLS_WORKSPACE=myspaces environment variable (via sessionVariables)
+- [ ] Add shell aliases to chezmoi's dot_bashrc.tmpl (bash managed by chezmoi)
+- [x] Create .semtools_config.json (empty, for future API keys)
+- [x] Import in home.nix
+- [x] Apply: `home-manager switch --flake .#mitsio@shoshin -b backup`
+- [x] Verify: `search --version` → semtools 1.2.0 ✅
+- [ ] ⚠️ **BLOCKED:** Model download from HuggingFace times out
+- [ ] ⚠️ **BLOCKED:** Test basic search (needs model: minishlab/potion-multilingual-128M)
+- [ ] Create navi cheatsheet after testing
+
+**Known Issues:**
+- ⚠️ **BLOCKER:** HuggingFace model download timeout - User downloading manually
+- ℹ️ Environment variable not active in current session (needs new login/shell)
+- ℹ️ nixpkgs v1.2.0 missing `workspace` and `ask` commands (acceptable)
 
 **Success Criteria:**
-- Binary in PATH, version check passes
-- Workspace initialized and active
-- Basic semantic search works on docs
+- ✅ Package installed (semtools 1.2.0)
+- ✅ Config file created
+- ✅ Environment variable configured
+- ⏸️ **PENDING:** Search command functional after model download
+- ⏸️ **PENDING:** Basic semantic search tested on MySpaces
 
 ---
 
