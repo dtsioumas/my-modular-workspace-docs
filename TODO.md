@@ -283,38 +283,39 @@ docs/home-manager/MIGRATION_FINDINGS.md
 
 ---
 
-##### 1.1 Semtools Installation (HIGH Priority - 30-45 min) ⚠️ BLOCKED
+##### 1.1 Semtools Installation ✅ COMPLETE
 
 **Tool:** https://github.com/run-llama/semtools
 **Binary:** `search`, `parse` (nixpkgs v1.2.0 - `workspace` and `ask` only in upstream v1.5.0)
-**Status:** ✅ INSTALLED - ⚠️ UNTESTED (Model Download Blocked)
+**Status:** ✅ COMPLETE - Installed, Tested, Working
 **Docs:** `docs/tools/semtools.md`
 **Phase Status:** `sessions/local-semantic-tools-week-49/PHASE1_SEMTOOLS_STATUS.md`
+**Completed:** 2025-12-05
 
 **Tasks:**
 - [x] Create `home-manager/semtools.nix` module
 - [x] Add semtools package (v1.2.0 from nixpkgs)
 - [x] Configure SEMTOOLS_WORKSPACE=myspaces environment variable (via sessionVariables)
-- [ ] Add shell aliases to chezmoi's dot_bashrc.tmpl (bash managed by chezmoi)
+- [ ] Add shell aliases to chezmoi's dot_bashrc.tmpl (deferred - optional)
 - [x] Create .semtools_config.json (empty, for future API keys)
 - [x] Import in home.nix
 - [x] Apply: `home-manager switch --flake .#mitsio@shoshin -b backup`
 - [x] Verify: `search --version` → semtools 1.2.0 ✅
-- [ ] ⚠️ **BLOCKED:** Model download from HuggingFace times out
-- [ ] ⚠️ **BLOCKED:** Test basic search (needs model: minishlab/potion-multilingual-128M)
-- [ ] Create navi cheatsheet after testing
+- [x] Model downloaded manually (507MB total in HuggingFace cache)
+- [x] Test basic search → Works! (relevance 0.47)
+- [x] Test MySpaces search → Works! (5 matches, relevance 0.28-0.31)
 
-**Known Issues:**
-- ⚠️ **BLOCKER:** HuggingFace model download timeout - User downloading manually
-- ℹ️ Environment variable not active in current session (needs new login/shell)
-- ℹ️ nixpkgs v1.2.0 missing `workspace` and `ask` commands (acceptable)
+**Performance:**
+- First run: 2-3 min (model loading - normal)
+- Subsequent: < 2 sec (cached)
 
 **Success Criteria:**
 - ✅ Package installed (semtools 1.2.0)
 - ✅ Config file created
 - ✅ Environment variable configured
-- ⏸️ **PENDING:** Search command functional after model download
-- ⏸️ **PENDING:** Basic semantic search tested on MySpaces
+- ✅ Model downloaded and cached
+- ✅ Search command functional and tested
+- ✅ MySpaces semantic search working excellently
 
 ---
 
