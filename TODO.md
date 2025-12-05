@@ -1336,3 +1336,45 @@ docs/home-manager/MIGRATION_FINDINGS.md
 **Last Review:** 2025-11-25 00:45
 **Next Review:** Weekly (every Sunday)
 **Maintained by:** Dimitris Tsioumas (Mitsio)
+
+---
+
+## Autocomplete Implementation Progress
+**Updated:** 2025-12-05 (Session 2)
+
+### Phase 1: Secret Management 🔄 IN PROGRESS
+- [x] Design generic systemd + KeePassXC pattern
+- [x] Research existing implementation (discovered working system!)
+- [x] Adapt design to existing pattern
+- [ ] Add OPENAI_API_KEY to load-keepassxc-secrets.service
+- [ ] Store OpenAI API key in KeePassXC
+- [ ] Test secret loading via systemd
+
+### Phase 2: LLM Autocomplete (Butterfish) ⏳ PENDING
+- [ ] Install butterfish via go (home-manager activation script)
+- [ ] Add bash integration (dot_bashrc.tmpl)
+- [ ] Create butterfish config with blocked patterns
+- [ ] Add HISTIGNORE for secret protection
+- [ ] Test functionality (Capital+Tab, goal mode)
+- [ ] Test security (SSH detection, history, company patterns)
+- [ ] Test performance (baseline vs after)
+
+### Phase 3: Classic Autocomplete (ble.sh) ⏳ PENDING
+- [ ] Check ble.sh availability in nixpkgs
+- [ ] Install via home-manager/shell.nix
+- [ ] Configure in dot_bashrc.tmpl
+- [ ] Create dot_config/blesh/init.sh
+- [ ] Test fish-like suggestions
+- [ ] Verify no conflicts with butterfish
+
+### Documentation 📝
+- [x] Plans V2 created with all fixes
+- [x] Ultrathink reviews completed
+- [x] ADR-009 created
+- [x] Session summaries written
+- [ ] Update plans with actual implementation details
+- [ ] Document adaptation from generic to existing pattern
+- [ ] Create troubleshooting guide based on real issues
+
+---
+
