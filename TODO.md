@@ -319,48 +319,62 @@ docs/home-manager/MIGRATION_FINDINGS.md
 
 ---
 
-##### 1.2 Semantic-Grep Installation (MEDIUM Priority - 45-60 min)
+##### 1.2 Semantic-Grep Installation ✅ COMPLETE
 
 **Tool:** https://github.com/arunsupe/semantic-grep
-**Binary:** `w2vgrep`
-**Status:** ⚠️ CONFIG EXISTS but NOT IMPORTED
-**Nix File:** `home-manager/semantic-grep.nix` (exists, needs vendorHash fix)
+**Binary:** `semantic-grep` (NOT `w2vgrep` - documentation outdated)
+**Status:** ✅ COMPLETE - Installed, Tested, Working
+**Nix File:** `home-manager/semantic-grep.nix`
 **Docs:** `docs/tools/semantic-grep.md`
+**Phase Status:** `sessions/local-semantic-tools-week-49/PHASE2_SEMANTIC_GREP_STATUS.md`
+**Completed:** 2025-12-06
 
 **Tasks:**
-- [ ] Fix vendorHash in `semantic-grep.nix:26` (currently `lib.fakeHash`)
-  - Option A: Run trial build, get correct hash from error
-  - Option B: Use `vendorHash = null;` temporarily
-- [ ] Import `./semantic-grep.nix` in home.nix
-- [ ] Apply: `home-manager switch --flake .`
-- [ ] Verify 350MB model downloads to `~/.config/semantic-grep/models/`
-- [ ] Test: `which w2vgrep && w2vgrep --help`
-- [ ] Test basic search: `echo "error" | w2vgrep -t 0.6 failure`
-- [ ] Test on MySpaces: `w2vgrep -C 2 -t 0.6 deployment docs/**/*.md`
-- [ ] Update `.claude/CLAUDE.md` with w2vgrep integration
-- [ ] Create navi cheatsheets in chezmoi repo
+- [x] Fix vendorHash in `semantic-grep.nix:26` → `sha256-HpKY5DkP9hRtH9O18irlNE2yd8eTSLogTpYTWR1kbXA=`
+- [x] Add `subPackages = ["."]` to fix build error (multiple main functions)
+- [x] Import `./semantic-grep.nix` in home.nix
+- [x] Apply: `home-manager switch --flake .#mitsio@shoshin -b backup`
+- [x] Add declarative model download via activation script
+- [x] Model downloaded (346MB uncompressed, 264MB compressed)
+- [x] Test: `which semantic-grep && semantic-grep --help` ✅
+- [x] Test exact match: Similarity 1.0000 ✅
+- [x] Test semantic match: "success" → "successful" (0.6168) ✅
+- [ ] Update `.claude/CLAUDE.md` with semantic-grep integration (deferred - optional)
+- [ ] Create navi cheatsheets in chezmoi repo (deferred - optional)
+
+**Performance:**
+- Model loads into memory on first run
+- Semantic word-level matching working excellently
+- Threshold tuning: 0.5-0.6 (broad), 0.65-0.7 (moderate), 0.75+ (strict)
 
 **Success Criteria:**
-- Binary works, model loaded (~350MB)
-- Semantic word-level matching functional
-- Threshold tuning tested (0.5-0.7)
+- ✅ Package built and installed (semantic-grep v0.7.0)
+- ✅ Config file created at `~/.config/semantic-grep/config.json`
+- ✅ Model downloaded declaratively (346MB)
+- ✅ Exact matching tested and working
+- ✅ Semantic word-level matching tested and working
+- ✅ Declarative model installation via home.activation script
+
+**Key Finding:** Binary is `semantic-grep`, not `w2vgrep` as documented upstream
 
 ---
 
-##### 1.3 CK Evaluation & Optional Installation (LOW Priority - 20-30 min if needed)
+##### 1.3 CK Evaluation & Optional Installation ⏸️ DEFERRED
 
 **Tool:** https://github.com/BeaconBay/ck
 **Binary:** `ck`
-**Status:** ❌ NOT INSTALLED (not in nixpkgs, cargo-only)
+**Status:** ⏸️ EVALUATION PENDING (deferred until after real-world usage of Phase 1+2)
 **Docs:** `docs/tools/ck.md`
 
+**Recommendation:** Test semtools + semantic-grep in daily workflow for 1-2 weeks, then evaluate if ck is needed.
+
 **Evaluation Criteria (answer BEFORE installing):**
-- [ ] Do semtools + semantic-grep cover your needs?
+- [ ] Do semtools + semantic-grep cover your needs? (TEST FIRST)
 - [ ] Do you need interactive TUI search?
 - [ ] Do you need hybrid search (semantic + BM25)?
 - [ ] Do you want built-in MCP server?
 
-**If YES to TUI/hybrid/MCP:**
+**If YES to TUI/hybrid/MCP after testing:**
 - [ ] Install via cargo: `cargo install ck-search`
 - [ ] Index MySpaces: `cd ~/.MyHome/MySpaces/my-modular-workspace && ck --index .`
 - [ ] Test semantic: `ck --sem "kubernetes" docs/`
@@ -368,13 +382,15 @@ docs/home-manager/MIGRATION_FINDINGS.md
 - [ ] Test TUI: `ck --tui`
 - [ ] Update `.claude/CLAUDE.md` with ck integration
 
-**If NO to above criteria:**
-- [ ] SKIP CK - semtools + semantic-grep sufficient
+**If NO to above criteria after testing:**
+- [ ] Mark Phase 3 as SKIPPED - semtools + semantic-grep sufficient
 
 **Success Criteria (if installed):**
 - All 3 search modes work (sem/hybrid/regex)
 - TUI launches and is navigable
 - Index builds and persists in `.ck/` directories
+
+**Current Decision:** DEFERRED - Use Phase 1+2 tools first, evaluate later
 
 ---
 
@@ -881,6 +897,11 @@ docs/home-manager/MIGRATION_FINDINGS.md
 
 ---
 
+#### Phase 0: Bisync recovery after secret refactor (HIGH - 20 min)
+- [ ] Run `ansible-playbook -i inventories/hosts playbooks/rclone-gdrive-sync.yml --tags resync` once to rebuild bisync state after the secret-service changes.
+- [ ] Manually trigger `systemctl --user start rclone-gdrive-sync.service` and monitor `journalctl --user -u rclone-gdrive-sync -f` to ensure RCLONE_CONFIG_PASS is detected and no KeePassXC prompts appear.
+- [ ] Confirm `systemctl --user show-environment | grep RCLONE_CONFIG_PASS` prints the password placeholder (reload via `reload-keepassxc-secrets.sh` if missing).
+
 #### Phase 1: Android Syncthing Setup (HIGH - 30 min)
 - [ ] Install Syncthing app on Android (xiaomi-poco-x6)
 - [ ] Get desktop Syncthing device ID: `syncthing -device-id`
@@ -1378,4 +1399,3 @@ docs/home-manager/MIGRATION_FINDINGS.md
 - [ ] Create troubleshooting guide based on real issues
 
 ---
-
