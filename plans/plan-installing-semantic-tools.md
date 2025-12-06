@@ -1,8 +1,21 @@
 # Comprehensive Installation Plan: Semantic Search Tools
 
 **Date:** 2025-12-03
+**Last Updated:** 2025-12-06
 **Target System:** shoshin (NixOS desktop)
 **Planning Confidence:** 0.85 (Band C - Safe to implement)
+
+## Implementation Status
+
+| Phase | Tool | Status | Completed | Notes |
+|-------|------|--------|-----------|-------|
+| **Phase 1** | semtools | ✅ COMPLETE | 2025-12-05 | Installed v1.2.0, model cached (507MB), tested working |
+| **Phase 2** | semantic-grep | ✅ COMPLETE | 2025-12-06 | Fixed build, model downloaded (346MB), tested working |
+| **Phase 3** | ck | ⏸️ PENDING | - | Evaluation needed after Phase 1+2 testing |
+
+**Current Status:** Phase 2 complete. Phase 3 evaluation pending.
+
+---
 
 ## Executive Summary
 
