@@ -1,8 +1,8 @@
 # Master TODO - My Modular Workspace
 
 **Project:** my-modular-workspace
-**Last Updated:** 2025-12-01
-**Current Phase:** Kitty Terminal Enhancements + Home-Manager Enhancements (Week 48-49)
+**Last Updated:** 2025-12-06
+**Current Phase:** MCP Servers Declarative Migration (ADR-010) + Home-Manager Enhancements (Week 49)
 **Working Directory:** `/home/mitsio/.MyHome/MySpaces/my-modular-workspace/`
 
 ---
@@ -394,54 +394,58 @@ docs/home-manager/MIGRATION_FINDINGS.md
 
 ---
 
-#### Phase 2: MCP Servers Reorganization (4-6 hours)
+#### Phase 2: MCP Servers Declarative Migration (ADR-010) 🔄 IN PROGRESS
 
-**Goal:** Move ALL MCP installations to home-manager, organized in `~/.local-mcp-servers/`
-**Architecture Doc:** Create `docs/integrations/mcp-servers.md`
+**Goal:** Migrate ALL MCP servers to Nix packages via Home-Manager (ADR-010)
+**Status:** Phase 1 COMPLETE ✅ | Phases 2-5 PENDING
+**ADR:** `docs/adrs/ADR-010-UNIFIED_MCP_SERVER_ARCHITECTURE.md`
+**Research:** `docs/researches/2025-12-06_NIX_MCP_SERVERS_PACKAGING_RESEARCH.md`
+**Session:** Previous session compacted - continuing from summary
 
-##### 2.1 Directory Setup
-- [ ] Create `home-manager/mcps/` directory for derivations
-- [ ] Create activation script for `~/.local-mcp-servers/` structure
-- [ ] Create `mcps/default.nix` to import all MCPs
+##### Key Discovery: natsukium/mcp-servers-nix Flake ✅
+- [x] Added flake input to home-manager/flake.nix
+- [x] Pre-built packages available for many MCP servers
+- [x] Created `home-manager/mcp-servers/default.nix` and `from-flake.nix`
 
-##### 2.2 npm-based MCPs (node2nix)
-- [ ] Research node2nix workflow
-- [ ] **context7-mcp** (`@upstash/context7-mcp`)
-  - [ ] Generate node-packages.nix
-  - [ ] Create derivation
-  - [ ] Test functionality
-- [ ] **firecrawl-mcp**
-  - [ ] Generate node-packages.nix
-  - [ ] Handle API key configuration
-  - [ ] Test functionality
-- [ ] **mcp-read-website-fast** (`@just-every/mcp-read-website-fast`)
-  - [ ] Generate node-packages.nix
-  - [ ] Test functionality
+##### 2.1 Phase 0: Infrastructure ✅ COMPLETE (2025-12-06)
+- [x] Add `natsukium/mcp-servers-nix` as flake input
+- [x] Create `home-manager/mcp-servers/` directory structure
+- [x] Create `mcp-servers/default.nix` (main importer)
+- [x] Create `mcp-servers/from-flake.nix` (flake packages with wrappers)
+- [x] Fix context7-mcp conflict (removed from local-mcp-servers.nix)
 
-##### 2.3 Go-based MCPs (buildGoModule)
+##### 2.2 Phase 1: Flake-Based Servers ✅ COMPLETE (2025-12-06)
+**Using natsukium/mcp-servers-nix packages:**
+- [x] **context7-mcp** - Library documentation lookup
+- [x] **mcp-server-sequential-thinking** - Deep reasoning
+- [x] **mcp-server-fetch** - Web content fetching
+- [x] **mcp-server-time** - Timezone operations (Europe/Athens)
+- [x] Created systemd wrapper scripts with resource isolation
+- [x] Build and activation successful
+
+##### 2.3 Phase 2: Custom NPM Derivations ⏳ PENDING
+**Need buildNpmPackage derivations for:**
+- [ ] **firecrawl-mcp** - Web scraping (github.com/firecrawl/firecrawl-mcp-server)
+- [ ] **exa-mcp** - Exa search (@modelcontextprotocol/server-exa)
+- [ ] **brave-search-mcp** - ARCHIVED upstream, needs alternative
+- [ ] **mcp-read-website-fast** - Fast web reading
+
+##### 2.4 Phase 3: Custom Python Derivations ⏳ PENDING
+- [ ] **ast-grep-mcp** (github.com/ast-grep/ast-grep-mcp)
+  - [ ] Create buildPythonPackage derivation
+  - [ ] Depends on: mcp SDK, pydantic, ast-grep CLI
+
+##### 2.5 Phase 4: Custom Go Derivations ⏳ PENDING
 - [ ] **git-mcp-go** (github.com/tak-bro/git-mcp-go)
-  - [ ] Create derivation with vendorHash
-  - [ ] Test with git repositories
-- [ ] **mcp-filesystem-server** (github.com/mark3labs/mcp-filesystem-server)
-  - [ ] Create derivation
-  - [ ] Configure allowed directories
 - [ ] **mcp-shell** (github.com/punkpeye/mcp-shell)
-  - [ ] Create derivation
-  - [ ] Configure security.yaml
+- [ ] **mcp-filesystem-server** (github.com/mark3labs/mcp-filesystem-server)
 
-##### 2.4 Python/uv-based MCPs
-- [ ] **mcp-server-fetch** - buildPythonPackage or uv wrapper
-- [ ] **mcp-server-time** - Configure timezone (Europe/Athens)
-- [ ] **sequential-thinking** - Test thinking process
-
-##### 2.5 Rust-based MCPs (buildRustPackage)
-- [ ] **rust-mcp-filesystem** (optional - compare with Go version)
-
-##### 2.6 Integration
-- [ ] Update `claude_desktop_config.json` with new paths
-- [ ] All paths use `~/.local-mcp-servers/<mcp>/bin/`
-- [ ] Verify paths use `mitsio` not `mitso`
-- [ ] Test all MCPs in Claude Desktop
+##### 2.6 Phase 5: Consolidation & Cleanup ⏳ PENDING
+- [ ] Remove runtime installers from `local-mcp-servers.nix`
+- [ ] Update chezmoi templates to use Nix-managed binaries
+- [ ] Test Claude Desktop with all MCP servers
+- [ ] Update Claude Code mcp_config.json
+- [ ] Remove uv/npm/go activation scripts for migrated servers
 
 ---
 
