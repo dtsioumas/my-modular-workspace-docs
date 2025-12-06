@@ -14,6 +14,7 @@
 - Systemd timer configured (30min interval, 1h timeout, 20% CPU)
 - Ansible playbook for sync automation
 - KeePassXC secret integration for rclone password
+- Plasma notifications with history/logging (`~/bin/rclone-notify`)
 - **Local-as-source-of-truth conflict resolution** (implemented 2025-12-01)
 - **.git directories excluded** (prevents 48+ git conflicts)
 
@@ -63,6 +64,13 @@ exclude_patterns:
   - "*.conflict1"
   - "*.conflict2"
 ```
+
+### Notification Enhancements (2025-12-05)
+
+- `~/bin/rclone-notify` wraps `notify-send` with KDE/Plasma-friendly defaults (non-transient and categorized as "transfer")
+- Each playbook phase now sends a rich summary (counts, conflict preview, log path)
+- Helper also logs every notification to `~/.logs/rclone/notifications.log` for quick auditing
+- Failure notifications include the last 20 log lines so you can triage directly from the Plasma history panel
 
 ---
 
