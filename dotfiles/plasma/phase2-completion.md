@@ -222,7 +222,17 @@ Ready to migrate (in priority order):
 
 **When Ready:** Say "Let's continue with Phase 3" or "Πάμε με Phase 3"
 
-**Recommendation:** Wait 1-2 days to verify Phase 2 apps work correctly before Phase 3.
+**⏸️ VERIFICATION PERIOD ACTIVE**
+- **Decision:** Waiting 1-2 days (until 2025-12-08 or later)
+- **Purpose:** Verify Phase 2 apps work correctly before high-risk Phase 3
+- **What to test:**
+  - Use all 4 apps normally (Dolphin, Konsole, Kate, Okular)
+  - Check settings persist across sessions
+  - Verify no config resets or unexpected behavior
+  - Run `chezmoi status` occasionally to check for issues
+
+**Phase 3 Risk:** 🔴 HIGH - core desktop (shortcuts, window manager)
+**Strategy:** Conservative approach - verify low-risk Phase 2 before high-risk Phase 3
 
 ---
 

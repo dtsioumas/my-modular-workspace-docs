@@ -1,7 +1,7 @@
 # Plasma Desktop Migration Plan - Chezmoi Integration
 
 **Created:** 2025-12-04
-**Status:** ⏳ Phase 2 COMPLETE - Phase 3 Ready
+**Status:** ⏸️ Phase 2 COMPLETE - Verification Period (1-2 days before Phase 3)
 **Planner Confidence:** `c_plan = 0.84` (Band C - HIGH)
 **Approach:** Gradual, hybrid migration with rollback capability
 
@@ -287,9 +287,23 @@ filter {
 
 **Detailed Report:** See `docs/dotfiles/plasma/phase2-completion.md`
 
+**⏸️ VERIFICATION PERIOD (1-2 days)**
+- **Decision:** Wait before Phase 3 to verify Phase 2 apps work correctly
+- **Start Date:** 2025-12-06
+- **Earliest Phase 3 Start:** 2025-12-08 or later
+- **What to verify:**
+  - ✅ Dolphin works normally (file manager operations, settings persist)
+  - ✅ Konsole works normally (terminal, tabs, color scheme)
+  - ✅ Kate works normally (editor, file tree, settings)
+  - ✅ Okular works normally (PDF viewing, sidebar settings)
+  - ✅ No unexpected config resets or issues
+  - ✅ chezmoi apply runs without errors
+
+**Rationale:** Phase 3 involves **HIGH RISK** core desktop configs (shortcuts, window manager). Better to ensure Phase 2 is solid first.
+
 ---
 
-### Phase 3: Core Plasma Configs Migration (Week 3-4)
+### Phase 3: Core Plasma Configs Migration (Week 3-4) ⏸️ WAITING
 
 **Goal:** Migrate core Plasma desktop configs while keeping plasma-manager as fallback
 
