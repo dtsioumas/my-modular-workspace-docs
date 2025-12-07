@@ -457,16 +457,203 @@ dotfiles/.chezmoi/
 
 ---
 
-## 9. Next Steps
+## 9. Implementation Progress (Updated 2025-12-07)
 
-1. [ ] Add `natsukium/mcp-servers-nix` to flake.nix inputs
-2. [ ] Create `home-manager/mcp-servers/from-flake.nix` using available packages
-3. [ ] Create buildNpmPackage derivations for: firecrawl, exa, brave-search, read-website-fast
-4. [ ] Create buildPythonPackage for ast-grep-mcp
-5. [ ] Update chezmoi templates to use Nix-managed binaries
-6. [ ] Test full integration
+### 9.1 Completed Steps
+
+- [x] Add `natsukium/mcp-servers-nix` to flake.nix inputs
+- [x] Create `home-manager/mcp-servers/from-flake.nix` using available packages
+  - context7-mcp, mcp-server-fetch, mcp-server-time, mcp-server-sequential-thinking
+- [x] Create buildNpmPackage derivations for: firecrawl, read-website-fast
+  - firecrawl-mcp v3.2.1 ✅
+  - mcp-read-website-fast v0.1.20 ✅
+
+### 9.2 Blocked Packages
+
+| Package | Issue | Workaround |
+|---------|-------|------------|
+| exa-mcp-server | smithery CLI adds dynamic deps during build | Keep runtime wrapper |
+| brave-search-mcp | npm `overrides` cause cache mismatch | Keep runtime wrapper |
+
+**Technical Details:**
+- `buildNpmPackage` limitation: `overrideAttrs` only affects `mkDerivation`, not `buildNpmPackage`
+- npm `overrides` in package.json modify dependency resolution at install time
+- Prefetched deps don't include these overridden packages
+
+### 9.3 Remaining Steps
+
+- [ ] Create buildPythonPackage for ast-grep-mcp
+- [ ] Create buildGoModule for git-mcp-go, mcp-shell
+- [ ] Implement systemd user services for MCP servers
+- [ ] Configure multi-client support (Claude Desktop, Warp, Codex)
+- [ ] Update chezmoi templates to use Nix-managed binaries
 
 ---
 
-**Research Status:** Complete
-**Confidence Level:** High (c = 0.85)
+## 10. Multi-Client Architecture (NEW - 2025-12-07)
+
+### 10.1 Problem Statement
+
+Current setup spawns separate MCP server instances per AI client:
+- Claude Code: STDIO transport, spawns own servers
+- Claude Desktop: Separate config, separate instances
+- Warp Terminal: Not yet integrated
+- Codex (OpenAI): Not yet integrated
+
+**Issues:**
+- Duplicated memory usage (N copies of each server)
+- No state sharing between clients
+- Inconsistent configuration
+
+### 10.2 MCP Transport Comparison
+
+| Transport | Multi-Client | Persistent | Resource Sharing | Native Support |
+|-----------|--------------|------------|------------------|----------------|
+| STDIO | ❌ 1:1 only | ❌ Per-spawn | ❌ None | ✅ Universal |
+| HTTP/SSE | ✅ Many:1 | ✅ Daemon | ✅ Full | ⚠️ Varies |
+| Streamable HTTP | ✅ Many:1 | ✅ Daemon | ✅ Full | ⚠️ New (2025-11-25) |
+
+### 10.3 Solution Architecture
+
+```
+┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│  Claude Code    │  │  Claude Desktop │  │  Warp/Codex     │
+└────────┬────────┘  └────────┬────────┘  └────────┬────────┘
+         │ STDIO              │ SSE                │ STDIO
+         ▼                    ▼                    ▼
+┌────────────────────────────────────────────────────────────┐
+│              mcp-router (optional, future)                 │
+│            Multiplexes requests to servers                 │
+└────────────────────────────┬───────────────────────────────┘
+                             │ HTTP/SSE
+┌────────────────────────────▼───────────────────────────────┐
+│              Systemd User Services (HTTP)                  │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
+│  │firecrawl │  │ context7 │  │   exa    │  │  fetch   │   │
+│  │  :8001   │  │  :8002   │  │  :8003   │  │  :8004   │   │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘   │
+└────────────────────────────────────────────────────────────┘
+```
+
+### 10.4 Systemd Integration Pattern
+
+**Service Unit Template:**
+```ini
+# ~/.config/systemd/user/mcp-firecrawl.service
+[Unit]
+Description=Firecrawl MCP Server
+PartOf=mcp-servers.target
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=%h/.nix-profile/bin/firecrawl-mcp --transport http --port 8001
+EnvironmentFile=%h/.config/mcp/secrets.env
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=mcp-servers.target
+```
+
+**Socket Activation (Optional):**
+```ini
+# ~/.config/systemd/user/mcp-firecrawl.socket
+[Unit]
+Description=Firecrawl MCP Server Socket
+
+[Socket]
+ListenStream=8001
+Accept=false
+
+[Install]
+WantedBy=sockets.target
+```
+
+### 10.5 Client Configuration Strategy
+
+**Single Source of Truth:** `~/.config/mcp/servers.yaml`
+```yaml
+servers:
+  firecrawl:
+    package: firecrawl-mcp
+    transport: http
+    port: 8001
+    env: [FIRECRAWL_API_KEY]
+  context7:
+    package: context7-mcp
+    transport: stdio  # Fallback for clients that don't support HTTP
+```
+
+**Chezmoi Templates Generate:**
+- `~/.claude.json` (Claude Code)
+- `~/Library/.../claude_desktop_config.json` (Claude Desktop)
+- `~/.warp/mcp_config.json` (Warp)
+
+### 10.6 Tools & References
+
+- **APISIX mcp-bridge**: Converts STDIO MCP servers to HTTP/SSE
+- **IBM mcp-context-forge**: MCP Gateway for central management
+- **MCP Spec 2025-11-25**: Streamable HTTP transport specification
+
+---
+
+## 11. Revised Implementation Phases (CORRECTED 2025-12-07)
+
+### Critical Architectural Insight
+
+**STDIO transport CANNOT use persistent systemd services!**
+
+STDIO requires process-per-connection spawned by the client. The current
+`systemd-run --scope` pattern is CORRECT for STDIO servers because:
+- Each client spawns its own server process
+- Scopes provide resource isolation without daemon overhead
+- Servers terminate when client disconnects
+
+**Systemd services only work for HTTP/SSE transport** where the server
+runs as a persistent daemon accepting multiple connections.
+
+---
+
+### Phase 1: Nix Packages ✅ COMPLETE
+- Flake packages: context7, fetch, time, sequential-thinking
+- Custom NPM: firecrawl-mcp, read-website-fast
+- BLOCKED: exa, brave-search (keep runtime wrappers)
+
+### Phase 2: Enhanced Wrappers (REVISED - Not systemd services)
+**Rationale:** STDIO transport requires process-per-client.
+**Tasks:**
+- [x] Current `systemd-run --scope` pattern is correct
+- [ ] Integrate with existing KeePassXC secret loading
+- [ ] Ensure all wrappers use `mcp-servers.slice` for resource limits
+- [ ] Add health check/debug scripts
+
+### Phase 3: Multi-Client Configuration (NEW)
+**Goal:** Single source of truth for all AI clients
+**Tasks:**
+- [ ] Create `~/.config/mcp/servers.yaml` as master config
+- [ ] Chezmoi template: `private_dot_claude/mcp_config.json.tmpl` (Claude Code)
+- [ ] Chezmoi template: `private_dot_config/Claude/claude_desktop_config.json.tmpl`
+- [ ] Chezmoi template: `private_dot_config/warp-terminal/mcp_servers.json.tmpl`
+- [ ] Document Codex integration (future)
+
+### Phase 4: Python/Go Derivations
+- [ ] ast-grep-mcp (buildPythonPackage)
+- [ ] git-mcp-go, mcp-shell (buildGoModule)
+
+### Phase 5: Consolidation
+- [ ] Remove deprecated runtime wrappers from local-mcp-servers.nix
+- [ ] Documentation updates
+- [ ] Integration tests
+
+### Phase 6: HTTP Transport (DEFERRED)
+**Status:** Defer until MCP ecosystem matures
+- Most servers are STDIO-only
+- HTTP support is inconsistent
+- mcp-bridge adds complexity not worth it now
+
+---
+
+**Research Status:** Complete (Architecture Finalized)
+**Confidence Level:** High (c = 0.89)
+**Last Updated:** 2025-12-07 23:23 EET
