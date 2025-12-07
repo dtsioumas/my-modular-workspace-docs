@@ -546,12 +546,12 @@ docs/home-manager/MIGRATION_FINDINGS.md
 
 ### 6. Kitty Terminal Enhancements
 
-**Status:** PHASE A & B ✅ COMPLETE | PHASE C.1 ✅ COMPLETE | PHASE C.2 🔬 RESEARCH COMPLETE - Awaiting Clarifications
-**Last Completed:** 2025-12-01 20:00 (Phase C.2 research)
-**Last Updated:** 2025-12-01 20:00 (Comprehensive session context documented)
+**Status:** PHASE A & B ✅ COMPLETE | PHASE C.1 ✅ COMPLETE | PHASE C.2 🔬 RESEARCH UPDATED 2025-12-07
+**Last Completed:** 2025-12-07 03:15 (Session research update)
+**Last Updated:** 2025-12-07 03:15 (New research on per-window status bars)
 **Goal:** Enhance kitty terminal with advanced features and workflow improvements
-**Time Spent:** ~5 hours (Phase A: 30m, Phase B: 2h, Phase C.1: 1h, Research: 2h)
-**Remaining:** 3-5 hours (Phase C.2 implementation pending user clarifications)
+**Time Spent:** ~5.5 hours (Phase A: 30m, Phase B: 2h, Phase C.1: 1h, Research: 2.5h)
+**Remaining:** 4-6 hours (Phase C.2 + new ideas from sessions)
 **Documentation:**
 - **Plan (Kittens):** `docs/plans/kitty-kittens-enhancements-plan.md` ⭐ PRIMARY
 - Plan (Basic): `docs/plans/kitty-enhancements-plan.md`
@@ -571,6 +571,50 @@ docs/home-manager/MIGRATION_FINDINGS.md
 - ✅ **Terminal Helpers Complete:** Navi cheatsheets (kh, khe, ks), daily reminder
 - 🔬 **Phase C.2 Research Complete:** Scrollbar, status bar, autocomplete, history export
 - ⏳ **Phase C.2 Pending:** Awaiting user clarifications before implementation
+
+---
+
+#### 🔬 Research Findings: Tab Bar + Window Bars (2025-12-07)
+
+**User Question:** Can I have tab bar on TOP and per-window status bars at BOTTOM?
+
+**Research Sources:**
+- GitHub Issue #3101: Per-window statusbar API
+- GitHub Discussion #9234: Per-tab status bar (Nov 2025)
+- Kitty official docs: Tab bar configuration
+- Context7 documentation search
+
+**Findings:**
+
+| Feature | Native Support | Status |
+|---------|---------------|--------|
+| Tab bar at TOP | ✅ YES | `tab_bar_edge top` |
+| Tab bar at BOTTOM | ✅ YES | `tab_bar_edge bottom` (default) |
+| Per-window status bar | ❌ NO | Workaround: 1-char window + remote control |
+| Per-tab status bar | ❌ NO | Use `active_tab_title_template` for active tab only |
+
+**Key Insight from kovidgoyal (kitty author):**
+> "For an actual docked status bar it would need issue #2391. As a workaround, implement a status bar as a 1 character high window and populate it with content via send-text."
+
+**Recommended Solution: Kitty + Zellij Architecture**
+```
+┌─────────────────────────────────────────┐
+│ [Tab 1] [Tab 2] [Tab 3]   ← Kitty tab bar (TOP)
+├─────────────────────────────────────────┤
+│                                         │
+│     Terminal content                    │
+│     (managed by Zellij panes)           │
+│                                         │
+├─────────────────────────────────────────┤
+│ git:main | ~/path | 15:30  ← Zellij zjstatus (BOTTOM)
+└─────────────────────────────────────────┘
+```
+
+**Action Items:**
+- [ ] Move tab bar to top: `tab_bar_edge top`
+- [ ] Customize active tab template: `active_tab_title_template`
+- [ ] Integrate Zellij for per-pane status bars (Phase D)
+- [ ] Or: Create custom 1-line window with remote control (advanced)
 
 ---
 
@@ -663,22 +707,27 @@ docs/home-manager/MIGRATION_FINDINGS.md
 - [x] All changes committed
 - **Status:** Complete and documented
 
-##### C.2.3: Interactive Scrollbar ✅ READY TO IMPLEMENT
+##### C.2.3: Interactive Scrollbar ✅ IMPLEMENTED (2025-12-01)
 - [x] Research complete (native support confirmed)
-- [ ] Enable interactive scrollbar
-- [ ] Configure appearance (transparency, colors)
-- [ ] Test clickability and drag functionality
-- **Estimate:** 15 mins
-- **Status:** Native support, ready to implement
+- [x] Enable interactive scrollbar (`scrollbar scrolled`)
+- [x] Configure appearance (opacity 0.6 handle, 0.3 track)
+- [x] Added to kitty.conf and committed
+- [ ] Test clickability and drag functionality (USER TODO)
+- **Estimate:** 15 mins → DONE
+- **Status:** Implemented, awaiting user testing
 
-##### C.2.4: Enhanced Tab Bar / Status Display ⏳ NEEDS CLARIFICATION
-- [x] Research complete (use tab bar at bottom)
-- [ ] User to specify what info to show (tab, dir, git, time, etc.)
-- [ ] Move tab bar to bottom
-- [ ] Add custom template
-- [ ] Optional: Git branch detection script
-- **Estimate:** 30-45 mins
-- **Status:** Waiting for user clarification
+##### C.2.4: Tab Bar Position & Configuration 🆕 NEW OPTION (2025-12-07)
+- [x] Research complete (2025-12-07)
+- [ ] **Option A (Simple):** Move tab bar to TOP (`tab_bar_edge top`)
+- [ ] **Option B (Advanced):** Keep tab bar at bottom as "status bar"
+- [ ] Customize `active_tab_title_template` for detailed active tab info
+- [ ] Optional: Git branch via custom Python `tab_bar.py`
+- **Estimate:** 30-45 mins (simple) | 2-4 hours (custom Python)
+- **Status:** Ready to implement - user to choose option
+- **Reference:** `docs/plans/kitty-advanced-statusbar-plan.md`
+
+**User Preference (2025-12-07):** Tab bar TOP + window bars BOTTOM
+→ **Recommended:** Tab bar TOP + Zellij zjstatus at BOTTOM (Phase D)
 
 ##### C.2.5: Terminal History Export 🔬 NEEDS DESIGN
 - [ ] User to specify format preferences
@@ -732,12 +781,59 @@ docs/home-manager/MIGRATION_FINDINGS.md
 
 **Phase C.2 Success Criteria:**
 - [ ] User provides clarifications
-- [ ] Scrollbar implemented and working
-- [ ] Status bar/tab bar configured per user preferences
+- [x] Scrollbar implemented and working ✅
+- [ ] Tab bar configured per user preferences
 - [ ] History export functional
 - [ ] F12 panel kitten debugged (if issues found)
 - [ ] Theme issue resolved
 - [ ] All limitations documented
+
+---
+
+#### 💡 Ideas from Previous Sessions (Collected 2025-12-07)
+
+**From: `sessions/summaries/01-12-2025_KITTY_ADVANCED_STATUSBAR_SESSION_SUMMARY.md`**
+
+##### Advanced Status Bar (Custom tab_bar.py) 📋 PLANNED
+- **Purpose:** SRE-focused status bar with system metrics
+- **Requested Metrics:**
+  1. Tab number, layout name
+  2. Git branch (current repo)
+  3. Time (HH:MM format)
+  4. CPU usage (refresh 3s)
+  5. RAM usage (refresh 5s)
+  6. Disk usage - Root `/` (refresh 10s)
+  7. Disk usage - Backups `/backups/` (refresh 10s)
+  8. Network stats (↑/↓ speeds, refresh 3s)
+  9. K8s context ⭐ CRITICAL (refresh 5s, prod alert: yellow + ⚠️)
+  10. Container count (Docker/Podman, refresh 5s)
+- **Estimate:** 4-6 hours (custom Python development)
+- **Status:** Plan created, implementation pending
+- **Reference:** `docs/plans/kitty-advanced-statusbar-plan.md`
+
+##### Window Splitting Enhancements ✅ MOSTLY DONE
+- [x] Splits layout enabled (`splits:split_axis=auto`)
+- [x] F5 = horizontal split, F6 = vertical split
+- [x] F7 = rotate layout
+- [x] Ctrl+Alt+Arrow navigation
+- [ ] Test first terminal split behavior (USER TODO)
+
+##### Tab Renaming Shortcut 📋 QUICK WIN
+- [ ] Add F2 for tab renaming: `map f2 set_tab_title`
+- [ ] Add Shift+F2 for reset: `map shift+f2 set_tab_title ""`
+- **Estimate:** 5 mins
+
+##### icat Image Preview 📋 OPTIONAL
+- [ ] Test `kitty +kitten icat image.png`
+- [ ] Create alias for quick preview
+- [ ] Consider ranger integration (`preview_images_method kitty`)
+- **Estimate:** 15 mins
+
+##### pawbar - Panel-based Desktop Bar 🆕 DISCOVERED
+- **URL:** https://github.com/codelif/pawbar
+- **What:** Desktop panel using kitty's panel kitten
+- **Use case:** Replace polybar/waybar with terminal-based status
+- **Status:** Research needed, optional enhancement
 
 ---
 
