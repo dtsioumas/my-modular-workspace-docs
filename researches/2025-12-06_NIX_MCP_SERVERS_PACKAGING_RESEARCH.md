@@ -654,6 +654,64 @@ runs as a persistent daemon accepting multiple connections.
 
 ---
 
+---
+
+## 12. MCP Server Lifecycle Management (NEW - 2025-12-08)
+
+### 12.1 Problem: Orphaned MCP Processes
+
+**GitHub Issue #1935**: Claude Code does not properly terminate MCP servers on exit.
+- MCP server processes remain running as orphans
+- Accumulate over multiple sessions
+- NOT cleaned up even when removing servers from config
+
+**Root Cause**: Claude Code spawns MCP servers but doesn't send SIGTERM when exiting.
+
+### 12.2 Solution: prctl(PR_SET_PDEATHSIG)
+
+Linux kernel provides `prctl(PR_SET_PDEATHSIG)` - sets a signal to send to child
+when parent process dies.
+
+**Implementation via setpriv (util-linux):**
+```bash
+setpriv --pdeathsig SIGTERM -- mcp-server
+```
+
+### 12.3 Updated Wrapper Pattern
+
+```nix
+mkMcpWrapper = { name, package, binary, ... }:
+  pkgs.writeShellScriptBin "mcp-${name}" ''
+    # Load secrets...
+
+    # Run with pdeathsig + systemd isolation
+    exec ${pkgs.util-linux}/bin/setpriv --pdeathsig SIGTERM -- \
+      ${pkgs.systemd}/bin/systemd-run \
+        --user --scope --slice=mcp-servers.slice \
+        --unit="mcp-${name}-''${RANDOM}.scope" \
+        --collect --property=MemoryMax=1G \
+        -- ${package}/bin/${binary} "$@"
+  '';
+```
+
+### 12.4 Behavior
+
+| Event | Result |
+|-------|--------|
+| Agent starts | MCP servers spawned with pdeathsig set |
+| Agent exits normally | Kernel sends SIGTERM to MCP servers |
+| Agent crashes | Kernel sends SIGTERM to MCP servers |
+| MCP server exits | Systemd scope garbage collected |
+
+### 12.5 Implementation Status
+
+- [x] Updated `from-flake.nix` with setpriv
+- [x] Updated `npm-custom.nix` with setpriv
+- [x] Tested build and home-manager switch
+- [x] Committed: `9a3a7d9`
+
+---
+
 **Research Status:** Complete (Architecture Finalized)
-**Confidence Level:** High (c = 0.89)
-**Last Updated:** 2025-12-07 23:23 EET
+**Confidence Level:** High (c = 0.91)
+**Last Updated:** 2025-12-08 21:45 EET
