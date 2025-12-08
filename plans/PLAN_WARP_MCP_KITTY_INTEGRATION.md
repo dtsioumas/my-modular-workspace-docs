@@ -1,17 +1,19 @@
 # Implementation Plan: Warp MCP + Kitty Integration
 
 **Created:** 2025-12-05
-**Status:** Ready for Implementation
+**Last Updated:** 2025-12-07
+**Status:** Ready for Implementation (Enhanced with Warp CLI)
 **Related Research:** [../researches/WARP_KITTY_MCP_INTEGRATION_RESEARCH.md](../researches/WARP_KITTY_MCP_INTEGRATION_RESEARCH.md)
 
 ---
 
 ## Overview
 
-This plan implements a **dual-terminal workflow** with:
-- **Kitty** as primary terminal (with zellij for multiplexing)
-- **Warp** as AI assistant terminal (with MCP servers from Claude Code)
-- **Shared MCP ecosystem** for unified AI context
+This plan implements a **three-tier integration** with:
+- **Tier 1: Warp App** - AI assistant terminal for complex tasks & Full Terminal Use
+- **Tier 2: Warp CLI in Kitty** - Quick AI queries without leaving kitty
+- **Tier 3: Kitty** - Primary terminal with zellij multiplexing
+- **Shared MCP ecosystem** for unified AI context across all tiers
 
 ---
 
@@ -167,6 +169,133 @@ This plan implements a **dual-terminal workflow** with:
 ```
 ```
 3. Click Start
+```
+
+---
+
+## Phase 1.5: Configure Warp CLI (NEW)
+
+**Objective:** Enable Warp agent features from kitty terminal
+
+### Step 1.5.1: Verify Warp CLI Installation
+```bash
+# Check if warp-terminal CLI is available (bundled with Warp app)
+which warp-terminal
+warp-terminal --version
+
+# If not found, the Warp app installation should include it
+# On Linux, warp-terminal command is available after installing Warp
+```
+
+### Step 1.5.2: Generate Warp API Key (for remote/CI use)
+```
+1. Open Warp
+2. Settings > Platform > API Keys
+3. Click "+ Create API Key"
+4. Name: "CLI Access"
+5. Copy the key (starts with wk-...)
+6. Store securely in KeePassXC
+```
+
+### Step 1.5.3: Create CLI Agent Profile
+```
+1. Open Warp
+2. Settings > Agent Profiles
+3. Click "Create Profile"
+4. Name: "CLI Usage"
+5. Configure permissions:
+   - File Operations: Allow reading and writing
+   - Code Diffs: Allow applying
+   - Commands: Allow executing (with default denylist)
+   - MCP Servers: Allow specific servers you want CLI to use
+6. Save profile
+7. Get profile ID:
+   warp-terminal agent profile list
+```
+
+### Step 1.5.4: Get MCP Server UUIDs
+```bash
+# List all configured MCP servers with their UUIDs
+warp-terminal mcp list
+
+# Output example:
+# +--------------------------------------+--------------------+
+# | UUID                                 | Name               |
+# +===============================================+
+# | 1deb1b14-b6e5-4996-ae99-233b7555d2d0 | context7           |
+# | 65450c32-9eb1-4c57-8804-0861737acbc4 | exa                |
+# +--------------------------------------+--------------------+
+
+# Save these UUIDs for use in bash aliases
+```
+
+### Step 1.5.5: Add Bash Aliases (via Chezmoi)
+```bash
+# Add to dotfiles/dot_bashrc.tmpl or create new file
+# dotfiles/dot_config/bash/warp-aliases.sh
+
+# ========================================
+# Warp CLI Aliases for Kitty Integration
+# ========================================
+
+# Quick Warp AI - simple prompt
+wai() {
+    warp-terminal agent run --prompt "$*"
+}
+
+# Warp AI with documentation MCP server
+wai-docs() {
+    warp-terminal agent run \
+        --mcp-server "REPLACE_WITH_CONTEXT7_UUID" \
+        --prompt "$*"
+}
+
+# Warp AI with coding profile
+wai-code() {
+    warp-terminal agent run \
+        --profile "REPLACE_WITH_CLI_PROFILE_ID" \
+        --prompt "$*"
+}
+
+# Warp AI with web search
+wai-search() {
+    warp-terminal agent run \
+        --mcp-server "REPLACE_WITH_EXA_UUID" \
+        --prompt "$*"
+}
+
+# Warp AI - fix last command error
+wai-fix() {
+    local last_cmd=$(fc -ln -1)
+    local last_output=$(fc -ln -1 | sh 2>&1)
+    warp-terminal agent run --prompt "Fix this command error: Command: $last_cmd Output: $last_output"
+}
+```
+
+### Step 1.5.6: Add to Chezmoi
+```bash
+# Create the alias file
+chezmoi add ~/.config/bash/warp-aliases.sh
+
+# Or add directly to .bashrc
+# Add this line to dotfiles/dot_bashrc.tmpl:
+# source ~/.config/bash/warp-aliases.sh
+```
+
+### Step 1.5.7: Test Warp CLI
+```bash
+# Reload bash config
+source ~/.bashrc
+
+# Test basic prompt
+wai "what is the current directory structure?"
+
+# Test with MCP server
+wai-docs "explain React hooks"
+
+# Test quick fix
+ls nonexistent_file 2>&1
+wai-fix
 ```
 
 ---
@@ -327,7 +456,7 @@ Update `docs/tools/warp/README.md`:
 
 ## Summary Checklist
 
-- [ ] Phase 1: MCP Servers
+- [ ] Phase 1: MCP Servers in Warp App
   - [ ] context7
   - [ ] exa
   - [ ] firecrawl
@@ -337,17 +466,28 @@ Update `docs/tools/warp/README.md`:
   - [ ] read-website-fast
   - [ ] grok (optional)
 
+- [ ] Phase 1.5: Warp CLI Setup (NEW)
+  - [ ] Verify warp-terminal CLI available
+  - [ ] Generate API key (optional, for remote)
+  - [ ] Create CLI agent profile
+  - [ ] Get MCP server UUIDs
+  - [ ] Add bash aliases (wai, wai-docs, wai-code, wai-fix)
+  - [ ] Add to chezmoi
+  - [ ] Test Warp CLI from kitty
+
 - [ ] Phase 2: Shortcuts
   - [ ] Warp global hotkey (Ctrl+F12)
   - [ ] KDE shortcuts
+  - [ ] Kitty shortcut for Warp CLI (Meta+W)
 
 - [ ] Phase 3: Customization
   - [ ] Theme
   - [ ] Launch configs
 
 - [ ] Phase 4: Integration
-  - [ ] Test workflow
-  - [ ] Verify MCP servers work
+  - [ ] Test three-tier workflow
+  - [ ] Verify MCP servers work in app
+  - [ ] Verify Warp CLI works from kitty
 
 - [ ] Phase 5: Documentation
   - [ ] Update guides
@@ -361,9 +501,27 @@ Update `docs/tools/warp/README.md`:
 2. **Warp + Zellij**: Do NOT try to run zellij inside Warp (known issues).
 3. **Nesting**: Cannot run Warp inside Kitty - they are both terminal emulators.
 4. **MCP Config**: Warp stores MCP config internally, not in a simple file.
+5. **Warp CLI Bridge**: Use Warp CLI (`warp-terminal agent run`) to get AI help without leaving kitty!
+6. **CLI Agent Profile**: Create a dedicated permissive profile for CLI usage.
+7. **MCP UUIDs**: Get server UUIDs via `warp-terminal mcp list` for CLI commands.
+8. **Full Terminal Use**: Only available in Warp GUI app, not via CLI.
 
 ---
 
-**Plan Status:** Ready for Implementation
-**Estimated Effort:** ~30-45 minutes for all phases
+## Architecture Summary (Three-Tier)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         USE CASE                                │
+├─────────────────────────────────────────────────────────────────┤
+│ Complex AI task, Full Terminal Use  →  Warp App (Ctrl+F12)     │
+│ Quick AI query from kitty           →  Warp CLI (wai "prompt") │
+│ Daily terminal work, multiplexing   →  Kitty + Zellij          │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+**Plan Status:** Ready for Implementation (Enhanced 2025-12-07)
+**Estimated Effort:** ~45-60 minutes for all phases (including CLI setup)
 **Dependencies:** Warp installed via home-manager (done)

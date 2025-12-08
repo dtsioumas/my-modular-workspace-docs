@@ -1,7 +1,8 @@
 # Warp + Kitty + MCP Integration Research
 
 **Research Date:** 2025-12-05
-**Status:** Complete
+**Last Updated:** 2025-12-07
+**Status:** Complete (Enhanced with Warp CLI Discovery)
 **Researcher:** Claude (Opus 4.5) + Mitsos
 
 ---
@@ -11,6 +12,8 @@
 This research investigates the feasibility of running Warp terminal "under" kitty and configuring MCP servers for Warp similar to Claude Code.
 
 **Key Finding:** Running Warp "inside" kitty is **technically impossible** - both are terminal emulators and cannot be nested. However, an elegant **dual-terminal workflow with shared MCP ecosystem** achieves the desired outcome.
+
+**NEW DISCOVERY (2025-12-07):** The **Warp CLI** enables running Warp agent features from ANY terminal, including kitty! This creates a **third integration tier** that bridges both terminals.
 
 ---
 
@@ -88,11 +91,96 @@ Previous research confirmed:
 - Catppuccin theme works in both
 - Keyboard shortcuts work properly
 
+### 2.4 Warp CLI (NEW - 2025-12-07)
+
+**Source:** [Warp CLI Documentation](https://docs.warp.dev/developers/cli)
+
+**Game-Changing Discovery:** Warp provides a standalone CLI that can run agent features from ANY terminal!
+
+**Key Capabilities:**
+```bash
+# Run agent from any terminal (including kitty!)
+warp-terminal agent run --prompt "fix this error"
+
+# Use MCP servers
+warp-terminal agent run --prompt "search docs" --mcp-server UUID
+
+# Use specific agent profile
+warp-terminal agent run --profile PROFILE_ID --prompt "task"
+
+# Share session with team
+warp-terminal agent run --share team:edit --prompt "debug this"
+
+# API key authentication (for CI/CD or remote)
+export WARP_API_KEY="wk-xxx..."
+warp-terminal agent run --prompt "analyze codebase"
+```
+
+**Installation on Linux:**
+- Bundled: `warp-terminal` command (comes with Warp app)
+- Standalone: `warp-cli` package via apt/yum/pacman
+
+**Agent Profile for CLI:**
+- CLI needs a permissive profile (allow reads/writes/commands)
+- Create dedicated profile via: Settings > Agent Profiles
+- Get profile ID: `warp-terminal agent profile list`
+
+**MCP Server Usage:**
+- Get server UUIDs: `warp-terminal mcp list`
+- MCP env vars must be set on remote hosts (not synced)
+
+### 2.5 Warp Full Terminal Use (NEW - 2025-12-07)
+
+**Source:** [Full Terminal Use Documentation](https://docs.warp.dev/agents/full-terminal-use)
+
+**What It Does:** Warp agents can interact with interactive terminal applications:
+- Database shells: psql, mysql, sqlite
+- Debuggers: gdb, lldb
+- REPLs: python, node, ipython
+- Text editors: vim, nano
+- Dev servers: npm run dev, uvicorn
+
+**How It Works:**
+1. Start interactive command (or let agent start it)
+2. Agent reads terminal buffer in real-time
+3. Agent writes to PTY to run commands
+4. User can take over/hand back control anytime
+
+**Limitation:** Full Terminal Use requires the Warp GUI app, not available via CLI alone.
+
+### 2.6 Kitty Remote Control Protocol (NEW - 2025-12-07)
+
+**Source:** [Kitty Remote Control](https://sw.kovidgoyal.net/kitty/remote-control/)
+
+**Capabilities for Integration:**
+```bash
+# Send text to specific windows
+kitten @ send-text --match "cmdline:vim" "Hello"
+
+# Launch new window with command
+kitten @ launch --title "Warp Agent" warp-terminal agent run --prompt "task"
+
+# Focus specific window
+kitten @ focus-window --match "title:Warp"
+
+# List windows
+kitten @ ls
+```
+
+**Requirements:**
+- Enable in kitty.conf: `allow_remote_control yes`
+- Or start kitty with: `kitty -o allow_remote_control=yes`
+
+**Integration Potential:**
+- Create bash aliases that invoke Warp CLI
+- Keyboard shortcuts in kitty to open Warp agent prompts
+- Scripts that orchestrate both terminals
+
 ---
 
-## 3. Solution Architecture
+## 3. Solution Architecture (ENHANCED)
 
-### Recommended: "Unified MCP Ecosystem with Dual-Terminal Workflow"
+### Recommended: "Three-Tier Integration with Warp CLI Bridge"
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -108,17 +196,28 @@ Previous research confirmed:
     ┌───────────┐   ┌───────────┐   ┌───────────┐
     │  Claude   │   │   Warp    │   │  Other    │
     │   Code    │   │ Terminal  │   │ MCP Hosts │
-    │   CLI     │   │           │   │           │
+    │   CLI     │   │ + CLI     │   │           │
     └───────────┘   └───────────┘   └───────────┘
           │               │
-          │               │
-          ▼               ▼
-    ┌───────────┐   ┌───────────┐
-    │   Kitty   │   │   Warp    │
-    │ (Primary) │   │(AI Tasks) │
-    │ + Zellij  │   │           │
-    └───────────┘   └───────────┘
+          │       ┌───────┴───────┐
+          │       │               │
+          ▼       ▼               ▼
+    ┌───────────────────┐   ┌───────────┐
+    │      Kitty        │   │   Warp    │
+    │    (Primary)      │   │   App     │
+    │  + Zellij         │   │ (AI GUI)  │
+    │  + Warp CLI ←─────┼───│           │
+    │  (Quick AI)       │   │           │
+    └───────────────────┘   └───────────┘
 ```
+
+### NEW: Three-Tier Architecture
+
+| Tier | Component | Use Case | Access Method |
+|------|-----------|----------|---------------|
+| **Tier 1** | Warp App (GUI) | Complex AI tasks, Full Terminal Use, interactive sessions | Ctrl+F12 hotkey |
+| **Tier 2** | Warp CLI in Kitty | Quick AI queries, single-shot agent runs | `wai "prompt"` alias or Meta+W |
+| **Tier 3** | Kitty Remote Control | Automation, scripting, window orchestration | `kitten @` commands |
 
 ### Terminal Role Division
 
@@ -140,6 +239,40 @@ Previous research confirmed:
 | F5/F6 | Kitty | Horizontal/Vertical split |
 | Ctrl+P | Zellij (in kitty) | Pane mode |
 | Ctrl+T | Zellij (in kitty) | Tab mode |
+| **Meta+W** | Kitty (NEW) | Run Warp CLI agent |
+
+### NEW: Warp CLI Integration Examples
+
+**Bash Aliases (add to ~/.bashrc via chezmoi):**
+```bash
+# Quick Warp AI alias
+wai() {
+    warp-terminal agent run --prompt "$*"
+}
+
+# Warp AI with specific MCP server
+wai-docs() {
+    warp-terminal agent run --mcp-server "CONTEXT7_UUID" --prompt "$*"
+}
+
+# Warp AI with coding profile
+wai-code() {
+    warp-terminal agent run --profile "CODING_PROFILE_ID" --prompt "$*"
+}
+```
+
+**Kitty Keyboard Shortcut (add to kitty.conf):**
+```conf
+# Meta+W: Open Warp agent prompt in new window
+map super+w launch --type=overlay sh -c 'read -p "Warp AI: " prompt && warp-terminal agent run --prompt "$prompt"'
+```
+
+**Kitty Remote Control Script:**
+```bash
+#!/bin/bash
+# warp-in-kitty.sh - Run Warp agent from kitty remote control
+kitten @ launch --title "Warp Agent" --keep-focus warp-terminal agent run --prompt "$1"
+```
 
 ---
 
@@ -252,10 +385,13 @@ dotfiles/
 
 ## 7. Important Limitations
 
-1. **No Warp in Kitty**: Cannot nest terminal emulators
+1. **No Warp in Kitty**: Cannot nest terminal emulators (but Warp CLI bridges this!)
 2. **Zellij in Warp**: Has issues - use zellij in Kitty instead
 3. **MCP Config Sync**: Warp MCP config not easily exportable to chezmoi
 4. **API Keys**: Must be manually configured in Warp (security feature)
+5. **Full Terminal Use**: Only available in Warp GUI app, not via CLI
+6. **CLI MCP Env Vars**: Not synced between hosts - must set manually on remote
+7. **CLI Agent Profile**: Requires dedicated permissive profile for CLI usage
 
 ---
 
@@ -263,23 +399,33 @@ dotfiles/
 
 | Question | Decision | Rationale |
 |----------|----------|-----------|
-| Can Warp run under kitty? | **No** | Both are terminal emulators |
+| Can Warp run under kitty? | **No** (but CLI can!) | Terminal emulators can't nest, but Warp CLI bridges them |
 | Should I replace kitty with Warp? | **No** | Kitty + zellij works well; Warp has zellij issues |
 | How to share AI context? | **MCP Servers** | Same servers in Claude Code and Warp |
-| Best shortcut for Warp? | **Ctrl+F12** | Avoids F12 (kitty panel) conflict |
+| Best shortcut for Warp GUI? | **Ctrl+F12** | Avoids F12 (kitty panel) conflict |
+| Best shortcut for Warp CLI? | **Meta+W** | Quick AI access from kitty |
 | Config management? | **Hybrid** | Chezmoi for launch configs; Warp UI for MCP |
+| Quick AI in kitty? | **Warp CLI** | `wai "prompt"` alias for instant AI help |
 
 ---
 
 ## 9. References
 
+### Original Research (2025-12-05)
 - [Warp MCP Documentation](https://docs.warp.dev/knowledge-and-collaboration/mcp)
 - [Warp Zellij Issue #3935](https://github.com/warpdotdev/Warp/issues/3935)
 - [Context7 MCP Server](https://github.com/upstash/context7)
 - [Kitty + Zellij Research](../sessions/kitty-configuration/RESEARCH_FINDINGS.md)
 - [Warp Complete Guide](../tools/warp/WARP_COMPLETE_GUIDE.md)
 
+### Deep Research (2025-12-07)
+- [Warp CLI Documentation](https://docs.warp.dev/developers/cli)
+- [Full Terminal Use](https://docs.warp.dev/agents/full-terminal-use)
+- [Kitty Remote Control Protocol](https://sw.kovidgoyal.net/kitty/remote-control/)
+- [Kitty Remote Control Commands](https://man.archlinux.org/man/kitten-@.1.en)
+- [doctorfree/kitty-control](https://github.com/doctorfree/kitty-control) - Community tool for kitty control
+
 ---
 
-**Document Status:** Complete
-**Next Steps:** See Implementation Plan below
+**Document Status:** Complete (Enhanced 2025-12-07)
+**Next Steps:** See Implementation Plan (PLAN_WARP_MCP_KITTY_INTEGRATION.md)

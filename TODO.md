@@ -611,10 +611,11 @@ docs/home-manager/MIGRATION_FINDINGS.md
 ```
 
 **Action Items:**
-- [ ] Move tab bar to top: `tab_bar_edge top`
+- [x] Move tab bar to top: `tab_bar_edge top` ✅ (2025-12-08)
+- [x] Add F2/Shift+F2 for quick tab renaming ✅ (2025-12-08)
+- [x] Enable Zellij pane_frames for per-pane titles ✅ (2025-12-08)
 - [ ] Customize active tab template: `active_tab_title_template`
-- [ ] Integrate Zellij for per-pane status bars (Phase D)
-- [ ] Or: Create custom 1-line window with remote control (advanced)
+- [ ] Research: Per-pane BOTTOM status bars (user request 2025-12-08)
 
 ---
 
