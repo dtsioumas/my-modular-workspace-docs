@@ -614,8 +614,23 @@ docs/home-manager/MIGRATION_FINDINGS.md
 - [x] Move tab bar to top: `tab_bar_edge top` ✅ (2025-12-08)
 - [x] Add F2/Shift+F2 for quick tab renaming ✅ (2025-12-08)
 - [x] Enable Zellij pane_frames for per-pane titles ✅ (2025-12-08)
+- [x] Research: Per-pane BOTTOM status bars ✅ (2025-12-08)
 - [ ] Customize active tab template: `active_tab_title_template`
-- [ ] Research: Per-pane BOTTOM status bars (user request 2025-12-08)
+- [ ] **CONSIDER:** tmux for per-pane bottom bars (see research below)
+
+**Research Finding (2025-12-08):** Per-pane BOTTOM status bars
+- **Zellij:** Only supports pane titles at TOP (Issue #680 open since 2021)
+- **Kitty:** Not supported natively
+- **tmux:** ✅ SUPPORTS THIS via `pane-border-status bottom`
+- **Reference:** `docs/researches/2025-12-08_PER_PANE_BOTTOM_STATUS_BAR_RESEARCH.md`
+
+**Alternative: tmux Integration**
+If per-pane bottom bars are critical, consider tmux instead of zellij:
+```bash
+# tmux.conf
+set -g pane-border-status bottom
+set -g pane-border-format " #{pane_index} #{pane_current_command} #{pane_current_path} "
+```
 
 ---
 
