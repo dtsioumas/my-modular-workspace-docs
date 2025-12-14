@@ -12,6 +12,11 @@ FastEmbed’s GPU path currently requires the CUDA-enabled ONNX Runtime build (`
 6. **Reported Failures on CUDA 12.4** – Community reports show ONNX Runtime 1.18–1.20 failing to detect the GPU when paired with CUDA 12.4 + cuDNN 9.0, reinforcing that we should stick to the last supported CUDA branch for Maxwell cards. citeturn0search6
 7. **Sandbox Limitation** – The Codex sandbox cannot access NVML (`nvidia-smi` fails), so driver/CUDA data must be collected from the host session and recorded manually.
 
+## Host Snapshot (shoshin, 2025-12-14 07:55 EET)
+- `nvidia-smi` → Driver 570.195.03, reports CUDA version 12.8, GPU = GeForce GTX 960 (4 GB). Processes primarily Plasma/Kitty.
+- `nvcc` → not installed (bash reports command not found).
+- Takeaway: even though the driver advertises CUDA 12.8, GTX 960 is physically limited to compute capability 5.2, so we must build against CUDA 11.0-compatible libraries.
+
 ## Implications for ck
 - Need a CUDA-aware ONNX Runtime derivation (overlay) plus CUDA/cuDNN runtime dependencies.
 - Need ck’s build to link against that derivation and expose provider selection (currently missing upstream).

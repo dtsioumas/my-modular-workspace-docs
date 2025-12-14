@@ -44,7 +44,7 @@
 
 ## Additional Tasks Discovered (2025-12-14)
 1. **Gather Hardware/Driver Data**
-   - Record current NVIDIA driver, CUDA toolkit, and cuDNN versions (`nvidia-smi`, `nvcc --version`, `ls /run/opengl-driver/lib`).
+   - Record current NVIDIA driver, CUDA toolkit, and cuDNN versions (`nvidia-smi`, `nvcc --version`, `ls /run/opengl-driver/lib`). (Latest snapshot: driver 570.195.03 / CUDA 12.8; no `nvcc` installed.)
    - Note whether CUDA is installed via `nixpkgs.cudatoolkit` or host system and confirm compute capability (GTX 960 = 5.2 limited to CUDA ≤11.0). citeturn1search0
 2. **Overlay Wiring**
    - Decide how overlays are imported (`home-manager/flake.nix`); document required edits before creating `onnxruntime-gpu.nix`.
