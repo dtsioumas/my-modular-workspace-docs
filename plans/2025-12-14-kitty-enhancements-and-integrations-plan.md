@@ -24,6 +24,35 @@ This comprehensive plan documents all kitty terminal enhancements from basic imp
 
 ---
 
+## 🔧 Current State & Management
+
+**Last Verified:** 2025-12-14 22:30 (Europe/Athens)
+
+### Active Theme
+- **Current:** Dracula (vibrant dark theme)
+- **File:** `~/.config/kitty/current-theme.conf`
+- **Previous:** Catppuccin Mocha (switched to Dracula for better contrast)
+
+### Configuration Management
+- **Kitty:** Managed by **home-manager** (`programs.kitty` in `home-manager/kitty.nix`)
+- **Zellij:** Managed by **home-manager** (`home.packages` in `home-manager/zellij.nix`)
+- **Bashrc/Gitconfig:** Managed by **chezmoi** (`dotfiles/dot_bashrc`, `dotfiles/dot_gitconfig`)
+- **Navi Cheatsheets:** Managed by **chezmoi** (`dotfiles/dot_local/share/navi/cheats/`)
+
+### Known Declarative Gaps
+⚠️ **Search Kitten:** Currently installed via manual `git clone` to `~/.config/kitty/kitty_search`
+- **Issue:** NOT tracked in version control, not reproducible
+- **Recommendation:** Migrate to chezmoi for declarative management
+- **Priority:** Medium (feature works but management is manual)
+
+### Platform
+- **OS:** NixOS
+- **Desktop:** KDE Plasma (Wayland)
+- **Terminal:** Kitty (GPU-accelerated)
+- **Multiplexer:** Zellij 0.43.1
+
+---
+
 ## 🎯 Overall Goals
 
 1. **Enhance kitty usability** - Better mouse/keyboard shortcuts
@@ -57,16 +86,23 @@ This comprehensive plan documents all kitty terminal enhancements from basic imp
 
 3. **Enhanced Transparency Control**
    - Ctrl+Shift+A, M/L - Adjust opacity
-   - Theme: Catppuccin Mocha (later switched to Dracula)
-   - Transparency: 0.15 (85% transparent)
+   - Theme: **Dracula** (vibrant dark theme with excellent contrast)
+   - Transparency: 0.15 (15% opacity = 85% transparent, very light background)
 
 ### Success Criteria Met
 
-- ✅ Right-click paste works
-- ✅ Ctrl+Alt+Arrow navigation works
+- ✅ Right-click paste works (verified: `kitty.conf` line 66)
+- ✅ Ctrl+Alt+Arrow navigation works (verified: `kitty.conf` lines 220-223)
 - ✅ Existing shortcuts still work
-- ✅ Theme and transparency configured
-- ✅ Changes committed to dotfiles repo
+- ✅ Theme configured: Dracula (`current-theme.conf`)
+- ✅ Transparency configured: 0.15 (`kitty.conf` line 136)
+- ✅ Managed via home-manager (`programs.kitty`)
+
+### File Locations
+
+- **Config:** Managed by home-manager in `home-manager/kitty.nix`
+- **Active Config:** `~/.config/kitty/kitty.conf` (symlinked to nix store)
+- **Theme:** `~/.config/kitty/current-theme.conf` → Dracula
 
 ---
 
@@ -98,6 +134,14 @@ map ctrl+shift+/ launch --location=hsplit --allow-remote-control kitty +kitten k
 
 **Status:** ✅ Installed and configured
 
+**⚠️ Declarative Management Gap:**
+- Currently installed manually via `git clone`
+- **TODO:** Migrate to chezmoi for reproducibility
+- **Steps to fix:**
+  1. Add `~/.config/kitty/kitty_search/` to chezmoi
+  2. Or package as nix derivation if available
+- **Priority:** Medium (works but not declarative)
+
 ---
 
 ### B.2: Shell Integration ✅
@@ -111,6 +155,8 @@ if test -n "$KITTY_INSTALLATION_DIR"; then
     source "$KITTY_INSTALLATION_DIR/shell-integration/bash/kitty.bash"
 fi
 ```
+
+**File Location:** Managed by chezmoi in `dotfiles/dot_bashrc` or `dotfiles/dot_bashrc.tmpl`
 
 **Kitty keybindings:**
 ```conf
@@ -148,6 +194,12 @@ map ctrl+shift+g show_last_command_output
 [core]
     editor = codium
 ```
+
+**File Location:** Managed by chezmoi in `dotfiles/dot_gitconfig`
+
+**Notes:**
+- `trustExitCode = true` - Git uses kitty's exit code to determine diff success
+- Requires VSCodium installed; if not available, falls back to system `$EDITOR`
 
 **Features:**
 - Side-by-side diffs with syntax highlighting
@@ -202,9 +254,13 @@ map f12 kitten panel --edge top --size 0.5
 - Runs arbitrary programs
 - GPU-accelerated
 
-**Status:** ✅ Configured (needs user platform testing)
+**Status:** ⚠️ CONFIGURED BUT NOT RECOMMENDED FOR KDE PLASMA
 
-**Known Issue:** Platform-dependent support (KDE Plasma partial)
+**Known Issue:** Platform-dependent support
+- **KDE Plasma:** Partial support - clicks outside panel may hide it
+- **GNOME Wayland:** No support
+- **Recommendation:** Use kitty window splits instead (`Ctrl+Shift+Enter` for horizontal/vertical)
+- **User Platform:** KDE Plasma (Wayland) - feature may not work reliably
 
 ---
 
@@ -228,7 +284,12 @@ kitty +kitten themes --reload-in=all Dracula
 - Quick theme switching
 - Apply to all windows
 
-**Status:** ✅ Configured (user reported issue, needs investigation)
+**Status:** ✅ Configured - **Awaiting user report of specific issue**
+
+**Note:** User mentioned an issue with theme browser but specific problem unclear. If issue persists:
+- Try: `kitty +kitten themes --reload-in=all Dracula`
+- Check: `Ctrl+Shift+F5` to reload config
+- Report: Describe specific error or unexpected behavior
 
 ---
 
@@ -459,6 +520,10 @@ copy_on_select true
 
 **Location:** `~/.config/zellij/plugins/zjstatus.wasm`
 
+**Management:** ✅ Declaratively managed by home-manager
+- Symlinked to: `/nix/store/.../home-manager-files/.config/zellij/plugins/zjstatus.wasm`
+- **Update Strategy:** Managed via home-manager configuration updates
+
 **Configuration:** Integrated in `config.kdl`
 
 **Features:**
@@ -468,7 +533,7 @@ copy_on_select true
 - DateTime (Europe/Athens timezone)
 - Catppuccin Mocha color scheme
 
-**Status:** ✅ Installed and configured
+**Status:** ✅ Installed and configured (declaratively managed)
 
 ---
 
@@ -501,10 +566,10 @@ zellij --layout ops attach -c monitoring
 
 ## 📋 PHASE E: Advanced Status Bar (OPTIONAL - PLANNED)
 
-**Status:** PLANNED - Comprehensive plan exists
+**Status:** PLANNED - Comprehensive plan exists (archived)
 **Priority:** OPTIONAL (nice-to-have for SRE workflows)
 **Estimated Time:** 6-8 hours
-**Plan File:** `docs/plans/kitty-advanced-statusbar-plan.md` (will be archived)
+**Archived Plan:** `docs/archive/plans/kitty-advanced-statusbar-plan-02-12-2025.md`
 
 ### Proposed Features
 
@@ -524,9 +589,9 @@ zellij --layout ops attach -c monitoring
    - Time (HH:MM, Europe/Athens)
 
 3. **Visual Design**
-   - Dracula theme colors
+   - **Theme colors:** Would use Dracula theme (current active theme)
    - Color-coded thresholds (green/yellow/red)
-   - Transparency-friendly
+   - Transparency-friendly (works with 0.15 opacity)
    - Readable at a glance
 
 ### Implementation Phases (if pursued)
@@ -542,7 +607,130 @@ zellij --layout ops attach -c monitoring
 
 **User to decide:** Pursue advanced status bar or use Zellij zjstatus?
 
-**Current Recommendation:** Use Zellij zjstatus for status bar needs (already installed)
+**Current Recommendation:** Use Zellij zjstatus for status bar needs (already installed and working)
+
+**Rationale for zjstatus vs custom tab_bar.py:**
+- zjstatus provides excellent status bar functionality at bottom
+- Custom tab_bar.py would add system metrics to top tab bar
+- Can use **both**: kitty tab bar (top) + zjstatus (bottom) for maximum info
+- Custom tab_bar.py is 6-8 hours of work vs zjstatus which is already done
+
+---
+
+## 📐 Status Definitions
+
+To clarify what each status means throughout this plan:
+
+| Status | Meaning | Criteria |
+|--------|---------|----------|
+| **CONFIGURED** | Code/config written | Config exists in source files |
+| **DEPLOYED** | Applied to system | Config active in `~/.config/` |
+| **TESTED** | User verified working | User confirmed feature works |
+| **VERIFIED** | Automated checks passed | Tests confirm functionality |
+| **COMPLETE** | Deployed + Tested | Feature is working and verified |
+
+**Status Progression:**
+1. CONFIGURED → Config written to files
+2. DEPLOYED → Applied via home-manager/chezmoi
+3. TESTED → User manually verified
+4. VERIFIED → (Optional) Automated tests passed
+5. COMPLETE → Fully working and documented
+
+---
+
+## 🧪 Verification & Testing
+
+### Phase A Verification
+
+**Commands to verify:**
+```bash
+# Check right-click paste config
+grep "mouse_map right press" ~/.config/kitty/kitty.conf
+
+# Check window navigation
+grep "ctrl+alt+left" ~/.config/kitty/kitty.conf
+
+# Check theme
+cat ~/.config/kitty/current-theme.conf | head -5
+
+# Check transparency
+grep "background_opacity" ~/.config/kitty/kitty.conf
+```
+
+**Manual Tests:**
+1. Right-click in kitty → Should paste clipboard content
+2. Open splits (`Ctrl+Shift+Enter`), use `Ctrl+Alt+Arrow` to navigate
+3. Adjust transparency: `Ctrl+Shift+A, M` (more opaque) or `L` (less opaque)
+
+### Phase B Verification
+
+**Search Kitten:**
+```bash
+# Verify installation
+ls -la ~/.config/kitty/kitty_search/search.py
+
+# Test: Open kitty, press Ctrl+Shift+/, type search term
+```
+
+**Shell Integration:**
+```bash
+# Verify enabled
+echo $KITTY_SHELL_INTEGRATION
+
+# Test: Run commands, press Ctrl+Shift+Z to jump to previous prompt
+```
+
+**Git Diff:**
+```bash
+# Verify config
+git config --get diff.tool
+
+# Test: git difftool <file>
+```
+
+**SSH Kitten:**
+```bash
+# Verify alias
+type ssh
+
+# Should show: ssh is aliased to `kitty +kitten ssh'
+```
+
+### Phase D Verification (Zellij)
+
+**Verify Installation:**
+```bash
+which zellij
+zellij --version
+ls -la ~/.config/zellij/config.kdl
+ls -la ~/.config/zellij/plugins/zjstatus.wasm
+```
+
+**Manual Test:**
+```bash
+# Launch zellij
+zellij
+
+# Test features:
+# - Ctrl+P, N - create new pane
+# - Ctrl+T, N - create new tab
+# - Ctrl+O, D - detach
+# - Check zjstatus bar at bottom shows mode, tabs, time
+```
+
+### Performance Baselines
+
+**Expected Performance:**
+- Kitty startup: < 500ms
+- Search kitten response: < 100ms
+- Zellij session attach: < 200ms
+- No UI lag during normal operation
+- CPU usage: < 5% when idle
+
+**If performance degraded:**
+- Check GPU acceleration: `kitty --debug-rendering`
+- Profile startup: `time kitty --detach`
+- Check zellij: `zellij --debug`
 
 ---
 
@@ -600,12 +788,12 @@ zellij --layout ops attach -c monitoring
 **Research:**
 - `docs/researches/2025-12-01_kitty_comprehensive_research.md`
 - `docs/researches/2025-12-07_kitty_tab_bar_window_bars_research.md`
-- `docs/researches/2025-12-08_kitty_per_pane_status_bars_research.md`
 - `docs/researches/2025-12-07-warp-kitty-mcp-integration-research.md` (Warp integration)
 
-**Tools:**
-- `docs/tools/kitty/README.md` (consolidated guide)
-- `docs/tools/kitty/TROUBLESHOOTING.md`
+**Tools Documentation:**
+- Located in: `docs/tools/kitty/` (contains autocomplete plans)
+- **Note:** Consolidated kitty user guide (README.md + TROUBLESHOOTING.md) not yet created
+- **TODO:** Create user-facing kitty guide consolidating all information
 
 **Related Active Plans:**
 - `2025-11-30-kitty-integration-verification-plan.md` - Testing/QA checklist for all integrations
@@ -677,6 +865,85 @@ zellij --layout ops attach -c monitoring
 1. **Theme Browser**
    - User reported issue (needs investigation)
    - Temporary: Use `kitty +kitten themes --reload-in=all ThemeName`
+
+---
+
+## 🔧 Troubleshooting
+
+### Common Issues & Solutions
+
+**Search Kitten Not Working:**
+- **Symptom:** `Ctrl+Shift+/` does nothing
+- **Check:** `ls ~/.config/kitty/kitty_search/search.py`
+- **Fix:** Re-clone if missing: `cd ~/.config/kitty && git clone https://github.com/trygveaa/kitty-kitten-search kitty_search`
+- **Reload:** `Ctrl+Shift+F5`
+
+**Shell Integration Not Active:**
+- **Symptom:** `$KITTY_SHELL_INTEGRATION` is empty
+- **Check:** `~/.bashrc` contains shell integration code
+- **Fix:** Restart terminal or `source ~/.bashrc`
+- **Alternative:** Check if another shell profile is loaded first
+
+**Zellij Shortcut Conflicts:**
+- **Issue:** Zellij shortcuts conflict with kitty
+- **Solution:** Remap zellij keys in `~/.config/zellij/config.kdl`
+- **Example:** Change `Ctrl+P` to `Ctrl+A` if preferred
+
+**Panel Kitten F12 Not Working (KDE Plasma):**
+- **Expected:** KDE Plasma has partial support
+- **Workaround:** Use kitty splits instead
+- **Alternative:** Map different key: `map f11 kitten panel`
+
+**Performance Issues:**
+- **GPU not used:** Run `kitty --debug-rendering`, check for "Using GPU"
+- **High CPU:** Check extensions/kittens causing issues
+- **Slow startup:** Profile with `time kitty --detach`
+
+### Rollback Procedures
+
+**Revert Kitty Changes:**
+```bash
+# Via home-manager
+cd ~/my-modular-workspace/home-manager
+git log  # Find commit before changes
+git revert <commit-hash>
+home-manager switch --flake .#mitsio@shoshin
+```
+
+**Revert Zellij:**
+```bash
+# Stop all sessions
+zellij delete-all-sessions
+
+# Remove from home-manager
+cd ~/my-modular-workspace/home-manager
+# Edit zellij.nix or shell.nix, remove zellij
+home-manager switch --flake .#mitsio@shoshin
+```
+
+**Restore Kitty Config Backup:**
+```bash
+# List backups
+ls ~/.config/kitty/kitty.conf.backup*
+
+# Restore specific backup
+cp ~/.config/kitty/kitty.conf.backup.20251201 ~/.config/kitty/kitty.conf
+```
+
+### System Update Considerations
+
+**After NixOS/Home-Manager Update:**
+1. Check kitty version: `kitty --version`
+2. Test all keybindings still work
+3. Verify search kitten compatibility (may need update)
+4. Check zellij: `zellij --version`
+5. Verify zjstatus plugin loads correctly
+
+**If Something Breaks:**
+1. Check error logs: `journalctl --user -u home-manager-*.service`
+2. Reload kitty config: `Ctrl+Shift+F5`
+3. Rebuild home-manager: `home-manager switch`
+4. As last resort: Rollback to previous generation
 
 ---
 
