@@ -18,7 +18,7 @@
    - References: add findings to `docs/researches/2025-12-14_ck_gpu_investigation.md`.
 
 2. **Package Dependencies**
-   - Create a `pkgs.onnxruntime-gpu` overlay targeting the last CUDA/cuDNN combo supported by GTX 960 (CUDA 11.0 + cuDNN 8.x/9.x per NVIDIA’s compatibility notes).
+   - Create a `pkgs.onnxruntime-gpu` overlay targeting the last CUDA/cuDNN combo supported by GTX 960 (CUDA 11.0 + cuDNN 8.x/9.x per NVIDIA’s compatibility notes). Prototype file: `home-manager/overlays/onnxruntime-gpu-11.nix`.
    - Ensure `LD_LIBRARY_PATH`/`LIBRARY_PATH` include CUDA + cuDNN.
    - Document overlay path: `home-manager/overlays/onnxruntime-gpu.nix` (to be created).
 
@@ -35,7 +35,7 @@
 
 5. **Testing & Verification**
    - Build locally via `home-manager switch`.
-   - Run `GPU=1 ck --sem "test" . --jsonl` and monitor `nvidia-smi` for load.
+   - Run `GPU=1 ck --sem "test" . --jsonl` and monitor `nvidia-smi` for load (run from host shell, capture output in docs).
    - Update docs with benchmark before/after CPU usage.
 
 6. **Documentation & Hand-off**
