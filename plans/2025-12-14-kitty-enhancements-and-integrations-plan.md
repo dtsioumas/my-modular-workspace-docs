@@ -252,13 +252,18 @@ map f12 kitten panel --edge top --size 0.5
 - Runs arbitrary programs
 - GPU-accelerated
 
-**Status:** ⚠️ CONFIGURED BUT NOT RECOMMENDED FOR KDE PLASMA
+**Status:** ✅ TESTED AND WORKING on KDE Plasma (Wayland) - 2025-12-15
 
-**Known Issue:** Platform-dependent support
-- **KDE Plasma:** Partial support - clicks outside panel may hide it
-- **GNOME Wayland:** No support
-- **Recommendation:** Use kitty window splits instead (`Ctrl+Shift+Enter` for horizontal/vertical)
-- **User Platform:** KDE Plasma (Wayland) - feature may not work reliably
+**User Testing Results:**
+- ✅ Panel appears from top perfectly
+- ✅ F12 toggle works reliably
+- ✅ No unexpected hiding issues
+- ✅ Fully functional on user's KDE Plasma Wayland setup
+
+**Enhancement Requested:**
+- [ ] Add workspace stats to F12 panel (CPU, RAM, etc.)
+- [ ] Integration with Phase E advanced status bar metrics
+- **Priority:** Medium (works well, enhancement nice-to-have)
 
 ---
 
@@ -398,19 +403,19 @@ scrollbar_track_opacity 0.3     # Track transparency
 
 ---
 
-### C.2.6: Panel Kitten Debugging (F12) 🐛
+### C.2.6: Panel Kitten Testing (F12) ✅
 
-**Status:** NEEDS USER TESTING
+**Status:** TESTED AND WORKING - 2025-12-15
 
-**Known Issue:** F12 may not work on KDE Plasma
+**User Testing Results:**
+- ✅ Panel appears from top perfectly
+- ✅ Toggle works reliably (F12)
+- ✅ No issues on KDE Plasma Wayland
+- ✅ Feature fully functional
 
-**User to test and report:**
-- [ ] What happens when pressing F12?
-- [ ] Panel appears?
-- [ ] Nothing happens?
-- [ ] Error message?
-
-**Estimate:** 30 mins debugging after user feedback
+**Enhancement Requested:**
+- [ ] Add workspace stats to panel (CPU, RAM, disk, network)
+- [ ] See Phase E for advanced metrics implementation
 
 ---
 
