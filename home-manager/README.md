@@ -1,118 +1,21 @@
-# Home-Manager User Environment
+# Home-Manager Documentation
 
-**Scope:** User-level configuration (no sudo required)
-**User:** mitsio
-**Strategy:** Standalone flake with nixpkgs-unstable
-**Last Updated:** 2025-11-30
-**Files:** 15 documents
+This directory contains documentation for the **user environment**, which is managed by Home-Manager. These configurations are designed to be portable and should work on any Linux distribution with Nix installed.
 
----
+## Key Documents
 
-## What This Covers
+### Architecture & Strategy
+- **[Decoupling Architecture](./decoupling-architecture.md):** The target architecture for using a standalone Home-Manager flake, separate from the base NixOS system.
+- **[Migration](./migration.md):** A consolidated guide detailing the migration from the old monolithic NixOS configuration to the current decoupled Home-Manager setup.
+- **[Ephemerality Strategy](./ephemeral.md):** The plan and principles for achieving an ephemeral, fully reproducible home environment.
 
-This directory documents the **user environment** - portable configuration that works on any Linux distro with Nix installed:
-
-| Category | Examples |
-|----------|----------|
-| **Packages** | Browsers, editors, CLI tools (~160 packages) |
-| **Dotfiles** | Shell config, aliases, environment variables |
-| **User Services** | Syncthing, rclone sync, KeePassXC vault |
-| **Desktop Settings** | KDE Plasma user preferences (via plasma-manager) |
-
-> **Note:** System-level configuration (drivers, DE enablement, Docker) is managed by [NixOS](../nixos/) and requires `sudo`.
-
----
-
-## Key Benefit: Distro-Agnostic
-
-```
-┌─────────────────────────────────────────────────────────┐
-│              HOME-MANAGER USER ENVIRONMENT               │
-│  No sudo | Works on: NixOS, Fedora, Ubuntu, WSL, macOS  │
-├─────────────────────────────────────────────────────────┤
-│  • User packages (browsers, dev tools, CLI)             │
-│  • User services (syncthing, rclone, keepassxc)         │
-│  • Dotfiles (shell, git, editor configs)                │
-│  • Desktop settings (Plasma user preferences)           │
-└─────────────────────────────────────────────────────────┘
-```
-
-When migrating to Fedora: **This configuration stays the same!**
-
----
-
-## Available Guides
-
-### Architecture & Migration
-
-| Guide | Description |
-|-------|-------------|
-| [decoupling-architecture.md](decoupling-architecture.md) | Target architecture for standalone home-manager |
-| [migration-plan.md](migration-plan.md) | File-by-file migration tracking |
-| [migration-findings.md](migration-findings.md) | Migration discoveries & notes |
-| [NIXOS_CONFIG_MIGRATION.md](NIXOS_CONFIG_MIGRATION.md) | NixOS → Home-Manager migration status |
-
-### Practices & Features
-
-| Guide | Description |
-|-------|-------------|
-| [ephemeral.md](ephemeral.md) | Ephemerality strategy & impermanence |
-| [node2nix.md](node2nix.md) | NPM package management with node2nix |
-| [SYMLINK-QUICK-REFERENCE.md](SYMLINK-QUICK-REFERENCE.md) | Symlink quick reference |
-| [symlink-research.md](symlink-research.md) | Declarative symlink tools research |
-| [git-hooks-integration.md](git-hooks-integration.md) | Pre-commit hooks setup |
+### Features & Implementation
+- **[Node2Nix for NPM Packages](./node2nix.md):** A guide on how `node2nix` is used to manage NPM packages declaratively.
+- **[Git Hooks Integration](./git-hooks-integration.md):** Documentation for the pre-commit hook setup.
+- **[Symlink Management](./SYMLINK-QUICK-REFERENCE.md):** A quick reference for how symlinks are managed declaratively.
+- **[Symlink Research](./symlink-research.md):** Research notes on different declarative symlink tools.
 
 ### Maintenance
-
-| Guide | Description |
-|-------|-------------|
-| [DEBUGGING_AND_MAINTENANCE.md](DEBUGGING_AND_MAINTENANCE.md) | Build debugging guide |
-| [DEPRECATION_FIXES.md](DEPRECATION_FIXES.md) | Fixing deprecated options |
-
----
-
-## Architecture Comparison
-
-| Layer | Managed By | Requires sudo | Portable |
-|-------|------------|---------------|----------|
-| **System** | NixOS (→ [../nixos/](../nixos/)) | Yes | No (NixOS only) |
-| **User** | Home-Manager (this) | No | Yes (any distro) |
-
-**Home-Manager (unstable packages):**
-- ALL user packages (browsers, apps, dev tools)
-- ~160 packages, full portability across distros
-
----
-
-## Usage
-
-```bash
-# Apply configuration
-home-manager switch --flake .#mitsio@shoshin
-
-# Update all packages
-nix flake update
-home-manager switch --flake .#mitsio@shoshin
-```
-
----
-
-## Current Modules
-
-| Module | Purpose |
-|--------|---------|
-| `home.nix` | Main entry |
-| `shell.nix` | Bash config, aliases |
-| `kitty.nix` | Terminal config |
-| `vscodium.nix` | IDE settings |
-| `keepassxc.nix` | Password manager |
-| `syncthing-myspaces.nix` | File sync |
-| `rclone-gdrive.nix` | Cloud backup |
-
----
-
-## Related Documentation
-
-- [../nixos/](../nixos/) - NixOS system configuration
-- [../tools/](../tools/) - Tool-specific guides
-- [../sync/](../sync/) - Synchronization setup
+- **[Debugging and Maintenance](./DEBUGGING_AND_MAINTENANCE.md):** A guide for debugging `home-manager build` failures.
+- **[Deprecation Fixes](./DEPRECATION_FIXES.md):** Notes on fixing deprecated options as the Nix ecosystem evolves.
+- **[MCP Servers Installation](./MCP_SERVERS_INSTALLATION.md):** A guide on how to install and setup the MCP servers.

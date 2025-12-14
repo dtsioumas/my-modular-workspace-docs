@@ -1,34 +1,19 @@
 # Tools Documentation
 
-**Last Updated:** 2025-11-29
+This directory contains guides and documentation for specific command-line and productivity tools used in the workspace.
 
-This directory contains consolidated documentation for development and productivity tools.
+## Index of Tool Guides
 
-## Available Guides
-
-| Tool | Description |
-|------|-------------|
-| [atuin.md](atuin.md) | Modern shell history with sync |
-| [chrome-plasma.md](chrome-plasma.md) | Chrome/Plasma integration |
-| [continue-dev.md](continue-dev.md) | AI code assistant for VSCodium |
-| [copyq.md](copyq.md) | Clipboard manager |
-| [kde-connect.md](kde-connect.md) | Phone-desktop integration |
-| [kitty.md](kitty.md) | Terminal emulator |
-| [llm-cli.md](llm-cli.md) | CLI for LLM interactions |
-| [navi.md](navi.md) | Interactive cheatsheet tool |
-| [plasma-manager.md](plasma-manager.md) | KDE Plasma declarative config |
-| [semantic-grep.md](semantic-grep.md) | AI-powered code search |
-| [vscodium.md](vscodium.md) | VSCodium setup and extensions |
-
-## Quick Reference
-
-```bash
-# Atuin - search history
-atuin search <query>
-
-# Navi - interactive cheatsheets
-navi
-
-# KDE Connect - send to phone
-kdeconnect-cli --share <file>
-```
+- **[Atuin](./atuin.md):** Configuration and usage for the magical shell history tool.
+- **[Chezmoi Modify Manager](./chezmoi-modify-manager.md):** A tool to manage chezmoi modifications.
+- **[Chrome-Plasma Integration](./chrome-plasma.md):** Notes on integrating Chrome with the Plasma desktop.
+- **[Continue Dev](./continue-dev.md):** Documentation for the Continue.dev AI code assistant in VSCodium.
+- **[CopyQ](./copyq.md):** Guide for the CopyQ clipboard manager.
+- **[Gemini CLI](./gemini-cli.md):** Documentation for the Gemini CLI tool.
+- **[KDE Connect](./kde-connect.md):** Setup for phone-desktop integration.
+- **[Kitty](./kitty/):** All documentation related to kitty terminal.
+- **[LLM CLI](./llm-cli.md):** Guide for the LLM command-line interaction tool.
+- **[Navi](./navi.md):** Setup for the interactive cheatsheet tool.
+- **[Plasma Manager](./plasma-manager.md):** Documentation for the declarative KDE Plasma configuration manager.
+- **[Semantic Grep](./semantic-grep.md):** Guide for the AI-powered code search tool.
+- **[VSCodium](./vscodium.md):** Setup and extension documentation for VSCodium.

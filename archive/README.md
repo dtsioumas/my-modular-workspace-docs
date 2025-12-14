@@ -1,40 +1,10 @@
-# Archive - Historical Documentation
+# Archive
 
-**Purpose:** Historical/deprecated documentation preserved for reference.
-**Last Updated:** 2025-11-30
+This directory contains documents that are outdated, have been superseded, or are preserved for historical context. Content here is generally not actively maintained.
 
----
+## Subdirectories
 
-## Contents
-
-### nixos-experiments/
-
-Learning notes from early NixOS flake experiments. Preserved for historical reference.
-
-| File | Description |
-|------|-------------|
-| `messaging-apps-flake-learnings.md` | Lessons from building messaging app flakes |
-| `SETUP_GUIDE_2025-11-05.md` | Early setup guide (outdated) |
-| `warp-terminal-flake-experience.md` | Warp terminal flake attempt |
-| `warp-terminal-research.md` | Warp terminal research notes |
-
----
-
-## Policy
-
-**What goes here:**
-- Historical experiments and learning notes
-- Superseded documentation with historical value
-- Old configurations that may be referenced
-
-**What does NOT go here:**
-- Active plans → `plans/`
-- Session notes → Integrate into `TODO.md` then delete
-- Research documents → Move to relevant directory (e.g., `home-manager/`, `tools/`)
-
----
-
-## Related
-
-- [plans/](../plans/) - Active implementation plans
-- [TODO.md](../TODO.md) - Master task list
+- **/plans**: Contains dated project plans from previous development cycles.
+- **/sessions**: Contains logs and summaries from past interactive sessions.
+- **/nixos-experiments**: Documents related to past experiments with NixOS configurations.
+- **/deprecated**: Miscellaneous deprecated documents.

@@ -1,48 +1,13 @@
 # Sync Documentation
 
-**Last Updated:** 2025-11-30
-**Files:** 8 documents
+This directory contains documentation for all file synchronization tools and strategies used in the workspace, primarily `rclone` and `syncthing`.
 
-This directory contains documentation for file synchronization tools.
+## Key Documents
 
-## Available Guides
-
-| Guide | Description |
-|-------|-------------|
-| [deployment.md](deployment.md) | Complete deployment guide for sync infrastructure |
-| [rclone-gdrive.md](rclone-gdrive.md) | Google Drive bisync backup reference |
-| [syncthing.md](syncthing.md) | P2P real-time sync between devices |
-| [ansible-playbooks.md](ansible-playbooks.md) | Ansible playbook reference and usage |
-| [monitoring.md](monitoring.md) | Health checks and monitoring procedures |
-| [conflicts.md](conflicts.md) | Conflict resolution and prevention |
-| [disaster-recovery.md](disaster-recovery.md) | Rollback and recovery procedures |
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────┐
-│              SYNCTHING P2P NETWORK                  │
-│            (Real-time bidirectional)                │
-└─────────────────────────────────────────────────────┘
-                         │
-       ┌─────────────────┼─────────────────┐
-       ▼                 ▼                 ▼
-   [SHOSHIN]        [LAPTOP]          [ANDROID]
-       │
-       │ rclone (hourly)
-       ▼
-   [GOOGLE DRIVE]
-```
-
-## Quick Commands
-
-```bash
-# Syncthing status
-systemctl --user status syncthing
-
-# rclone sync status
-systemctl --user status rclone-gdrive-sync.timer
-
-# Manual rclone sync
-rclone bisync ~/.MyHome/ GoogleDrive-dtsioumas0:MyHome/ --resilient --recover -v
-```
+- **[Deployment](./deployment.md):** The complete deployment guide for the synchronization infrastructure.
+- **[Disaster Recovery](./disaster-recovery.md):** Rollback and recovery procedures for sync-related issues.
+- **[Rclone for Google Drive](./rclone-gdrive.md):** Reference guide for using `rclone` to bi-directionally sync with Google Drive.
+- **[Syncthing for P2P Sync](./syncthing.md):** Guide for setting up `syncthing` for real-time, peer-to-peer synchronization between devices.
+- **[Ansible Playbooks](./ansible-playbooks.md):** Documentation for the Ansible playbooks used to automate sync tasks.
+- **[Conflict Resolution](./conflicts.md):** How to prevent and resolve file conflicts.
+- **[Monitoring](./monitoring.md):** Health checks and monitoring procedures for sync services.

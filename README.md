@@ -1,14 +1,26 @@
 # My Modular Workspace - Documentation
 
-**Last Updated:** 2025-11-30
-**Status:** Active Development
-**Total Files:** 80 markdown documents
+**Status:** Active & Refactored
+**Last Updated:** 2025-12-14
 
-Documentation for a portable, declarative workspace configuration system built with NixOS, Home Manager, and modern tools.
+This repository is the **single source of truth** for all documentation related to the Modular Workspace project. All component-specific documentation (for Home-Manager, Ansible, Chezmoi, etc.) lives here, not in the component repositories themselves.
+
+---
+
+## The Golden Rule of Documentation
+
+> **If it's documentation, it belongs in this `docs/` repository.**
+
+To maintain consistency and avoid information silos, please adhere to the following:
+1.  **Centralize:** Do not create `README.md` or other documentation files within the `home-manager`, `ansible`, or other component-specific source code repositories.
+2.  **Structure:** Create or update documentation within the appropriate subdirectory here (e.g., `docs/ansible/`, `docs/home-manager/`).
+3.  **Index:** Update the corresponding `README.md` in the subdirectory to reference any new document you create.
 
 ---
 
 ## Architecture Overview
+
+The workspace is built on a clear separation between the user environment and the underlying system.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -24,89 +36,51 @@ Documentation for a portable, declarative workspace configuration system built w
 │  → docs/home-manager/                                       │
 └─────────────────────────────────────────────────────────────┘
 ```
+This structure allows the user environment, managed by Home-Manager, to be portable across different Linux distributions or even WSL, while the system-specific configuration remains isolated.
 
 ---
 
-## Repository Structure
+## Documentation Structure
 
-| Directory | Files | Description | README |
-|-----------|-------|-------------|--------|
-| [nixos/](nixos/) | 6 | **Root system** config (drivers, DE, sudo) | [nixos/README.md](nixos/README.md) |
-| [home-manager/](home-manager/) | 15 | **User environment** (portable, no sudo) | [home-manager/README.md](home-manager/README.md) |
-| [tools/](tools/) | 12 | Tool guides (atuin, kitty, navi, etc.) | [tools/README.md](tools/README.md) |
-| [sync/](sync/) | 8 | Syncthing + rclone sync guides | [sync/README.md](sync/README.md) |
-| [chezmoi/](chezmoi/) | 11 | Dotfile management guides | [chezmoi/README.md](chezmoi/README.md) |
-| [ansible/](ansible/) | 5 | Automation playbook docs | [ansible/README.md](ansible/README.md) |
-| [adrs/](adrs/) | 6 | Architecture Decision Records | - |
-| [archive/](archive/) | 5 | Historical/deprecated docs | [archive/README.md](archive/README.md) |
-| [plans/](plans/) | 8 | Implementation plans | [plans/README.md](plans/README.md) |
+This repository is organized by component. Each directory contains detailed guides, research, and decisions related to that part of the workspace.
 
----
-
-## Quick Navigation
-
-### Configuration Layers
-
-| Layer | Directory | Scope | Portable |
-|-------|-----------|-------|----------|
-| **System** | [nixos/](nixos/) | Drivers, DE, Docker (sudo required) | NixOS only |
-| **User** | [home-manager/](home-manager/) | Packages, configs, services | Any distro |
-
-### Supporting Documentation
-
-| Component | Purpose | Key Docs |
-|-----------|---------|----------|
-| **Sync** | File synchronization | [README](sync/README.md), [Syncthing](sync/syncthing.md), [rclone](sync/rclone-gdrive.md) |
-| **Tools** | Development tools | [README](tools/README.md), [Atuin](tools/atuin.md), [Kitty](tools/kitty.md) |
-| **Chezmoi** | Cross-platform dotfiles | [README](chezmoi/README.md), [Migration](chezmoi/02-migration-strategy.md) |
-| **Ansible** | Bootstrap automation | [README](ansible/README.md) |
-| **ADRs** | Architecture decisions | [ADR-001](adrs/ADR-001-NIXPKGS_UNSTABLE_ON_HOME_MANAGER_AND_STABLE_ON_NIXOS.md) |
+| Directory | Description | README |
+|-----------|-------------|--------|
+| **[adrs/](adrs/)** | **Architecture Decision Records:** The "why" behind key technical choices. | - |
+| **[ansible/](ansible/)** | Automation playbooks for bootstrapping and maintenance. | [ansible/README.md](ansible/README.md) |
+| **[chezmoi/](chezmoi/)** | Cross-platform dotfile management with `chezmoi`. | [chezmoi/README.md](chezmoi/README.md) |
+| **[home-manager/](home-manager/)** | **User Environment:** Declarative management of packages, services, and configs. | [home-manager/README.md](home-manager/README.md) |
+| **[integrations/](integrations/)** | How third-party services (like KeePassXC) connect to the workspace. | [integrations/README.md](integrations/README.md) |
+| **[nixos/](nixos/)** | **System Environment:** NixOS-specific configs for drivers, kernel, etc. | [nixos/README.md](nixos/README.md) |
+| **[plans/](plans/)** | Active and future implementation plans. | [plans/README.md](plans/README.md) |
+| **[sync/](sync/)** | File synchronization guides for `rclone` and `syncthing`. | [sync/README.md](sync/README.md) |
+| **[tools/](tools/)** | Guides for specific command-line tools (atuin, kitty, navi, etc.). | [tools/README.md](tools/README.md) |
+| **[archive/](archive/)** | Deprecated plans, old research, and historical documents. | [archive/README.md](archive/README.md) |
+| [TODO.md](TODO.md) | A living document of active tasks and future work for the workspace. | - |
 
 ---
 
-## Key Documents
+## How to Use This Documentation
 
-| Document | Description |
-|----------|-------------|
-| [home-manager/ephemeral.md](home-manager/ephemeral.md) | Ephemerality strategy |
-| [home-manager/node2nix.md](home-manager/node2nix.md) | NPM package management |
-| [nixos/flakes-guide.md](nixos/flakes-guide.md) | Building Nix flakes |
-| [sync/syncthing.md](sync/syncthing.md) | P2P sync setup |
-| [sync/rclone-gdrive.md](sync/rclone-gdrive.md) | Cloud backup |
-| [tools/atuin.md](tools/atuin.md) | Shell history sync |
+1.  **Start with the Component:** If you have a question about Ansible, start in the `ansible/` directory.
+2.  **Look for the `README.md`:** Each directory has a `README.md` that acts as a table of contents for that section.
+3.  **Check the ADRs:** If you want to understand *why* a certain tool or approach was chosen, look for a relevant document in `adrs/`.
+4.  **Consult the `TODO.md`:** For the latest tasks and development focus, see the main `TODO.md` file.
 
 ---
 
 ## Project Goals
 
-1. **Portability** - Same config across NixOS, Fedora, WSL
-2. **Reproducibility** - Declarative everything
-3. **Ephemerality** - Rebuild home directory from scratch
-4. **Maintainability** - Clear docs, modular structure
-
----
-
-## Technology Stack
-
-| Layer | Tool |
-|-------|------|
-| Package Management | Nix + Home Manager |
-| Dotfiles | Chezmoi |
-| Secrets | KeePassXC |
-| Sync | Syncthing + rclone |
-| Bootstrap | Ansible |
-| Base OS | NixOS (current) |
+1.  **Portability:** The user environment should work on NixOS, Fedora, and WSL.
+2.  **Reproducibility:** Everything should be declarative and version-controlled.
+3.  **Maintainability:** A clean, single source of truth for documentation makes the project easier to manage.
+4.  **Ephemerality:** The ability to rebuild a complete user environment from scratch is a key design goal.
 
 ---
 
 ## Related Repositories
 
-- **Home Manager:** `~/.MyHome/MySpaces/my-modular-workspace/home-manager/`
-- **NixOS Config:** `~/.MyHome/MySpaces/my-modular-workspace/hosts/shoshin/nixos/`
-- **Ansible:** `~/.MyHome/MySpaces/my-modular-workspace/ansible/`
-- **Dotfiles:** `~/.MyHome/MySpaces/my-modular-workspace/dotfiles/`
-
----
-
-**Author:** Dimitris Tsioumas (Mitsos)
-**GitHub:** [@dtsioumas](https://github.com/dtsioumas)
+- **Home Manager:** `../home-manager/`
+- **NixOS Config:** `../hosts/shoshin/nixos/`
+- **Ansible:** `../ansible/`
+- **Dotfiles (Chezmoi):** `../dotfiles/`
