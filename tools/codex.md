@@ -38,7 +38,7 @@
 
 2. **MCP Support (ADR-010)**
    - Full Model Context Protocol support
-   - 14 Nix-packaged MCP servers
+   - 17 MCP servers (14 custom wrappers + 3 upstream packages)
    - Shared configuration with Claude Code and Claude Desktop
    - systemd resource isolation
 
@@ -216,7 +216,7 @@ All MCP servers are Nix-packaged via home-manager with:
 - Automatic cleanup via SIGTERM on parent death
 - API keys loaded from KeePassXC
 
-### Configured MCP Servers (14 total)
+### Configured MCP Servers (17 total)
 
 ```toml
 # ~/.codex/config.toml - MCP section
@@ -276,6 +276,19 @@ args = []
 [mcp_servers.git]
 command = "/home/mitsio/.nix-profile/bin/mcp-git"
 args = []
+
+# Upstream nixpkgs packages (no systemd wrapper)
+[mcp_servers.server-fetch]
+command = "/home/mitsio/.nix-profile/bin/mcp-server-fetch"
+args = ["--max-length", "50000"]
+
+[mcp_servers.server-time]
+command = "/home/mitsio/.nix-profile/bin/mcp-server-time"
+args = []
+
+[mcp_servers.server-sequential-thinking]
+command = "/home/mitsio/.nix-profile/bin/mcp-server-sequential-thinking"
+args = []
 ```
 
 ### MCP Server Capabilities
@@ -296,6 +309,9 @@ args = []
 | **filesystem** | File read/write operations |
 | **shell** | Shell command execution |
 | **git** | Git operations |
+| **server-fetch** | URL fetching (upstream, 50k char limit) |
+| **server-time** | Time queries (upstream nixpkgs) |
+| **server-sequential-thinking** | Reasoning (upstream nixpkgs) |
 
 ### Managing MCP Servers
 
@@ -471,7 +487,7 @@ programs.vscode = {
 | **Provider** | OpenAI | Anthropic |
 | **CLI** | `codex` | `claude` |
 | **IDE Extension** | VSCode, VSCodium | VSCode (beta) |
-| **MCP Support** | 14 servers (Nix-managed) | 14 servers (Nix-managed) |
+| **MCP Support** | 17 servers (Nix-managed) | 17 servers (Nix-managed) |
 | **Cloud Agent** | Yes | Limited |
 | **GitHub Integration** | Native | Via MCP |
 | **Mobile** | ChatGPT mobile | No |

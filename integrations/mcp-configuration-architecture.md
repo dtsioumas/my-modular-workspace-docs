@@ -77,9 +77,9 @@ This document describes the unified MCP (Model Context Protocol) server configur
 
 ---
 
-## MCP Servers (14 Total)
+## MCP Servers (17 Total)
 
-All agents share the same 14 MCP servers:
+All agents share the same 17 MCP servers (14 custom wrappers + 3 upstream packages):
 
 | Server | Purpose | Wrapper Binary |
 |--------|---------|----------------|
@@ -97,6 +97,9 @@ All agents share the same 14 MCP servers:
 | `filesystem` | File operations | `mcp-filesystem-server` |
 | `shell` | Shell commands | `mcp-shell` |
 | `git` | Git operations | `mcp-git` |
+| `server-fetch` | URL fetching (upstream, 50k limit) | `mcp-server-fetch` |
+| `server-time` | Time queries (upstream) | `mcp-server-time` |
+| `server-sequential-thinking` | Reasoning (upstream) | `mcp-server-sequential-thinking` |
 
 ---
 
