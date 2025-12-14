@@ -28,6 +28,26 @@ This plan details the migration of KDE Plasma configuration files from plasma-ma
 - Phase 3: Core Plasma configs (2 weeks)
 - Phase 4: Final migration & cleanup (1 week)
 
+### Current Coverage Snapshot (2025-12-14)
+
+| Config | chezmoi Status | Notes / Next Action |
+| --- | --- | --- |
+| `plasmarc` | ✅ (`private_dot_config/modify_plasmarc`) | Filters theme + desktop defaults correctly. |
+| `kglobalshortcutsrc` | ✅ (`modify_kglobalshortcutsrc`) | All Meta/Alt shortcuts managed + tested (Phase 3). |
+| `kwinrc` | ✅ (`modify_kwinrc`) | Window manager behavior under modify_manager; verified via Alt+Shift + tiling tests. |
+| `kxkbrc` | ✅ (`modify_kxkbrc`) | Keyboard layouts + Alt+Shift toggle declarative. |
+| `dolphinrc`, `konsolerc`, `katerc`, `okularrc` | ✅ (`modify_*` scripts + `.src.ini`) | Application configs migrated in Phase 2 (low risk). |
+| `plasmashellrc` | ❌ Live only in `~/.config`; holds panel settings. Requires high-signal filters before migration. |
+| `plasma-org.kde.plasma.desktop-appletsrc` | ❌ Not tracked; extremely volatile applett rc. Needs dedicated plan/filters if we ever move panels off plasma-manager. |
+| `plasmanotifyrc` | ✅ (`modify_plasmanotifyrc`) | Notifications now tracked via modify_manager (2025-12-14). |
+| `plasma_workspace.notifyrc` | ✅ (`modify_plasma_workspace.notifyrc`) | Device popup rules migrated (2025-12-14). |
+| `plasma-localerc` | ✅ (`modify_plasma-localerc`) | Locale formats tracked (2025-12-14); templating TBD for multi-host. |
+| `plasma_calendar_holiday_regions` | ✅ (`modify_plasma_calendar_holiday_regions`) | Holiday regions tracked (2025-12-14); templating TBD for multi-host. |
+| `kwinoutputconfig.json` | ❌ Hardware-specific (monitors). Remains ignored via `.chezmoiignore`. |
+| `powerdevilrc`, `kscreenlockerrc`, `krunnerrc`, `kdeglobals`, `ksmserverrc` | ❌ Present under `~/.config` but still unmanaged. Add to modify_manager queue once priorities free up. |
+
+**Home-Manager state:** `home-manager/home.nix` no longer imports `plasma.nix`/`plasma-full.nix` (commented out at line 73). The file remains in the repo as historical reference but does not affect current builds, so live Plasma behavior depends entirely on the dotfiles + manual settings.
+
 ---
 
 ## Migration Phases
@@ -548,12 +568,25 @@ filter {
 3. Verify all settings work
 4. Document any manual steps needed
 
+#### 4.6 Automate modify_manager Refresh (NEW)
+
+**Goal:** Provide a repeatable way to re-run `chezmoi_modify_manager --smart-add` for every managed Plasma config before commits or after GUI tweaks.
+
+**Action:** Create an Ansible playbook (`ansible/playbooks/chezmoi-modify-refresh.yml`) that:
+
+1. Iterates through the managed config list (`kxkbrc`, `plasmarc`, `kwinrc`, `kglobalshortcutsrc`, `dolphinrc`, `konsolerc`, `katerc`, `okularrc`, `plasmanotifyrc`, and any future additions).
+2. Executes the appropriate `chezmoi_modify_manager --smart-add <file>` command for each entry.
+3. Reports which files changed so we know when to `chezmoi apply`.
+
+**Why:** Keeps `.src.ini` files synchronized without manually running 10+ commands and prepares the workflow for future automation/CI.
+
 **Success Criteria Phase 4:**
 - ✅ Decision made on panel migration
 - ✅ Fedora migration guide created
 - ✅ All config filters optimized
 - ✅ plasma-manager cleaned up (minimal or removed)
 - ✅ Tested on fresh NixOS install
+- ✅ Ansible automation exists for `chezmoi_modify_manager` refreshes
 - ✅ Full documentation complete
 
 ---

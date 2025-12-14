@@ -589,13 +589,28 @@ zellij --layout ops attach -c monitoring
 - `docs/researches/2025-12-01_kitty_comprehensive_research.md`
 - `docs/researches/2025-12-07_kitty_tab_bar_window_bars_research.md`
 - `docs/researches/2025-12-08_kitty_per_pane_status_bars_research.md`
+- `docs/researches/2025-12-07-warp-kitty-mcp-integration-research.md` (Warp integration)
 
 **Tools:**
 - `docs/tools/kitty/README.md` (consolidated guide)
 - `docs/tools/kitty/TROUBLESHOOTING.md`
 
+**Related Active Plans:**
+- `2025-11-30-kitty-integration-verification-plan.md` - Testing/QA checklist for all integrations
+- `2025-12-07-warp-kitty-integration-and-mcp-plan.md` - Warp + Kitty + MCP 3-tier integration
+- `2025-11-30-autocomplete-sh-integration-plan.md` - AI autocomplete (Phase C.2.6 implementation)
+
+**Archived Plans:**
+- `archive/plans/kitty-enhancements-plan-01-12-2025.md` (merged into this plan)
+- `archive/plans/kitty-kittens-enhancements-plan-03-12-2025.md` (merged into this plan)
+- `archive/plans/kitty-advanced-statusbar-plan-02-12-2025.md` (merged into this plan)
+- `archive/plans/kitty-zellij-phase1-plan-01-12-2025.md` (merged into this plan)
+- `archive/plans/2025-11-30-kitty-advanced-features-plan.md` (zellij layouts - completed)
+- `archive/plans/2025-12-01-zellij-installation-and-integration-with-kitty-plan.md` (completed)
+- `archive/plans/2025-12-01-zjstatus-integration-plan.md` (zjstatus - completed)
+
 **Session History:**
-- `sessions/kitty-configuration/` (archived session files)
+- `sessions/kitty-configuration/ARCHIVE_NOTE.md` (points to new locations)
 - `sessions/summaries/*KITTY*.md` (session summaries)
 
 ---

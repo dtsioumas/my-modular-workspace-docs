@@ -6,19 +6,19 @@
 **Estimated Time:** 80-115 minutes (1.5-2 hours)
 **Risk Level:** LOW (isolated, reversible changes)
 
----
-
 ## Executive Summary
 
 This plan integrates autocomplete.sh AI-powered command completion into kitty terminal with secure API key management via KeePassXC and declarative configuration via chezmoi.
 
 **What You Get:**
+
 - ✅ AI completions in kitty (double TAB for LLM suggestions)
 - ✅ Secure API key storage (KeePassXC + secret-tool)
 - ✅ Declarative config (chezmoi-managed `.bashrc`)
 - ✅ Fast, context-aware suggestions
 
 **Deliverables:**
+
 1. autocomplete.sh installed at `~/.local/bin/autocomplete`
 2. API keys stored in KeePassXC, accessed via secret-tool
 3. Bash configuration template: `dotfiles/dot_bashrc.tmpl`
@@ -30,6 +30,7 @@ This plan integrates autocomplete.sh AI-powered command completion into kitty te
 ## Prerequisites
 
 **Required:**
+
 - ✅ Kitty terminal installed
 - ✅ Bash shell  (>=4.0)
 - ✅ Chezmoi managing dotfiles
@@ -38,6 +39,7 @@ This plan integrates autocomplete.sh AI-powered command completion into kitty te
 - ✅ Internet connection (for API-based LLMs)
 
 **Verify:**
+
 ```bash
 which kitty          # Should exist
 which chezmoi        # Should exist
@@ -47,6 +49,7 @@ bash --version       # Should be >= 4.0
 ```
 
 **Before Starting:**
+
 1. Backup current `.bashrc` (chezmoi handles this automatically)
 2. Have your LLM API key ready (OpenAI, Anthropic, or Groq)
 3. Or plan to use Ollama (local, free, no key needed)
@@ -63,6 +66,7 @@ bash --version       # Should be >= 4.0
 ### Step 1.1: Create API Key Entries in KeePassXC
 
 **Open KeePassXC GUI:**
+
 ```bash
 keepassxc
 ```
@@ -70,18 +74,19 @@ keepassxc
 **Create entries in your vault:**
 
 1. **OpenAI API Key**
+
    - Title: `OpenAI API`
    - Username: `openai`
    - Password: `sk-...your-api-key...`
    - URL: `https://platform.openai.com/api-keys`
-
 2. **Anthropic API Key** (optional)
+
    - Title: `Anthropic API`
    - Username: `anthropic`
    - Password: `sk-ant-...your-api-key...`
    - URL: `https://console.anthropic.com/`
-
 3. **Groq API Key** (optional, free tier)
+
    - Title: `Groq API`
    - Username: `groq`
    - Password: `gsk_...your-api-key...`
@@ -89,9 +94,10 @@ keepassxc
 
 **Save vault**
 
-###  Step 1.2: Store Keys in Secret Service (GNOME Keyring)
+### Step 1.2: Store Keys in Secret Service (GNOME Keyring)
 
 **Using secret-tool:**
+
 ```bash
 # Store OpenAI API key
 secret-tool store --label="OpenAI API Key" service openai key apikey
@@ -121,6 +127,7 @@ bash -c 'echo $(secret-tool lookup service openai key apikey 2>/dev/null)'
 ```
 
 **Success Criteria:**
+
 - ✅ API keys stored in KeePassXC
 - ✅ `secret-tool lookup` retrieves keys successfully
 - ✅ No plaintext API keys in files
@@ -153,6 +160,7 @@ bash /tmp/autocomplete-install.sh
 ```
 
 **Expected actions:**
+
 - Downloads `autocomplete.sh` to `~/.local/bin/autocomplete`
 - Adds sourcing line to `~/.bashrc` (we'll manage this via chezmoi instead)
 
@@ -185,6 +193,7 @@ grep "autocomplete" ~/.bashrc
 ```
 
 **Success Criteria:**
+
 - ✅ `~/.local/bin/autocomplete` exists and is executable
 - ✅ `autocomplete --version` returns version number
 - ✅ Ready for configuration
@@ -322,6 +331,7 @@ echo "Sanitization: $ACSH_ENABLE_SANITIZATION"
 ```
 
 **Success Criteria:**
+
 - ✅ No bash syntax errors
 - ✅ API keys loaded from secret-tool
 - ✅ autocomplete function available
@@ -404,6 +414,7 @@ chezmoi apply
 ```
 
 **Success Criteria:**
+
 - ✅ All keybindings work
 - ✅ Overlays display correctly
 - ✅ No conflicts with existing kitty shortcuts
@@ -420,23 +431,26 @@ chezmoi apply
 ### Option A: Use Cloud LLM (Recommended for Starting)
 
 **Interactive selection:**
+
 ```bash
 autocomplete model
 ```
 
 **Recommended choices:**
 
-| Model | Provider | Cost (1K) | Speed | Best For |
-|-------|----------|-----------|-------|----------|
-| **gpt-4o-mini** | OpenAI | ~$0.01 | Fast | **Default, balanced** |
-| **llama-3.1-8b-instant** | Groq | FREE | Very Fast | **Budget testing** |
-| **claude-3-5-haiku** | Anthropic | ~$0.01 | Very Fast | Quick completions |
+
+| Model                    | Provider  | Cost (1K) | Speed     | Best For              |
+| ------------------------ | --------- | --------- | --------- | --------------------- |
+| **gpt-4o-mini**          | OpenAI    | ~$0.01    | Fast      | **Default, balanced** |
+| **llama-3.1-8b-instant** | Groq      | FREE      | Very Fast | **Budget testing**    |
+| **claude-3-5-haiku**     | Anthropic | ~$0.01    | Very Fast | Quick completions     |
 
 **Select:** `gpt-4o-mini` (default) or `llama-3.1-8b-instant` (free)
 
 ### Option B: Use Local LLM (Privacy-Focused)
 
 **Install Ollama:**
+
 ```bash
 # Install Ollama
 curl https://ollama.ai/install.sh | sh
@@ -450,12 +464,14 @@ ollama list
 ```
 
 **Configure autocomplete.sh:**
+
 ```bash
 autocomplete model
 # Select: ollama: codellama
 ```
 
 **Benefits:**
+
 - ✅ Zero API costs
 - ✅ Complete privacy (no data leaves machine)
 - ✅ No API key needed
@@ -477,6 +493,7 @@ autocomplete command "git push"
 ```
 
 **Success Criteria:**
+
 - ✅ Model selected
 - ✅ Test completion works
 - ✅ API key authenticated (or Ollama running locally)
@@ -611,6 +628,7 @@ autocomplete usage
 **✅ Pass:** All keybindings work
 
 **Success Criteria:**
+
 - ✅ All 7 tests pass
 - ✅ Completions work in kitty
 - ✅ API keys secure
@@ -666,6 +684,7 @@ secret-tool clear service anthropic key apikey
 ### Maintenance
 
 **Update autocomplete.sh:**
+
 ```bash
 # Check for updates
 curl -s https://api.github.com/repos/closedloop-technologies/autocomplete-sh/releases/latest | grep tag_name
@@ -678,6 +697,7 @@ source ~/.bashrc
 ```
 
 **Rotate API Keys:**
+
 ```bash
 # Update in KeePassXC GUI, then update keyring:
 secret-tool store --label="OpenAI API Key" service openai key apikey
@@ -703,6 +723,7 @@ autocomplete model
 ## Success Criteria
 
 **Implementation complete when:**
+
 - ✅ autocomplete.sh installed at `~/.local/bin/autocomplete`
 - ✅ API keys stored in KeePassXC, retrieved via secret-tool
 - ✅ Bash configuration template managed by chezmoi
@@ -726,6 +747,7 @@ autocomplete model
 5. **Provide feedback:** Star the GitHub repo, report issues
 
 **Optional enhancements:**
+
 - Create navi cheatsheet for autocomplete.sh commands
 - Add more kitty keybindings
 - Explore Ollama for fully local completions
@@ -736,12 +758,14 @@ autocomplete model
 ## Reference
 
 **Documentation:**
+
 - Tool Guide: `docs/tools/autocomplete-sh.md`
 - Integration Guide: `docs/integrations/kitty-autocomplete-integration.md`
 - This Plan: `docs/plans/autocomplete-sh-integration-plan.md`
 - Navi Cheatsheet: `~/.local/share/navi/cheats/autocomplete.cheat` (to be created)
 
 **External:**
+
 - Official Site: https://autocomplete.sh/
 - GitHub: https://github.com/closedloop-technologies/autocomplete-sh
 - KeePassXC: https://keepassxc.org/
