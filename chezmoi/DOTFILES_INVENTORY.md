@@ -1,381 +1,292 @@
-# Dotfiles Inventory - Complete Analysis
+# Dotfiles Inventory & Migration Priorities
 
-**Created:** 2025-11-18
+**Last Updated:** 2025-12-14
 **System:** shoshin (NixOS)
-**User:** mitsio
-**Purpose:** Comprehensive inventory of all dotfiles for chezmoi migration
-**Comment** This file needs review, it's the inventory of dotfiles. Don't migrate dotfiles before discuss with user each use case.
----
-
-## 📋 Inventory Summary
-
-**Total Configuration Directories:** 47+ in `~/.config/`
-**Total Root Dotfiles:** 10+ in `~`
-**Home-Manager Managed:** 6 symlinks
-**Standalone Files:** Many
+**Purpose:** Comprehensive inventory of dotfiles with migration priorities
+**Consolidated from:** DOTFILES_INVENTORY, INITIAL_SCAN_FINDINGS, PRIORITY_SUMMARY, PRIORITY_APPS_DETAILED
 
 ---
 
-## 🏠 Home Directory Dotfiles
+## Summary Statistics
 
-### Home-Manager Managed (Symlinks to /nix/store)
-
-| File | Target | Source | Status |
-|------|--------|--------|--------|
-| `~/.bash_profile` | `/nix/store/...-home-manager-files/.bash_profile` | Home-Manager | ✅ Managed |
-| `~/.bashrc` | `/nix/store/...-home-manager-files/.bashrc` | Home-Manager | ✅ Managed |
-| `~/.profile` | `/nix/store/...-home-manager-files/.profile` | Home-Manager | ✅ Managed |
-| `~/.npmrc` | `/nix/store/...-home-manager-files/.npmrc` | Home-Manager | ✅ Managed |
-| `~/.keep-myvault` | `/nix/store/...-home-manager-files/.keep-myvault` | Home-Manager | ✅ Managed |
-| `~/.nix-profile` | System symlink | Nix | ⚠️ System |
-
-### Standalone Dotfiles (NOT managed)
-
-| File | Purpose | Source App/Tool | Action |
-|------|---------|-----------------|--------|
-| `~/.bash_history` | Bash command history | Bash | ❌ Don't manage |
-| `~/.bashrc.backup` | Backup file | Manual | ❌ Don't manage |
-| `~/.gtkrc-2.0` | GTK 2.0 theme config | GTK | ✅ Migrate |
-| `~/.viminfo` | Vim session info | Vim | ❌ Don't manage |
-| `~/.npmrc.backup` | Backup file | Manual | ❌ Don't manage |
-| `~/.claude.json` | Claude settings | Claude Desktop | ⚠️ Contains secrets |
-| `~/.claude.json.backup*` | Backup files | Manual | ❌ Don't manage |
+| Category | Count | Notes |
+|----------|-------|-------|
+| ~/.config/ directories | 125+ | Total scanned |
+| Plasma/KDE configs | ~40 files | Desktop environment |
+| Root dotfiles | ~30 | Excluding cache/history |
+| Home-Manager managed | 6+ symlinks | Shell, profile, etc. |
+| Chezmoi managed | 15+ | See MIGRATION_STATUS.md |
 
 ---
 
-## ⚙️ ~/.config/ Directory Analysis
+## Migration Priority Matrix
 
-### Development Tools
+### 🔥 HIGH Priority (Migrate First)
 
-#### Code Editors & IDEs
+| App/Config | Location | Status | Notes |
+|------------|----------|--------|-------|
+| **OBSIDIAN** | `~/.config/obsidian/` | ⏳ Pending | Minimal config (86B) |
+| **CopyQ** | `~/.config/copyq/` | ✅ Migrated | 7 files + themes |
+| **Flameshot** | `~/.config/flameshot/` | ⏳ Pending | Screenshot tool |
+| **KDE Connect** | `~/.config/kdeconnect/` | ⚠️ Has secrets | TLS certs/keys |
+| **btop** | `~/.config/btop/` | ⏳ Pending | 9.5K config |
+| **KDE Plasma Core** | Various | ⏳ Pending | 40+ files |
 
-| Directory/File | App | Purpose | Migrate? | Notes |
-|---------------|-----|---------|----------|-------|
-| `Code/` | VS Code / VSCodium | Editor settings, extensions | ✅ Yes | Large directory |
-| `kate/` | Kate (KDE) | KDE text editor | ✅ Yes | KDE-specific |
-| `katerc`, `katemetainfos`, `katevirc` | Kate | Kate configs | ✅ Yes | KDE-specific |
+### ⚠️ MEDIUM Priority
 
-#### Version Control
+| App/Config | Location | Status | Notes |
+|------------|----------|--------|-------|
+| Discord | `~/.config/discord/` | ⏳ Pending | Settings only |
+| Session Messenger | `~/.config/Session/` | ⏳ Pending | Electron app |
+| Okular | `~/.config/okularrc` | ⏳ Pending | PDF viewer |
+| Dolphin | `~/.config/dolphinrc` | ⏳ Pending | File manager |
+| Spectacle | `~/.config/spectaclerc` | 🔻 Low | Migrating to Flameshot |
+| pavucontrol | `~/.config/pavucontrol.ini` | ⏳ Pending | Audio control |
 
-| Directory/File | App | Purpose | Migrate? | Notes |
-|---------------|-----|---------|----------|-------|
-| `git/` | Git | Git global config | ✅ Yes | Home-Manager managed? |
-| `gh/` | GitHub CLI | GitHub CLI settings | ✅ Yes | Contains credentials? |
+### 🔻 LOW Priority / Skip
 
-#### Language-Specific
-
-| Directory/File | App | Purpose | Migrate? | Notes |
-|---------------|-----|---------|----------|-------|
-| `go/` | Go | Go environment | ✅ Yes | Development config |
-| `godot/` | Godot Engine | Game engine settings | ⚠️ Maybe | Project-specific? |
-
----
-
-### Terminal & Shell
-
-| Directory/File | App | Purpose | Migrate? | Notes |
-|---------------|-----|---------|----------|-------|
-| `kitty/` | Kitty Terminal | Terminal emulator config | ✅ Yes | Currently managed by HM |
-| `kitty.old` | Legacy | Symlink to old config | ❌ No | Remove |
-| `konsolerc` | Konsole | KDE terminal | ✅ Yes | KDE default terminal |
-| `htop/` | htop | System monitor | ✅ Yes | User preferences |
-| `bottom/` | bottom (btm) | System monitor | ✅ Yes | Alternative to htop |
-| `btop/` | btop | System monitor | ✅ Yes | Modern alternative |
-| `lnav/` | lnav | Log navigator | ✅ Yes | Log viewer config |
+| App/Config | Reason |
+|------------|--------|
+| Kate, KWrite | Rarely used |
+| Konsole | User uses kitty |
+| Firefox profiles | Too large, use sync |
+| UserFeedback configs | Telemetry |
+| .git-credentials | Deprecated (use systemd service) |
 
 ---
 
-### System & Desktop Environment (KDE Plasma)
+## Already Managed
 
-#### Core Plasma Configs
+### Chezmoi Managed (dotfiles/)
 
-| File | Purpose | Migrate? | Notes |
-|------|---------|----------|-------|
-| `kdeglobals` | KDE global settings | ⚠️ Partial | Theme, colors, fonts |
-| `kglobalshortcutsrc` | Global shortcuts | ✅ Yes | Keyboard shortcuts |
-| `kwinrc` | KWin (window manager) | ✅ Yes | Window behavior |
-| `kwinoutputconfig.json` | Display config | ⚠️ Maybe | Hardware-specific |
-| `plasmarc` | Plasma shell | ✅ Yes | Desktop behavior |
-| `plasmashellrc` | Plasma shell | ✅ Yes | Panel configuration |
-| `plasma-org.kde.plasma.desktop-appletsrc` | Desktop widgets | ✅ Yes | Widgets/applets |
-| `powerd evilrc`, `powerdevilrc` | Power management | ✅ Yes | Power settings |
-| `kscreenlockerrc` | Screen locker | ✅ Yes | Lock screen |
-| `ksmserverrc` | Session manager | ✅ Yes | Session settings |
-| `krunnerrc` | KRunner launcher | ✅ Yes | Launcher config |
+| Config | Location | Notes |
+|--------|----------|-------|
+| Atuin | `dot_config/atuin/` | Shell history sync |
+| CopyQ | `dot_config/copyq/` | Clipboard manager |
+| Git | `dot_gitconfig.tmpl` | Cross-platform |
+| KeePassXC | `dot_config/keepassxc/` | App settings |
+| Kitty | `dot_config/kitty/` | Catppuccin Mocha |
+| Navi | `dot_config/navi/` + `dot_local/` | Cheatsheets |
+| Claude | `private_dot_claude/` | Settings + MCP |
+| Codex | `private_dot_codex/` | Config template |
+| Gemini | `private_dot_gemini/` | Settings |
+| VSCodium | `dot_config/VSCodium/` | User settings |
+| Bashrc | `dot_bashrc.tmpl` | Additions |
+| Zellij | `private_dot_config/zellij/` | Layouts + config |
 
-#### Plasma Components
+### Home-Manager Managed
 
-| File | Purpose | Migrate? | Notes |
-|------|---------|----------|-------|
-| `plasma-localerc` | Locale settings | ✅ Yes | Language/region |
-| `plasmanotifyrc` | Notifications | ✅ Yes | Notification settings |
-| `plasma_calendar_holiday_regions` | Calendar | ✅ Yes | Holiday config |
-| `ksplashrc` | Splash screen | ✅ Yes | Boot splash |
-| `kxkbrc` | Keyboard layout | ✅ Yes | Keyboard settings |
-
-#### KDE Applications
-
-| File/Dir | App | Migrate? | Notes |
-|----------|-----|----------|-------|
-| `dolphinrc` | Dolphin | ✅ Yes | File manager |
-| `gwenviewrc` | Gwenview | ✅ Yes | Image viewer |
-| `okularrc`, `okularpartrc` | Okular | ✅ Yes | PDF viewer |
-| `spectaclerc` | Spectacle | ✅ Yes | Screenshot tool |
-| `kwriterc` | KWrite | ✅ Yes | Text editor |
-| `kmenueditrc` | Menu editor | ✅ Yes | Application menu |
-| `drkonqirc` | Dr. Konqi | ⚠️ Maybe | Crash handler |
-
-#### KDE System Components
-
-| File/Dir | Purpose | Migrate? | Notes |
-|----------|---------|----------|-------|
-| `KDE/` | KDE data | ⚠️ Partial | Various KDE data |
-| `kdedefaults/` | KDE defaults | ⚠️ Maybe | System defaults |
-| `kdeconnect/` | KDE Connect | ✅ Yes | Phone integration |
-| `kded5rc`, `kded6rc` | KDE daemon | ⚠️ Maybe | System daemon |
-| `kconf_updaterc` | Config updates | ❌ No | Auto-generated |
-| `autostart/` | Autostart apps | ✅ Yes | Startup programs |
-| `environment.d/` | Environment vars | ✅ Yes | Home-Manager managed |
+| Module | Purpose | Why Not Chezmoi |
+|--------|---------|-----------------|
+| `shell.nix` | Bash/env vars | System integration |
+| `autostart.nix` | XDG autostart | Systemd integration |
+| `claude-code.nix` | npm CLI | Package management |
+| `vscodium.nix` | Package | Marketplace config |
+| `brave.nix` | Browser | NVIDIA overlays |
+| `symlinks.nix` | ~/.MyHome | Nix file management |
+| `CLAUDE.md` | Global instructions | Nix module integration |
 
 ---
 
-### Applications
+## KDE Plasma Desktop
 
-#### Browsers
+### Core Plasma Files
 
-| Directory | Browser | Migrate? | Notes |
-|-----------|---------|----------|-------|
-| `BraveSoftware/` | Brave | ⚠️ Partial | Profile data - large |
-| `chromium/` | Chromium | ⚠️ Partial | Profile data |
-| `google-chrome/` | Chrome | ⚠️ Partial | Profile data |
+| File | Purpose | Priority |
+|------|---------|----------|
+| `plasmarc` | Plasma shell | ✅ High |
+| `plasmashellrc` | Panel config | ✅ High |
+| `plasma-org.kde.plasma.desktop-appletsrc` | Widgets | ✅ High |
+| `kdeglobals` | Theme, colors, fonts | ✅ High |
+| `kglobalshortcutsrc` | Keyboard shortcuts (16K!) | ✅ High |
+| `kwinrc` | Window manager | ✅ High |
+| `kwinoutputconfig.json` | Display config | ⚠️ Hardware-specific |
 
-**Recommendation:** Don't migrate full browser profiles (huge, contains cache). Only migrate:
-- Bookmarks (if not synced)
-- Custom settings/flags
-- Extensions list (document separately)
+### KDE System Components
 
-#### Communication
+| File | Purpose | Priority |
+|------|---------|----------|
+| `ksmserverrc` | Session manager | ✅ |
+| `krunnerrc` | KRunner launcher | ✅ |
+| `kscreenlockerrc` | Screen locker | ✅ |
+| `powerdevilrc` | Power management | ✅ |
+| `plasmanotifyrc` | Notifications | ✅ |
+| `kactivitymanagerdrc` | Activity manager | ✅ |
+| `kxkbrc` | Keyboard layout | ✅ |
 
-| Directory | App | Migrate? | Notes |
-|-----------|-----|----------|-------|
-| `discord/` | Discord | ⚠️ Partial | Settings only, not cache |
-| `Session/` | Session Messenger | ⚠️ Partial | Private messenger |
+### KDE Applications
 
-#### Productivity
-
-| Directory/File | App | Migrate? | Notes |
-|---------------|-----|----------|-------|
-| `obsidian/` | Obsidian | ⚠️ Partial | Settings only, not vaults |
-| `keepassxc/`, `KeePassXCrc` | KeePassXC | ✅ Yes | Password manager config |
-| `rclone/` | rclone | ✅ Yes | Cloud sync config |
-| `sqlitebrowser/` | DB Browser | ✅ Yes | Database browser |
-
-#### Claude & AI Tools
-
-| Directory/File | App | Migrate? | Notes |
-|---------------|-----|----------|-------|
-| `Claude/` | Claude Desktop | ⚠️ Secrets | Contains API keys |
-| `cline/` | Cline CLI | ✅ Yes | Config managed by HM |
-| `.claude.json` | Claude Code | ⚠️ Secrets | Contains settings + keys |
+| App | Config | Priority | Notes |
+|-----|--------|----------|-------|
+| Dolphin | `dolphinrc` | ✅ | File manager - IMPORTANT |
+| Spectacle | `spectaclerc` | 🔻 | Migrating to Flameshot |
+| Okular | `okularrc` | ⚠️ | PDF viewer |
+| Kate | `katerc` | 🔻 | Text editor |
+| KWrite | `kwriterc` | 🔻 | Simple editor |
+| Gwenview | `gwenviewrc` | ⚠️ | Image viewer |
 
 ---
 
-### System Utilities
+## Communication Apps
 
-| Directory/File | Purpose | Migrate? | Notes |
-|---------------|---------|----------|-------|
-| `dconf/` | GNOME settings | ⚠️ Maybe | Desktop settings database |
-| `gtk-3.0/`, `gtk-4.0/` | GTK themes | ✅ Yes | GTK application themes |
-| `gtkrc`, `gtkrc-2.0` | GTK 2 config | ✅ Yes | Legacy GTK apps |
-| `menus/` | Desktop menus | ⚠️ Maybe | Application menus |
-| `mimeapps.list` | File associations | ✅ Yes | Managed by HM |
-| `QtProject.conf` | Qt settings | ✅ Yes | Qt application framework |
-| `pulse/` | PulseAudio | ❌ No | Audio system (system-level) |
-| `pavucontrol.ini` | PulseAudio control | ✅ Yes | Audio mixer GUI |
-| `session/` | Session data | ❌ No | Runtime session data |
+### Session Messenger (`~/.config/Session/`)
 
-#### Misc Configs
+**Important Files:**
+- `config.json` (190B)
+- `ephemeral.json` (161B)
 
-| Directory/File | Purpose | Migrate? | Notes |
-|---------------|---------|----------|-------|
-| `Bitwarden CLI/` | Bitwarden | ⚠️ Secrets | CLI config may have secrets |
-| `Electron/` | Electron apps | ❌ No | Framework cache |
-| `akonadi/` | Akonadi (KDE PIM) | ⚠️ Maybe | Personal info manager |
-| `baloofilerc`, `baloofileinformationrc` | Baloo (KDE indexer) | ⚠️ Maybe | File indexing |
-| `arkrc` | Ark (KDE) | ✅ Yes | Archive manager |
-| `kio rc` | KIO | ⚠️ Maybe | KDE I/O subsystem |
-| `kwalletrc` | KWallet | ⚠️ Secrets | KDE wallet config |
-| `libaccounts-glib/` | Accounts | ⚠️ Secrets | Online accounts |
-| `mcp-shell-new/` | Custom | ✅ Yes | User tool config |
+**Ignore (Cache):**
+- Cache/, Code Cache/, GPUCache/, blob_storage/
+- Crashpad/, DawnCache/, attachments.noindex/
 
----
+### Discord (`~/.config/discord/`)
 
-## 🎯 Migration Priority
+**Important Files:**
+- `settings.json` (296B)
+- `Preferences` (208B)
+- `quotes.json` (34B)
 
-### High Priority (Migrate First)
+**Ignore (Cache):**
+- Cache/, Code Cache/, GPUCache/, blob_storage/
+- IndexedDB/, Local Storage/
 
-**Shell & Terminal:**
-- `.bashrc` (already managed by HM)
-- `.bash_profile` (already managed by HM)
-- `.profile` (already managed by HM)
-- `kitty/` (already managed by HM)
-- `htop/`, `btop/`, `bottom/`
+### Signal
 
-**Development:**
-- `git/` config
-- `gh/` GitHub CLI
-- `Code/` VSCode/VSCodium settings
-- `go/` Go environment
-
-**Applications:**
-- `keepassxc/` + `KeePassXCrc`
-- `rclone/`
-- `cline/` (already managed by HM)
-
-### Medium Priority
-
-**KDE Desktop:**
-- `kdeglobals` (global theme/fonts)
-- `kglobalshortcutsrc` (shortcuts)
-- `kwinrc` (window manager)
-- `plasmarc`, `plasmashellrc` (desktop shell)
-- `plasma-org.kde.plasma.desktop-appletsrc` (widgets)
-
-**KDE Apps:**
-- `dolphinrc`, `konsolerc`, `okularrc`, `spectaclerc`
-- `kate/`, `katerc`, `katevirc`
-
-**System:**
-- `gtk-3.0/`, `gtk-4.0/`, `gtkrc`, `gtkrc-2.0`
-- `QtProject.conf`
-- `mimeapps.list` (already managed by HM)
-
-### Low Priority (Optional)
-
-**Browser Configs** (settings only, not profiles):
-- Brave settings
-- Chromium settings
-
-**Communication** (settings only):
-- Discord settings
-
-**Misc:**
-- `sqlitebrowser/`
-- `obsidian/` settings (not vaults)
-
-### ❌ Do NOT Migrate
-
-**History/Cache:**
-- `.bash_history`
-- `.viminfo`
-- `session/`
-- `Electron/`
-- Browser caches/profiles
-
-**Backups:**
-- `*.backup` files
-- `.claude.json.backup*`
-
-**System/Auto-Generated:**
-- `.nix-profile`
-- `kconf_updaterc`
-- `pulse/` (system-level)
-- `dconf/` (complex, system-integrated)
-
-**Secrets (Handle Separately with Encryption):**
-- `Claude/` (contains API keys)
-- `.claude.json` (contains keys)
-- `Bitwarden CLI/` (may contain secrets)
-- `kwalletrc` (KDE wallet config)
-- `libaccounts-glib/` (online accounts)
+**Status:** ⚠️ NOT FOUND in ~/.config/
+- May not be installed or uses different location
 
 ---
 
-## 📦 Application Sources
+## Root Dotfiles (~/)
 
-### Identified Applications
+### Home-Manager Managed (Symlinks)
 
-| App | Official Website | Package Source | Config Location |
-|-----|------------------|----------------|-----------------|
-| **Kitty** | https://sw.kovidgoyal.net/kitty/ | nixpkgs | `~/.config/kitty/` |
-| **VS Code** | https://code.visualstudio.com/ | nixpkgs | `~/.config/Code/` |
-| **Git** | https://git-scm.com/ | nixpkgs | `~/.config/git/` |
-| **GitHub CLI (gh)** | https://cli.github.com/ | nixpkgs | `~/.config/gh/` |
-| **htop** | https://htop.dev/ | nixpkgs | `~/.config/htop/` |
-| **btop** | https://github.com/aristocratos/btop | nixpkgs | `~/.config/btop/` |
-| **bottom** | https://github.com/ClementTsang/bottom | nixpkgs | `~/.config/bottom/` |
-| **lnav** | https://lnav.org/ | nixpkgs | `~/.config/lnav/` |
-| **KeePassXC** | https://keepassxc.org/ | nixpkgs | `~/.config/keepassxc/` |
-| **rclone** | https://rclone.org/ | nixpkgs | `~/.config/rclone/` |
-| **Cline** | https://github.com/cline/cline | npm | `~/.config/cline/` |
-| **Claude Desktop** | https://claude.ai/ | Flake | `~/.config/Claude/` |
-| **Brave** | https://brave.com/ | nixpkgs | `~/.config/BraveSoftware/` |
-| **Discord** | https://discord.com/ | nixpkgs | `~/.config/discord/` |
-| **Obsidian** | https://obsidian.md/ | nixpkgs | `~/.config/obsidian/` |
-| **DB Browser for SQLite** | https://sqlitebrowser.org/ | nixpkgs | `~/.config/sqlitebrowser/` |
-| **Kate** | https://kate-editor.org/ | KDE | `~/.config/kate/` |
-| **Dolphin** | https://apps.kde.org/dolphin/ | KDE | `~/.config/dolphinrc` |
-| **Konsole** | https://konsole.kde.org/ | KDE | `~/.config/konsolerc` |
-| **Okular** | https://okular.kde.org/ | KDE | `~/.config/okularrc` |
-| **Spectacle** | https://apps.kde.org/spectacle/ | KDE | `~/.config/spectaclerc` |
-| **Gwenview** | https://apps.kde.org/gwenview/ | KDE | `~/.config/gwenviewrc` |
-| **KDE Plasma** | https://kde.org/plasma-desktop/ | KDE | Various `~/.config/` files |
+| File | Target |
+|------|--------|
+| `~/.bash_profile` | /nix/store/...-home-manager-files/ |
+| `~/.bashrc` | /nix/store/...-home-manager-files/ |
+| `~/.profile` | /nix/store/...-home-manager-files/ |
+| `~/.npmrc` | /nix/store/...-home-manager-files/ |
+| `~/.keep-myvault` | /nix/store/...-home-manager-files/ |
 
----
+### Standalone (Not Managed)
 
-## 🚀 Next Steps
+| File | Purpose | Action |
+|------|---------|--------|
+| `~/.gtkrc-2.0` | GTK 2.0 theme | ✅ Migrate |
+| `~/.icons/` | Custom icons | ⚠️ Review |
+| `~/.bash_history` | Command history | ❌ Don't manage |
+| `~/.viminfo` | Vim session | ❌ Don't manage |
+| `~/.git-credentials` | Git creds | ❌ Deprecated |
 
-### 1. Create Dotfiles Repository Structure
+### Development Directories
 
-```
-my-modular-workspace/dotfiles/
-├── dot_bashrc.tmpl
-├── dot_bash_profile
-├── dot_profile
-├── dot_gtkrc-2.0
-├── dot_config/
-│   ├── kitty/
-│   ├── git/
-│   ├── gh/
-│   ├── htop/
-│   ├── btop/
-│   ├── Code/
-│   │   └── User/
-│   │       └── settings.json
-│   ├── keepassxc/
-│   ├── rclone/
-│   ├── kate/
-│   ├── kde/  # KDE configs
-│   ├── gtk-3.0/
-│   └── gtk-4.0/
-├── .chezmoiignore
-├── .chezmoiexternal.toml
-└── README.md
-```
-
-### 2. Prioritize Migration
-
-**Week 1:** Shell, terminal, development tools
-**Week 2:** KDE desktop settings
-**Week 3:** Applications
-**Week 4:** Secrets management, testing
-
-### 3. Handle Secrets
-
-- Use `age` encryption for sensitive files
-- Use KeePassXC integration for API keys/tokens
-- Never commit unencrypted secrets
+| Directory | Purpose | Priority |
+|-----------|---------|----------|
+| `.ansible/` | Ansible data | ✅ High |
+| `.bun/` | Bun JS runtime | ⚠️ Maybe |
+| `.dotnet/` | .NET SDK | 🔻 Low |
+| `.eclipse/` | Eclipse IDE | 🔻 Low |
+| `.minikube/` | Kubernetes | 🔻 Low |
 
 ---
 
-## 📝 Notes
+## Secrets & Security
 
-- Many files are KDE Plasma-specific (won't work on Fedora GNOME)
-- Consider platform-specific templates for KDE vs GNOME configs
-- Browser profiles are huge - document extensions/settings separately
-- Some configs are auto-generated and shouldn't be managed
+### Files with Secrets (Handle Carefully)
+
+| File/Dir | Contents | Strategy |
+|----------|----------|----------|
+| `~/.config/kdeconnect/certificate.pem` | TLS cert | private_ prefix |
+| `~/.config/kdeconnect/privateKey.pem` | Private key | private_ + age |
+| `~/.config/Claude/` | API keys | Template with KeePassXC |
+| `~/.claude.json` | Settings + keys | Template |
+| `~/.ssh/` | SSH keys | age encryption |
+
+### Secrets Management Strategy
+
+1. **KeePassXC** - Source of truth
+2. **Chezmoi templates** - Dynamic insertion
+3. **age encryption** - Static sensitive files
+4. **private_ prefix** - Correct permissions (0600)
 
 ---
 
-**Status:** ✅ Inventory Complete
-**Next:** Begin migration with high-priority dotfiles
+## User Preferences Summary
+
+**What User Uses:**
+- **Desktop:** KDE Plasma (core + important apps)
+- **Terminal:** kitty (NOT Konsole)
+- **Browser:** Brave (main), Firefox (backup)
+- **Screenshot:** Flameshot (migrating from Spectacle)
+- **Clipboard:** CopyQ (highly important)
+- **Notes:** OBSIDIAN (highly important)
+- **Phone:** KDE Connect (really important)
+- **Monitoring:** btop, htop
+- **Messaging:** Session, Discord
+
+**Secrets Management:**
+- KeePassXC for all secrets (NOT KDE Wallet)
+- Systemd service for credential access
+- age encryption for sensitive files
+
+---
+
+## Staging Directory
+
+**Location:** `dotfiles/_staging/`
+**Purpose:** Backup/reference for safe migration
+
+| Directory | Contents |
+|-----------|----------|
+| BraveBrowser/ | Browser profile backup |
+| claude-code/ | Claude Code backup |
+| claude-desktop/ | Claude Desktop backup |
+| KDE/ | KDE configs backup |
+| Plasma/ | Plasma configs backup |
+| vscode/ | VS Code backup |
+| vscodium/ | VSCodium backup |
+| zellij/ | Zellij backup |
+| llm-cli/ | LLM CLI backup |
+
+**Note:** All staging contents are IGNORED by chezmoi via `.chezmoiignore`
+
+---
+
+## Next Actions
+
+### Ready to Migrate NOW
+
+1. OBSIDIAN config
+2. btop.conf + themes
+3. KDE Connect (with private_ prefix)
+4. Plasma notification configs
+5. pavucontrol.ini
+6. Session messenger (config.json only)
+7. Discord (settings.json only)
+
+### Needs Investigation
+
+1. Signal location/status
+2. pulse/ directory contents
+3. Audio tools identification
+4. KDE Plasma full scan
+
+### After User Approval
+
+1. Create detailed per-app migration
+2. Design .chezmoiignore patterns
+3. Test on clean system
+
+---
+
+## Related Documentation
+
+- [chezmoi-guide.md](chezmoi-guide.md) - Implementation guide
+- [MIGRATION_STATUS.md](MIGRATION_STATUS.md) - Current progress
+- [README.md](README.md) - Documentation index
+
+---
+
+**Maintained by:** Dimitris Tsioumas
+**Original Sources:** INITIAL_SCAN_FINDINGS, PRIORITY_SUMMARY, PRIORITY_APPS_DETAILED, dotfiles_investigation_context
