@@ -369,19 +369,31 @@ scrollbar_track_opacity 0.3     # Track transparency
 
 ### C.2.8: Autocomplete.sh Integration 🔬
 
-**Status:** NEEDS DEEP RESEARCH (2-3 hours)
+**Status:** IMPLEMENTATION PLAN READY (pending execution)
 
 **Research Finding:** Atuin integration exists
 
 **Repository:** TIAcode/LLMShellAutoComplete
 
-**Tasks:**
-- [ ] Web research for best integration approach
-- [ ] Test autocomplete.sh with Atuin history
-- [ ] Configure LLM backend (requires API keys)
-- [ ] Integrate with kitty shell integration
+**Implementation Plan:** See `docs/plans/2025-11-30-autocomplete-sh-integration-plan.md`
 
-**Estimate:** 2-3 hours
+**Summary from detailed plan:**
+- AI-powered command completion in kitty (double TAB)
+- Secure API key storage via KeePassXC + secret-tool
+- Declarative config via chezmoi `.bashrc.tmpl`
+- Support for OpenAI, Anthropic, Groq, or local Ollama
+- Estimated time: 80-115 minutes
+
+**Tasks:**
+- [ ] Store LLM API keys in KeePassXC
+- [ ] Install autocomplete.sh to `~/.local/bin/`
+- [ ] Configure bash integration via chezmoi
+- [ ] Test AI completions
+- [ ] Optional: Add kitty keybindings
+
+**Estimate:** 1.5-2 hours (detailed plan available)
+
+**Cross-Reference:** Full implementation guide in `2025-11-30-autocomplete-sh-integration-plan.md`
 
 ---
 
