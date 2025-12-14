@@ -397,10 +397,11 @@ docs/home-manager/MIGRATION_FINDINGS.md
 #### Phase 2: MCP Servers Declarative Migration (ADR-010) 🔄 IN PROGRESS
 
 **Goal:** Migrate ALL MCP servers to Nix packages via Home-Manager (ADR-010)
-**Status:** Phase 1 COMPLETE ✅ | Phases 2-5 PENDING
+**Status:** Phases 0-2 COMPLETE ✅ | Phase 3 IN PROGRESS | Phases 4-5 PENDING
 **ADR:** `docs/adrs/ADR-010-UNIFIED_MCP_SERVER_ARCHITECTURE.md`
 **Research:** `docs/researches/2025-12-06_NIX_MCP_SERVERS_PACKAGING_RESEARCH.md`
-**Session:** Previous session compacted - continuing from summary
+**Session:** `sessions/summaries/12-06-2025_SUMMARY_MCP_SERVERS_DECLARATIVE_MIGRATION_SESSION.md`
+**Last Updated:** 2025-12-11
 
 ##### Key Discovery: natsukium/mcp-servers-nix Flake ✅
 - [x] Added flake input to home-manager/flake.nix
@@ -423,24 +424,61 @@ docs/home-manager/MIGRATION_FINDINGS.md
 - [x] Created systemd wrapper scripts with resource isolation
 - [x] Build and activation successful
 
-##### 2.3 Phase 2: Custom NPM Derivations ⏳ PENDING
-**Need buildNpmPackage derivations for:**
-- [ ] **firecrawl-mcp** - Web scraping (github.com/firecrawl/firecrawl-mcp-server)
-- [ ] **exa-mcp** - Exa search (@modelcontextprotocol/server-exa)
-- [ ] **brave-search-mcp** - ARCHIVED upstream, needs alternative
-- [ ] **mcp-read-website-fast** - Fast web reading
+##### 2.3 Phase 2: Custom NPM Derivations ✅ COMPLETE (2025-12-11)
+**Using buildNpmPackage/stdenv.mkDerivation in `mcp-servers/npm-custom.nix`:**
+- [x] **firecrawl-mcp** v3.2.1 - Web scraping (buildNpmPackage)
+- [x] **exa-mcp-server** v3.1.3 - Exa AI search (stdenv.mkDerivation with pre-built npm tarball)
+- [x] **brave-search-mcp** v0.8.0 - Brave Search (mikechao alternative - buildNpmPackage)
+- [x] **mcp-read-website-fast** v0.1.20 - Fast web reading (buildNpmPackage)
 
-##### 2.4 Phase 3: Custom Python Derivations ⏳ PENDING
-- [ ] **ast-grep-mcp** (github.com/ast-grep/ast-grep-mcp)
-  - [ ] Create buildPythonPackage derivation
-  - [ ] Depends on: mcp SDK, pydantic, ast-grep CLI
+**Key Solution for exa-mcp-server:**
+- npm tarball contains pre-built `.smithery/stdio/index.cjs` (fully bundled)
+- Used `stdenv.mkDerivation` instead of `buildNpmPackage` to bypass smithery dynamic deps
+- No npm install needed - just extract and wrap with Node.js
 
-##### 2.5 Phase 4: Custom Go Derivations ⏳ PENDING
+##### 2.4 Phase 3: Custom Python Derivations ✅ COMPLETE (2025-12-11)
+**Using stdenv.mkDerivation + python3.withPackages in `mcp-servers/python-custom.nix`:**
+- [x] **claude-thread-continuity** v1.1.0 (github.com/peless/claude-thread-continuity) - ✅ WORKING
+  - [x] Created derivation using stdenv.mkDerivation + python3.withPackages
+  - [x] Depends on: mcp>=1.0.0, pydantic>=2.0.0
+  - [x] Data storage: declarative symlink `~/.claude_states/` -> `~/.MyHome/MySpaces/random-space/mcps-common-space/claude-thread-continuity`
+- [x] **ast-grep-mcp** v0.1.0 (github.com/ast-grep/ast-grep-mcp) - ✅ WORKING
+  - [x] Created derivation using stdenv.mkDerivation + python3.withPackages
+  - [x] Depends on: mcp[cli]>=1.6.0, pydantic>=2.11.0, pyyaml>=6.0.2
+  - [x] Requires: ast-grep CLI (added to PATH in wrapper)
+
+##### 2.5 Phase 4: Custom Rust Derivations ⏳ IN PROGRESS (2025-12-11)
+
+**Pre-requisite: Add rust-overlay to flake.nix**
+- [ ] Add `rust-overlay` flake input (github:oxalica/rust-overlay)
+- [ ] Pass `rust-overlay` via `extraSpecialArgs`
+- [ ] Verified: nixpkgs Rust is 1.86.0, ck requires 1.88.0+
+
+**ck-search MCP Server:**
+- [ ] **ck** v0.7.1 (github.com/BeaconBay/ck) - Local semantic & hybrid search with MCP server
+  - [ ] Create `mcp-servers/rust-custom.nix`
+  - [ ] Use rustPlatform.buildRustPackage with rust-overlay Rust 1.88+
+  - [ ] Calculate cargoHash for workspace
+  - [ ] Handle dependencies: fastembed, tantivy, tree-sitter, rmcp, openssl
+  - [ ] MCP Tools: `semantic_search`, `regex_search`, `hybrid_search`, `index_status`, `reindex`, `health_check`
+  - [ ] Binary: `ck`, MCP mode: `ck --serve`
+  - [ ] Create wrapper script with systemd isolation
+  - [ ] Update ~/.claude/mcp_config.json
+  - [ ] Test MCP server connection
+
+**Research Findings (2025-12-11):**
+- Crate name on crates.io: `ck-search`
+- Rust workspace with 9 crates: ck-cli, ck-core, ck-index, ck-engine, ck-chunk, ck-embed, ck-ann, ck-models, ck-tui
+- Edition 2024 (requires Rust 1.88.0+)
+- Uses `rmcp` for MCP protocol implementation
+- TUI support included (ratatui)
+
+##### 2.6 Phase 5: Custom Go Derivations ⏳ PENDING
 - [ ] **git-mcp-go** (github.com/tak-bro/git-mcp-go)
 - [ ] **mcp-shell** (github.com/punkpeye/mcp-shell)
 - [ ] **mcp-filesystem-server** (github.com/mark3labs/mcp-filesystem-server)
 
-##### 2.6 Phase 5: Consolidation & Cleanup ⏳ PENDING
+##### 2.7 Phase 6: Consolidation & Cleanup ⏳ PENDING
 - [ ] Remove runtime installers from `local-mcp-servers.nix`
 - [ ] Update chezmoi templates to use Nix-managed binaries
 - [ ] Test Claude Desktop with all MCP servers
@@ -732,18 +770,14 @@ set -g pane-border-format " #{pane_index} #{pane_current_command} #{pane_current
 - **Estimate:** 15 mins → DONE
 - **Status:** Implemented, awaiting user testing
 
-##### C.2.4: Tab Bar Position & Configuration 🆕 NEW OPTION (2025-12-07)
+##### C.2.4: Tab Bar Position & Configuration ✅ MOSTLY COMPLETE (2025-12-08)
 - [x] Research complete (2025-12-07)
-- [ ] **Option A (Simple):** Move tab bar to TOP (`tab_bar_edge top`)
-- [ ] **Option B (Advanced):** Keep tab bar at bottom as "status bar"
+- [x] **Option A:** Move tab bar to TOP (`tab_bar_edge top`) ✅ (2025-12-08)
+- [x] Add F2/Shift+F2 for quick tab renaming ✅ (2025-12-08)
 - [ ] Customize `active_tab_title_template` for detailed active tab info
 - [ ] Optional: Git branch via custom Python `tab_bar.py`
-- **Estimate:** 30-45 mins (simple) | 2-4 hours (custom Python)
-- **Status:** Ready to implement - user to choose option
+- **Status:** Tab bar at TOP done, template customization pending
 - **Reference:** `docs/plans/kitty-advanced-statusbar-plan.md`
-
-**User Preference (2025-12-07):** Tab bar TOP + window bars BOTTOM
-→ **Recommended:** Tab bar TOP + Zellij zjstatus at BOTTOM (Phase D)
 
 ##### C.2.5: Terminal History Export 🔬 NEEDS DESIGN
 - [ ] User to specify format preferences
@@ -834,10 +868,10 @@ set -g pane-border-format " #{pane_index} #{pane_current_command} #{pane_current
 - [x] Ctrl+Alt+Arrow navigation
 - [ ] Test first terminal split behavior (USER TODO)
 
-##### Tab Renaming Shortcut 📋 QUICK WIN
-- [ ] Add F2 for tab renaming: `map f2 set_tab_title`
-- [ ] Add Shift+F2 for reset: `map shift+f2 set_tab_title ""`
-- **Estimate:** 5 mins
+##### Tab Renaming Shortcut ✅ COMPLETE (2025-12-08)
+- [x] Add F2 for tab renaming: `map f2 set_tab_title` ✅
+- [x] Add Shift+F2 for reset: `map shift+f2 set_tab_title ""` ✅
+- **Completed:** 2025-12-08
 
 ##### icat Image Preview 📋 OPTIONAL
 - [ ] Test `kitty +kitten icat image.png`
@@ -853,44 +887,34 @@ set -g pane-border-format " #{pane_index} #{pane_current_command} #{pane_current
 
 ---
 
-#### Phase 2 (Phase D): Zellij Integration (FUTURE - 2-3 hours) 📋 PLANNED
+#### Phase 2 (Phase D): Zellij Integration ✅ COMPLETE (2025-12-08)
 
-**Priority:** MEDIUM (Powerful enhancement for SRE workflows)
-**Risk:** LOW (well-planned, step-by-step)
+**Status:** ✅ INSTALLED AND CONFIGURED
+**Zellij Version:** 0.43.1
 **Reference:** `docs/plans/kitty-zellij-phase1-plan.md`
 
-**What it includes:**
-- Terminal multiplexer (like tmux, but modern)
-- zjstatus beautiful status bar
-- Catppuccin Mocha theme matching kitty
-- Session persistence (detach/reattach)
-- Custom layouts (dev, ops)
+**What's working:**
+- ✅ Zellij installed via home-manager
+- ✅ zjstatus plugin configured (CPU, MEM, SWAP, datetime)
+- ✅ Catppuccin Mocha theme
+- ✅ Mouse mode enabled
+- ✅ pane_frames available (currently disabled per user preference)
 
-##### 2.1 Install Zellij via Home-Manager
-- [ ] Create `home-manager/zellij.nix`:
-  ```nix
-  { config, pkgs, ... }:
-  {
-    home.packages = with pkgs; [ zellij ];
-  }
-  ```
-- [ ] Import in `home-manager/home.nix`
-- [ ] Build: `home-manager build --flake .#mitsio@shoshin`
-- [ ] Switch: `home-manager switch --flake .#mitsio@shoshin`
-- [ ] Verify: `which zellij && zellij --version`
+##### 2.1 Install Zellij via Home-Manager ✅ COMPLETE
+- [x] Zellij installed via home-manager
+- [x] Version: 0.43.1
+- [x] Verified: `which zellij && zellij --version` ✅
 
-##### 2.2 Configure Zellij with Catppuccin Theme
-- [ ] Create `~/.config/zellij/config.kdl` with theme
-- [ ] Create `~/.config/zellij/layouts/default.kdl`
-- [ ] Test launch: `zellij`
-- [ ] Add configs to chezmoi: `chezmoi add ~/.config/zellij/`
+##### 2.2 Configure Zellij with Catppuccin Theme ✅ COMPLETE
+- [x] Created `~/.config/zellij/config.kdl` with theme
+- [x] Catppuccin Mocha theme configured
+- [x] Added to chezmoi
 
-##### 2.3 Install zjstatus Plugin
-- [ ] Download: `curl -L https://github.com/dj95/zjstatus/releases/latest/download/zjstatus.wasm -o ~/.config/zellij/plugins/zjstatus.wasm`
-- [ ] Configure in `config.kdl` with Catppuccin Mocha colors
-- [ ] Update default layout to use zjstatus
-- [ ] Test status bar appearance
-- [ ] Add plugin to chezmoi
+##### 2.3 Install zjstatus Plugin ✅ COMPLETE
+- [x] zjstatus.wasm installed at `~/.config/zellij/plugins/`
+- [x] Configured with Catppuccin Mocha colors
+- [x] Shows: Mode, Tabs, CPU, MEM, SWAP, DateTime
+- [x] Added to chezmoi
 
 ##### 2.4 Create Custom Layouts (Optional)
 - [ ] Create `~/.config/zellij/layouts/dev.kdl` (editor + terminal)
@@ -1176,16 +1200,22 @@ set -g pane-border-format " #{pane_index} #{pane_current_command} #{pane_current
 
 **Goal:** Unified KeePassXC-based secrets strategy
 
-- [ ] Define cross-component secrets access:
-  - [ ] KeePassXC vault location (currently `~/MyVault/`)
-  - [ ] Ansible accessing secrets from KeePassXC
-  - [ ] Home-manager activation scripts accessing secrets
-  - [ ] Secrets rotation policy
-- [ ] Chezmoi integration with KeePassXC
+- [x] Approve ADR-012 (KeePassXC-centralized secret management contract)
+- [ ] Define cross-component secrets access (update `docs/security/secrets-management.md`):
+  - [x] KeePassXC vault location (currently `~/MyVault/`)
+  - [ ] Ansible playbooks accessing secrets via `secret-tool`/systemd loaders
+  - [ ] Home-manager activation/systemd loaders referencing the factory module
+  - [ ] Secrets rotation policy (define cadence + documentation)
+  - [x] Secret health-check timer + notifications (every 10 min → 1h later)
+- [ ] Chezmoi integration with KeePassXC (template references + docs refresh)
 - [ ] Replace KDE-Wallet with KeePassXC in home-manager:
-  - [ ] Dropbox secrets retrieval
-  - [ ] rclone secrets retrieval
-- [ ] Document in `docs/security/secrets-management.md`
+  - [x] Dropbox secrets retrieval (loader + vault entry)
+  - [x] rclone secrets retrieval (RCLONE_PASSWORD_COMMAND via secret-tool)
+- [ ] Integrate Brave browser password/sync secrets with KeePassXC (follow Brave migration plan)
+- [ ] Integrate Claude Code & Codex CLI API tokens via KeePassXC loader modules
+- [ ] Integrate autocomplete/butterfish (`OPENAI_API_KEY` loader, HISTIGNORE guards) – Autocomplete Phase 1
+- [ ] Store Brave Sync recovery phrase in KeePassXC and document recovery steps
+- [ ] Document entire strategy in `docs/security/secrets-management.md`
 
 ### 9. Repository Structure Reorganization
 
@@ -1471,9 +1501,33 @@ set -g pane-border-format " #{pane_index} #{pane_current_command} #{pane_current
 
 ---
 
-**Last Review:** 2025-11-25 00:45
+**Last Review:** 2025-12-14
 **Next Review:** Weekly (every Sunday)
 **Maintained by:** Dimitris Tsioumas (Mitsio)
+
+---
+
+## OpenAI Codex Implementation (Added 2025-12-14)
+
+**Status:** Mostly Complete
+**Last Updated:** 2025-12-04
+
+### Completed (2025-12-04)
+- [x] Research OpenAI Codex agent capabilities and configuration
+- [x] Fix build errors during node2nix installation
+- [x] Install Codex via node2nix (declarative)
+- [x] Configure Codex MCP servers (context7, firecrawl, read-website-fast, time, fetch, sequential-thinking)
+- [x] Create global AGENTS.md with shared instructions
+- [x] Verify Codex installation (`codex --version` returns `codex-cli 0.64.0`)
+- [x] Install OpenAI VSCodium extension (declarative)
+- [x] Create comprehensive documentation (docs/tools/codex.md - 500+ lines)
+
+### Pending
+- [ ] Apply home-manager rebuild to install VSCodium extension
+- [ ] Verify VSCodium extension installation
+- [ ] Test Codex with real coding tasks
+- [ ] Fine-tune approval_policy and sandbox_mode
+- [ ] Configure additional MCP servers (exa, grok, chatgpt)
 
 ---
 
