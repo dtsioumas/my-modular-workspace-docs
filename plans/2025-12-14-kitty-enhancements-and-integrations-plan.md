@@ -34,16 +34,17 @@ This comprehensive plan documents all kitty terminal enhancements from basic imp
 - **Previous:** Catppuccin Mocha (switched to Dracula for better contrast)
 
 ### Configuration Management
-- **Kitty:** Managed by **home-manager** (`programs.kitty` in `home-manager/kitty.nix`)
+- **Kitty:** Managed by **chezmoi** (`dotfiles/private_dot_config/kitty/`) - **Migrated 2025-11-29**
+  - Source: `~/.local/share/chezmoi/private_dot_config/kitty/kitty.conf`
+  - Previous: home-manager (deprecated, now in chezmoi)
 - **Zellij:** Managed by **home-manager** (`home.packages` in `home-manager/zellij.nix`)
 - **Bashrc/Gitconfig:** Managed by **chezmoi** (`dotfiles/dot_bashrc`, `dotfiles/dot_gitconfig`)
 - **Navi Cheatsheets:** Managed by **chezmoi** (`dotfiles/dot_local/share/navi/cheats/`)
 
-### Known Declarative Gaps
-⚠️ **Search Kitten:** Currently installed via manual `git clone` to `~/.config/kitty/kitty_search`
-- **Issue:** NOT tracked in version control, not reproducible
-- **Recommendation:** Migrate to chezmoi for declarative management
-- **Priority:** Medium (feature works but management is manual)
+### Declarative Status ✅
+- ✅ **All configurations in version control**
+- ✅ **Search Kitten:** Managed by chezmoi at `dotfiles/private_dot_config/kitty/kitty_search/` (migrated 2025-11-29)
+- ✅ **No manual installations** - Everything reproducible via chezmoi/home-manager
 
 ### Platform
 - **OS:** NixOS
@@ -96,12 +97,12 @@ This comprehensive plan documents all kitty terminal enhancements from basic imp
 - ✅ Existing shortcuts still work
 - ✅ Theme configured: Dracula (`current-theme.conf`)
 - ✅ Transparency configured: 0.15 (`kitty.conf` line 136)
-- ✅ Managed via home-manager (`programs.kitty`)
+- ✅ Managed via chezmoi (`dotfiles/private_dot_config/kitty/`)
 
 ### File Locations
 
-- **Config:** Managed by home-manager in `home-manager/kitty.nix`
-- **Active Config:** `~/.config/kitty/kitty.conf` (symlinked to nix store)
+- **Config:** Managed by **chezmoi** in `dotfiles/private_dot_config/kitty/kitty.conf` (migrated 2025-11-29)
+- **Active Config:** `~/.config/kitty/kitty.conf` (deployed by chezmoi)
 - **Theme:** `~/.config/kitty/current-theme.conf` → Dracula
 
 ---
@@ -132,15 +133,12 @@ map ctrl+shift+/ launch --location=hsplit --allow-remote-control kitty +kitten k
 - Regex support (Tab to toggle)
 - Keyboard navigation (↑/↓ for matches)
 
-**Status:** ✅ Installed and configured
+**Status:** ✅ Installed, configured, and declaratively managed
 
-**⚠️ Declarative Management Gap:**
-- Currently installed manually via `git clone`
-- **TODO:** Migrate to chezmoi for reproducibility
-- **Steps to fix:**
-  1. Add `~/.config/kitty/kitty_search/` to chezmoi
-  2. Or package as nix derivation if available
-- **Priority:** Medium (works but not declarative)
+**Declarative Management:** ✅
+- Managed by **chezmoi** at `dotfiles/private_dot_config/kitty/kitty_search/` (migrated 2025-11-29)
+- Source location: `~/.local/share/chezmoi/private_dot_config/kitty/kitty_search/`
+- Fully reproducible via `chezmoi apply`
 
 ---
 
