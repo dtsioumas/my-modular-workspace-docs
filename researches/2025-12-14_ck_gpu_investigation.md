@@ -10,6 +10,7 @@ FastEmbed’s GPU path currently requires the CUDA-enabled ONNX Runtime build (`
 4. **Execution Providers** – ONNX Runtime lets you register CUDA/TensorRT providers in priority order; GPU acceleration only happens if the binary loads those providers. citeturn0search2turn0search5
 5. **GTX 960 Support Window** – GeForce GTX 960 (Maxwell 2.0, compute capability 5.2) is officially supported only up to CUDA 11.0; NVIDIA removed support for this architecture starting with CUDA 11.1, meaning CUDA 12-based ORT builds will not run on this GPU. citeturn1search0
 6. **Reported Failures on CUDA 12.4** – Community reports show ONNX Runtime 1.18–1.20 failing to detect the GPU when paired with CUDA 12.4 + cuDNN 9.0, reinforcing that we should stick to the last supported CUDA branch for Maxwell cards. citeturn0search6
+7. **Sandbox Limitation** – The Codex sandbox cannot access NVML (`nvidia-smi` fails), so driver/CUDA data must be collected from the host session and recorded manually.
 
 ## Implications for ck
 - Need a CUDA-aware ONNX Runtime derivation (overlay) plus CUDA/cuDNN runtime dependencies.

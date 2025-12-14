@@ -58,11 +58,12 @@
 6. **Upstream Issue Drafting**
    - Outline the GitHub issue/PR for ck requesting GPU provider support; keep notes in `docs/researches/2025-12-14_ck_gpu_investigation.md`.
 
-## Local Paths to Inspect
-- `home-manager/mcp-servers/rust-custom.nix`
-- `home-manager/overlays/` (future overlay files)
-- `dotfiles/private_dot_codex/config.toml.tmpl` (MCP entries)
-- `docs/researches/2025-12-14_ck_gpu_investigation.md` (companion research)
+## Required Context & Paths
+- Docs: `docs/researches/2025-12-14_ck_gpu_investigation.md`, `docs/context/MCP_CODEX_CONFIG.md`, `docs/plans/ck-rebuild-for-gpu-usage-plan.md`
+- Prompt: `sessions/prompts/ck_gpu_followup_prompt.txt`
+- Home-Manager sources: `home-manager/mcp-servers/rust-custom.nix`, `home-manager/overlays/` (and overlay imports in `home-manager/flake.nix`)
+- Dotfiles: `dotfiles/private_dot_codex/config.toml.tmpl`, `dotfiles/dot_bashrc.d/20-systemd-session-env.sh`
+- MCP docs: ADR-010 (`docs/adrs/ADR-010-UNIFIED_MCP_SERVER_ARCHITECTURE.md`)
 
 ## External References
 - ONNX Runtime CUDA EP requirements: https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html
