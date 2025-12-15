@@ -389,17 +389,33 @@ scrollbar_track_opacity 0.3     # Track transparency
 
 ---
 
-### C.2.5: Terminal History Export 🔬
+### C.2.5: Terminal History Export 📋
 
-**Status:** NEEDS DESIGN - Waiting for user preferences
+**Status:** DESIGNED - Ready for Implementation (2025-12-15)
 
-**Requirements to clarify:**
-- [ ] Export format (markdown with timestamps?)
-- [ ] Export scope (entire session or scrollback only?)
-- [ ] Include commands + output or just commands?
-- [ ] Keyboard shortcut (Ctrl+Shift+H suggested)
+**User Requirements:**
+- ✅ **Format:** Markdown with timestamps (Claude session-style snapshot)
+- ✅ **Scope:** Entire session history
+- ✅ **Content:** Commands + Output + Working directory (no exit codes)
+- ✅ **Shortcut:** Ctrl+Shift+O (O for Output/sO for SaveOutput)
+- ✅ **Save Location:** `~/Archives/terminal_sessions/terminal_session-DD-MM-YYYY-hh-mm-ss.md`
 
-**Estimate:** 1 hour after clarifications
+**Implementation Plan:**
+1. Create `~/.config/kitty/export_history.py` kitten
+2. Capture scrollback buffer via kitty API
+3. Parse shell integration markers for commands/output/directories
+4. Format as markdown with timestamp headers
+5. Auto-create `~/Archives/terminal_sessions/` if needed
+6. Save with timestamped filename
+7. Show notification with file path
+
+**Technical Approach:**
+- Use `@kitty.kitten` decorator for Python kitten
+- Access scrollback via `get_boss().active_window.screen.scrollback_lines`
+- Parse KITTY_SHELL_INTEGRATION markers (OSC 133 sequences)
+- Markdown structure: Session header → Commands with timestamps → Output blocks
+
+**Estimate:** 1-1.5 hours implementation + testing
 
 ---
 
