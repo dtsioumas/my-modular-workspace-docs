@@ -333,7 +333,7 @@ kitty +kitten themes --reload-in=all Dracula
 
 ### C.2.3: Interactive Scrollbar ✅
 
-**Status:** ✅ IMPLEMENTED (2025-12-01) - Awaiting User Testing
+**Status:** ✅ TESTED AND WORKING (2025-12-15)
 
 **Configuration:**
 ```conf
@@ -351,7 +351,12 @@ scrollbar_track_opacity 0.3     # Track transparency
 - Shows position in scrollback buffer
 - GPU-accelerated
 
-**Next:** User to test clickability and drag
+**User Testing Results (2025-12-15):**
+- ✅ Scrollbar visible on right edge
+- ✅ Click and jump to position works
+- ✅ Drag handle works smoothly
+- ✅ Click track (above/below handle) works
+- ✅ All functionality working as expected
 
 ---
 
@@ -1000,12 +1005,185 @@ cp ~/.config/kitty/kitty.conf.backup.20251201 ~/.config/kitty/kitty.conf
    - [ ] Pursue advanced status bar (Phase E)?
    - [ ] Or use Zellij zjstatus for status needs?
 
-### Future Enhancements (Optional)
+### Future Enhancements (Post-Current Phases)
 
-- [ ] Custom kittens for SRE workflows
-- [ ] More zellij layouts
-- [ ] Autocomplete.sh integration
-- [ ] Advanced automation with kitty remote control
+**Status:** PLANNING - To be discussed after Phase E completion
+**Note:** All items below require user clarification, research, and detailed planning
+
+---
+
+#### 🎯 Phase F: Panel & Menu Integration (PLANNED)
+
+**F.1: Permanent Top Panel in Menu**
+- **User Request:** Make F12 top panel appear in menu permanently
+- **Requirements Needed:**
+  - [ ] Clarify: System menu (KDE menu) or kitty menu?
+  - [ ] Clarify: "Permanently" = always visible or always available in menu?
+  - [ ] Research: KDE Plasma panel integration vs kitty menu bar
+- **Complexity:** Medium-High (depends on interpretation)
+- **Estimate:** TBD after clarification
+
+---
+
+#### 🌐 Phase G: Web Access in Terminal (RESEARCH REQUIRED)
+
+**G.1: Web Browsing Through Kitty**
+- **User Request:** "Access web through kitty" - open web content in terminal
+- **Possible Interpretations:**
+  1. Text-based web browsers (w3m, lynx, browsh) integration
+  2. Open URLs from Firefox/other tools directly in kitty viewer
+  3. Render web pages in terminal (terminal graphics protocol)
+  4. HTML-to-terminal converter integration
+
+- **Research Tasks:**
+  - [ ] **Technical Researcher Role:** Investigate terminal web browsers
+  - [ ] Research kitty graphics protocol for web rendering
+  - [ ] Explore Firefox → kitty integration patterns
+  - [ ] Investigate tools: w3m, lynx, browsh, carbonyl, etc.
+  - [ ] Determine user's actual use case and preferences
+
+- **Questions for User:**
+  - What web content do you want to access? (Documentation? GitHub? General browsing?)
+  - Should it open automatically when clicking links?
+  - Text-only rendering or graphical rendering preferred?
+  - Integration point: Firefox extension? Kitty hints? Shell alias?
+
+- **Complexity:** HIGH - requires extensive research
+- **Estimate:** 4-8 hours research + 3-6 hours implementation
+
+---
+
+#### 🛠️ Phase H: Terminal Tools Integration (7 Tools)
+
+**H.1: Markdown Presentations - presenterm**
+- **Tool:** https://github.com/mfontanini/presenterm
+- **Purpose:** Present markdown files as slides in terminal
+- **Integration Tasks:**
+  - [ ] Install via home-manager (check nixpkgs availability)
+  - [ ] Create keyboard shortcut for presentations
+  - [ ] Test with sample markdown files
+  - [ ] Create navi cheatsheet
+- **Estimate:** 30-45 mins
+
+**H.2: PDF Viewer - termpdf.py**
+- **Tool:** https://github.com/dsanson/termpdf.py
+- **Purpose:** View PDFs in terminal
+- **Integration Tasks:**
+  - [ ] Research nixpkgs availability or manual install
+  - [ ] Configure as default PDF handler for kitty hints
+  - [ ] Test rendering quality in kitty
+  - [ ] Alternative: Consider zathura-pywal integration
+- **Estimate:** 1 hour
+
+**H.3: Image Viewer - mcat**
+- **Tool:** https://github.com/Skardyy/mcat
+- **Purpose:** Display images in terminal (using kitty graphics protocol)
+- **Integration Tasks:**
+  - [ ] Install and test with kitty graphics protocol
+  - [ ] Create aliases for quick image viewing
+  - [ ] Compare with `kitty +kitten icat` (built-in)
+  - [ ] Decide if mcat adds value over built-in icat
+- **Estimate:** 30 mins
+
+**H.4: TUI Tool - tgutui**
+- **Tool:** https://github.com/tgu-ltd/tgutui
+- **Purpose:** TBD (need to research what this tool does)
+- **Integration Tasks:**
+  - [ ] **Research:** Understand tool purpose and features
+  - [ ] Determine use case and integration point
+  - [ ] Plan installation and configuration
+- **Estimate:** TBD after research
+
+**H.5: Note-Taking - nb**
+- **Tool:** https://github.com/xwmx/nb
+- **Purpose:** CLI note-taking, bookmarking, archiving system
+- **Integration Tasks:**
+  - [ ] Install via home-manager
+  - [ ] Configure note storage location
+  - [ ] Create keyboard shortcuts for quick notes
+  - [ ] Integrate with existing workflow (Obsidian?)
+  - [ ] Create navi cheatsheet
+- **Estimate:** 1-2 hours (powerful tool, needs proper setup)
+
+**H.6: QEMU TUI - nemu**
+- **Tool:** https://github.com/nemuTUI/nemu
+- **Purpose:** TUI for QEMU virtual machines
+- **Integration Tasks:**
+  - [ ] Install if QEMU/KVM workflow exists
+  - [ ] Configure for VM management
+  - [ ] Test with existing VMs
+- **Estimate:** 1 hour
+- **Question:** Do you use QEMU/VMs regularly?
+
+**H.7: Smart Tab Management - kitty-smart-tab**
+- **Tool:** https://github.com/yurikhan/kitty-smart-tab
+- **Purpose:** Enhanced tab management for kitty
+- **Integration Tasks:**
+  - [ ] Research features vs current tab setup
+  - [ ] Install and configure
+  - [ ] Compare with existing tab shortcuts
+  - [ ] Decide if it improves workflow
+- **Estimate:** 30-45 mins
+
+**Phase H Total Estimate:** 5-8 hours (all tools)
+
+---
+
+#### 🖥️ Phase I: Xterm Integration (MULTI-PHASE)
+
+**I.1: Xterm Integration with Kitty**
+- **User Request:** "Integrate xterm with kitty and enhance xterm bar"
+- **Status:** NEEDS CLARIFICATION - Multi-phase plan required
+
+**Questions for User:**
+- [ ] What does "integrate xterm with kitty" mean?
+  - Run xterm inside kitty?
+  - Use xterm compatibility mode?
+  - Share configurations between xterm and kitty?
+  - Replace xterm with kitty system-wide?
+
+- [ ] What is "xterm bar"?
+  - XTerm title bar?
+  - Status bar in xterm?
+  - Something else?
+
+- [ ] Use case: Why both xterm and kitty?
+  - Legacy application compatibility?
+  - Specific xterm features needed?
+  - Terminal multiplexing scenario?
+
+**Research Required:**
+- [ ] **Technical Researcher Role:** Investigate xterm/kitty interoperability
+- [ ] Research xterm features not in kitty
+- [ ] Explore xterm → kitty migration strategies
+- [ ] Investigate terminal emulator compatibility layers
+
+**Complexity:** HIGH - unclear requirements, potentially complex
+**Estimate:** TBD after clarification (likely 4-10 hours across multiple phases)
+
+**Recommended Approach:**
+1. Clarify user requirements and use cases
+2. Research technical options (Technical Researcher role)
+3. Create detailed multi-phase plan (Planner role)
+4. Implement incrementally with user testing
+
+---
+
+### 📋 Future Phases Summary
+
+| Phase | Description | Complexity | Status |
+|-------|-------------|------------|--------|
+| **F** | Panel & Menu Integration | Medium-High | NEEDS CLARIFICATION |
+| **G** | Web Access in Terminal | HIGH | NEEDS RESEARCH |
+| **H** | Terminal Tools (7 tools) | Medium | READY TO PLAN |
+| **I** | Xterm Integration | HIGH | NEEDS CLARIFICATION |
+
+**Next Steps for Future Phases:**
+1. Complete current Phase C.2 and Phase E
+2. User provides clarifications for Phase F, G, I
+3. Technical Researcher investigates Phase G (web access)
+4. Create detailed implementation plans for each phase
+5. Prioritize phases based on user needs and complexity
 
 ---
 
