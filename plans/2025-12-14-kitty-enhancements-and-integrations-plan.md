@@ -389,9 +389,9 @@ scrollbar_track_opacity 0.3     # Track transparency
 
 ---
 
-### C.2.5: Terminal History Export 📋
+### C.2.5: Terminal History Export ✅
 
-**Status:** DESIGNED - Ready for Implementation (2025-12-15)
+**Status:** IMPLEMENTED - Ready for Testing (2025-12-15)
 
 **User Requirements:**
 - ✅ **Format:** Markdown with timestamps (Claude session-style snapshot)
@@ -415,7 +415,22 @@ scrollbar_track_opacity 0.3     # Track transparency
 - Parse KITTY_SHELL_INTEGRATION markers (OSC 133 sequences)
 - Markdown structure: Session header → Commands with timestamps → Output blocks
 
-**Estimate:** 1-1.5 hours implementation + testing
+**Implementation:** ✅ COMPLETE
+- Created: `~/.config/kitty/export_history.py` (Python kitten)
+- Added: Ctrl+Shift+O keyboard shortcut to kitty.conf
+- Committed: dotfiles repo (e639b29)
+- Applied: chezmoi apply
+
+**Testing Required:**
+1. Reload kitty config: Press Ctrl+Shift+F5 in kitty OR restart kitty
+2. Press Ctrl+Shift+O to export current session
+3. Check `~/Archives/terminal_sessions/` for exported markdown file
+4. Verify markdown format with commands, output, timestamps
+5. Report any issues or improvements needed
+
+**Files:**
+- Kitten: `dotfiles/private_dot_config/kitty/export_history.py`
+- Config: `dotfiles/private_dot_config/kitty/kitty.conf` (line 320)
 
 ---
 
