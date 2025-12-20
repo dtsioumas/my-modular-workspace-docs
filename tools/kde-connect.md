@@ -193,10 +193,12 @@ sudo tcpdump -i any -n port 1716
 | Issue | Likely Cause | Solution |
 |-------|--------------|----------|
 | Devices not visible | Firewall blocking | Check ports 1714-1764 |
+| Devices not visible | Android network app | Disable VPN/antenna/network apps |
 | Pairing fails | Different subnets | Both on same WiFi network |
 | Android disconnects | Battery optimization | Lock app, disable battery save |
 | VPN active | VPN interfering | Disable VPN or split tunnel |
 | Guest WiFi | AP isolation | Move to main network |
+| Discovery fails (Bug #511914) | mDNS disabled | Enable mDNS in Android app settings |
 
 ---
 
