@@ -173,15 +173,30 @@ chezmoi add --recursive ~/.config/nvim/
 # Edit managed file
 chezmoi edit ~/.bashrc
 
-# View changes
-chezmoi diff
-
 # Apply changes
 chezmoi apply -v
 
 # Dry run
 chezmoi apply --dry-run -v
 ```
+
+### Diff & Merge Workflow (VSCodium)
+
+```bash
+# Enhanced diff (delta side-by-side pager)
+chezmoi diff
+
+# Diff specific file
+chezmoi diff ~/.config/kitty/kitty.conf
+
+# Launch VSCodium merge view to reconcile local vs source state
+chezmoi merge ~/.config/kitty/kitty.conf
+
+# Open chezmoi source repo inside VSCodium for staging/commits
+chezmoi cd && codium --wait .
+```
+
+> **Tip:** `chezmoi merge` uses `codium --wait --merge` (configured in `chezmoi.toml`). After saving the merge result, re-run `chezmoi diff` to confirm and then `chezmoi apply` or `chezmoi re-add` as needed.
 
 ### Git Workflow
 
@@ -237,6 +252,17 @@ chezmoi data
 # .chezmoi.homeDir    → "/home/mitsio"
 # .chezmoi.osRelease.id → "nixos", "fedora"
 ```
+
+### When to Use `chezmoi_modify_manager`
+
+Templates are the preferred path, but certain configs (Plasma geometry, apps that rewrite binary blobs) still need incremental edits. In those cases:
+
+1. **Snapshot** the live file as `*.src.ini`.
+2. **Create** a `modify_*` script that calls `#!/usr/bin/env chezmoi_modify_manager` with the minimal `ignore`/`transform` rules.
+3. **Document** the choice (e.g., in the plasma migration plan or ADR) so future hosts know why the file isn’t templated.
+4. **Revisit** later—once you understand the structure, migrate back to a full template and delete the modify script.
+
+> Use modify_manager only when a reliable template is impossible today. Every new host must still render the same results, so keep host-specific data inside `.chezmoidata` even when a modify script is involved.
 
 ### Testing Templates
 
