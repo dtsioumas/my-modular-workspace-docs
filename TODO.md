@@ -1427,7 +1427,7 @@ set -g pane-border-format " #{pane_index} #{pane_current_command} #{pane_current
 
 ### 14. Plasma Desktop Dotfiles Migration to Chezmoi 🆕
 
-**Status:** PHASE 0-3 COMPLETE ✅ | Ready to Start Phase 1 (Execution)
+**Status:** PHASE 4 IN PROGRESS (panels/applications under chezmoi)
 **Priority:** MEDIUM
 **Documentation:** `docs/dotfiles/plasma/`
 **Migration Plan:** `docs/dotfiles/plasma/migration-plan.md` ⭐
@@ -1455,26 +1455,35 @@ set -g pane-border-format " #{pane_index} #{pane_current_command} #{pane_current
 #### Next: Execution Phases (User Decision)
 
 **Phase 1 (Execution): Tool Setup & Preparation** (1 week)
-- [ ] Install chezmoi_modify_manager
-- [ ] Update .chezmoiignore patterns
-- [ ] Create backup of current Plasma configs
-- [ ] Test chezmoi_modify_manager with sample file
+- [x] Install chezmoi_modify_manager
+- [x] Update .chezmoiignore patterns
+- [x] Create backup of current Plasma configs
+- [x] Test chezmoi_modify_manager with sample file
 
 **Phase 2 (Execution): Application Configs** (1 week)
-- [ ] Migrate Dolphin config
-- [ ] Migrate Konsole config
-- [ ] Migrate Kate config
-- [ ] Migrate Okular config
+- [x] Migrate Dolphin config
+- [x] Migrate Konsole config
+- [x] Migrate Kate config
+- [x] Migrate Okular config
 
 **Phase 3 (Execution): Core Plasma Configs** (2 weeks)
-- [ ] Migrate keyboard layouts
-- [ ] Migrate theme settings
-- [ ] Migrate global shortcuts
-- [ ] Migrate KWin settings
+- [x] Migrate keyboard layouts
+- [x] Migrate theme settings
+- [x] Migrate global shortcuts
+- [x] Migrate KWin settings
 
 **Phase 4 (Execution): Final Migration** (1 week)
-- [ ] Decide on panel migration
-- [ ] Create Fedora migration guide
+- [x] Capture/annotate live configs (now documented in `docs/dotfiles/plasma/panel-config-reference.md`).
+- [x] Draft candidate `modify_plasmashellrc` / `modify_plasma-org.kde.plasma.desktop-appletsrc` filters (notes moved to docs).
+- [x] Dry-run the filters against a copy of `~/.config` (or VM user) before touching live Plasma session.
+- [x] Migrate the real files via `chezmoi_modify_manager --smart-add`; capture live state as source.
+- [x] Document panel/widget layout (extend `docs/dotfiles/plasma/panel-config-reference.md` with text notes – screenshots optional).
+- [ ] Template wallpaper paths / launcher lists for multi-host support.
+- [x] Implement `ansible/playbooks/chezmoi-modify-refresh.yml` to pipeline all smart-add operations.
+- [x] Add/update `dot_local/share/navi/cheats/chezmoi-modify-plasma.cheat` so the refresh workflow is one keystroke away.
+- [ ] Fix CK embedding persistence (`ck --index` caching).
+- [ ] Run full Plasma verification in VM/fresh user once panel/app configs move to chezmoi.
+- [ ] Create Fedora migration guide.
 - [ ] Test on VM
 - [ ] Cleanup plasma-manager
 

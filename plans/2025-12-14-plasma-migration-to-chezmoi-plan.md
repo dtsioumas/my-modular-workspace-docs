@@ -1,9 +1,9 @@
 # Plasma Desktop Migration Plan - Chezmoi Integration
 
 **Created:** 2025-12-04
-**Updated:** 2025-12-08
-**Status:** ✅ Phase 3 COMPLETE - Verification Period (1-2 days before Phase 4)
-**Planner Confidence:** `c_plan = 0.84` (Band C - HIGH)
+**Updated:** 2025-12-14
+**Status:** ✅ Phase 4 IN PROGRESS – Panels & applets fully under chezmoi with live-state capture
+**Planner Confidence:** `c_plan = 0.87` (Band C - HIGH)
 **Approach:** Gradual, hybrid migration with rollback capability
 
 ---
@@ -32,19 +32,23 @@ This plan details the migration of KDE Plasma configuration files from plasma-ma
 
 | Config | chezmoi Status | Notes / Next Action |
 | --- | --- | --- |
-| `plasmarc` | ✅ (`private_dot_config/modify_plasmarc`) | Filters theme + desktop defaults correctly. |
+| `plasmarc` | ✅ (`modify_plasmarc`) | Filters theme + desktop defaults correctly. |
 | `kglobalshortcutsrc` | ✅ (`modify_kglobalshortcutsrc`) | All Meta/Alt shortcuts managed + tested (Phase 3). |
 | `kwinrc` | ✅ (`modify_kwinrc`) | Window manager behavior under modify_manager; verified via Alt+Shift + tiling tests. |
 | `kxkbrc` | ✅ (`modify_kxkbrc`) | Keyboard layouts + Alt+Shift toggle declarative. |
 | `dolphinrc`, `konsolerc`, `katerc`, `okularrc` | ✅ (`modify_*` scripts + `.src.ini`) | Application configs migrated in Phase 2 (low risk). |
-| `plasmashellrc` | ❌ Live only in `~/.config`; holds panel settings. Requires high-signal filters before migration. |
-| `plasma-org.kde.plasma.desktop-appletsrc` | ❌ Not tracked; extremely volatile applett rc. Needs dedicated plan/filters if we ever move panels off plasma-manager. |
+| `plasmashellrc` | ✅ (`modify_plasmashellrc`) | Filter keeps Panel 56 metadata; legacy panels ignored (2025-12-14). |
+| `plasma-org.kde.plasma.desktop-appletsrc` | ✅ (`modify_plasma-org...`) | Containments 27/56/62 tracked via modify script (2025-12-14). |
 | `plasmanotifyrc` | ✅ (`modify_plasmanotifyrc`) | Notifications now tracked via modify_manager (2025-12-14). |
 | `plasma_workspace.notifyrc` | ✅ (`modify_plasma_workspace.notifyrc`) | Device popup rules migrated (2025-12-14). |
 | `plasma-localerc` | ✅ (`modify_plasma-localerc`) | Locale formats tracked (2025-12-14); templating TBD for multi-host. |
 | `plasma_calendar_holiday_regions` | ✅ (`modify_plasma_calendar_holiday_regions`) | Holiday regions tracked (2025-12-14); templating TBD for multi-host. |
 | `kwinoutputconfig.json` | ❌ Hardware-specific (monitors). Remains ignored via `.chezmoiignore`. |
-| `powerdevilrc`, `kscreenlockerrc`, `krunnerrc`, `kdeglobals`, `ksmserverrc` | ❌ Present under `~/.config` but still unmanaged. Add to modify_manager queue once priorities free up. |
+| `powerdevilrc` | ✅ (`modify_powerdevilrc`) | AC power/display policy tracked (2025-12-14).
+| `kscreenlockerrc` | ✅ (`modify_kscreenlockerrc`) | Lock screen timing + wallpaper tracked (2025-12-14). |
+| `krunnerrc` | ✅ (`modify_krunnerrc`) | KRunner behavior now tracked (2025-12-14). |
+| `kdeglobals` | ✅ (`modify_kdeglobals`) | Colors/fonts now tracked (2025-12-14); filters TBD for dialog history. |
+| `ksmserverrc` | ✅ (`modify_ksmserverrc`) | Session manager counts tracked (2025-12-14). |
 
 **Home-Manager state:** `home-manager/home.nix` no longer imports `plasma.nix`/`plasma-full.nix` (commented out at line 73). The file remains in the repo as historical reference but does not affect current builds, so live Plasma behavior depends entirely on the dotfiles + manual settings.
 
@@ -588,6 +592,40 @@ filter {
 - ✅ Tested on fresh NixOS install
 - ✅ Ansible automation exists for `chezmoi_modify_manager` refreshes
 - ✅ Full documentation complete
+
+### Phase 4 Progress (2025-12-14)
+- ✅ Captured working `plasmashellrc` / `plasma-org...apletsrc` into chezmoi source
+- ✅ Relaxed modify scripts so Plasma always keeps required containments (only wallpaper/geometry ignored)
+- ✅ `chezmoi diff`/`apply` now stable; future reboots won’t lose panels
+- ✅ Automation playbook (`ansible/playbooks/chezmoi-modify-refresh.yml`) + `make plasma-refresh` target keep `.src.ini` snapshots fresh
+- 🚧 Pending: Wallpaper templating for multiple hosts + VM/Fedora regression test
+- 🆕 `kscreenlockerrc` migrated to full chezmoi template powered by `.chezmoidata/plasma.yaml` (no longer part of modify_refresh)
+- 🆕 `plasma-localerc` + `plasma_calendar_holiday_regions` now render from `.chezmoidata/plasma.yaml`, removing two more configs from modify_manager
+- 🆕 `plasmarc` templated via `.chezmoidata/plasma.yaml` (theme + wallpaper defaults) so modify_manager only tracks high-volatility configs
+- 🆕 `powerdevilrc` templated via `.chezmoidata/plasma.yaml` (AC display/suspend profile) so power settings remain declarative
+- 🆕 `plasmanotifyrc` templated via `.chezmoidata/plasma.yaml` (popup position, DND behavior, history apps)
+- 🆕 `krunnerrc` templated via `.chezmoidata/plasma.yaml` (free-floating + type-to-activate behavior)
+- 🆕 `plasma_workspace.notifyrc` templated via `.chezmoidata/plasma.yaml` (device added/removed + critical message actions)
+- 🆕 `ksmserverrc` templated via `.chezmoidata/plasma.yaml` (session restore counters)
+- 🆕 `kglobalshortcutsrc` templated via `.chezmoidata/plasma.yaml` (Flameshot vs Spectacle, Klipper shortcuts)
+- 🆕 `plasma-org.kde.plasma.desktop-appletsrc` now fully templated (wallpapers + IconTasks) via `.chezmoidata/plasma.yaml`; geometry changes require `chezmoi re-add` if you tweak panels in the GUI.
+
+#### Phase 4 – Remaining templating scope (2025-12-20)
+1. **plasmashellrc templating draft** – Decide which `[Containments][56]` keys (Kickoff/DigitalClock/System Monitor) should move into a `.tmpl` fed by `.chezmoidata/plasma.yaml` and which should remain in `plasmashellrc.src.ini`. Start with static values (formfactor, System Monitor colors) and keep panel geometry in modify_manager until VM testing passes.
+2. **YAML expansion** – Add per-host overrides for pending attributes (secondary wallpapers, panel applet presets, digital-clock fonts) so Fedora/WSL can reuse the templates without editing `.tmpl` files.
+3. **Automation checklist** – Update `ansible/group_vars/all/plasma_configs.yml` whenever a new `.src.ini`/`.tmpl` pair is added so `make plasma-refresh` and the navi cheat stay accurate.
+4. **Documentation loop** – Mirror each new templated section inside `docs/dotfiles/plasma/panel-config-reference.md` (section IDs, applet order, YAML keys) so future agents know exactly where data flows from.
+
+### Automation & Safety Enhancements
+1. **Baseline capture** – Always copy `~/.config/plasmashellrc` and `plasma-org...rc` into `private_dot_config/*.src.ini` before editing filters.
+2. **Incremental filtering** – Introduce ignores one category at a time (wallpaper → geometry → unused panels) and validate after each change.
+3. **Ansible refresh playbook** – `ansible/playbooks/chezmoi-modify-refresh.yml` should iterate over every managed Plasma config and run `chezmoi_modify_manager --smart-add` so `.src.ini` files stay in sync before committing.
+4. **CLI shortcuts / cheatsheets** – `dot_local/share/navi/cheats/chezmoi-modify-plasma.cheat` documents the refresh workflow (`make plasma-refresh`, `chezmoi diff`, etc.); update the cheat whenever new modify-managed files are added so future sessions have a one-command reminder.
+5. **Testing matrix** – After any high-risk filter change:
+   - `chezmoi diff` must be empty.
+   - Restart plasmashell (`kquitapp6 plasmashell && kstart plasmashell`).
+   - Schedule a full reboot or VM test within 24h.
+6. **Documentation** – Maintain `docs/dotfiles/plasma/panel-config-reference.md` with the latest containment notes so future sessions know which sections are safe to trim.
 
 ---
 
