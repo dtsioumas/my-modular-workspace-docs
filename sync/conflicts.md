@@ -9,6 +9,7 @@
 ## Table of Contents
 
 - [Quick Resolution (Conflict Manager)](#quick-resolution-tool)
+- [Troubleshooting: Reappearing Deleted Files](#troubleshooting-reappearing-deleted-files)
 - [Conflict Prevention Strategies](#conflict-prevention-strategies)
 - [Recommended Workflows](#recommended-workflows)
 - [Historical Conflicts](#historical-conflicts)
@@ -33,6 +34,27 @@ conflict-manager scan ~/.MyHome
 
 **Installation:**
 The tool is installed via home-manager and symlinked to `~/.local/bin/conflict-manager`.
+
+---
+
+## 🛑 Troubleshooting: Reappearing Deleted Files
+
+**Problem:** You delete files locally, but they reappear after the next sync.
+**Cause:** The "Resync Loop" trap.
+1. You mass-delete files (e.g., 100+ conflicts).
+2. The automatic sync runs, detects >50 deletions, and **ABORTS** (safety feature).
+3. You run `sync-gdrive-resync` (or `--resync`) to "fix" it.
+4. `--resync` treats the Remote files (which weren't deleted because of step 2) as "New" and downloads them back.
+
+**The Fix (Proper Way):**
+Do **NOT** use `resync` to propagate deletions. Instead, override the safety limit for one run:
+
+```bash
+# Allow up to 1000 deletions for this run only
+ansible-playbook -i ~/ansible/inventories/hosts ~/ansible/playbooks/rclone-gdrive-sync.yml -e "rclone_max_delete=1000"
+```
+
+*Note: The default limit has been increased to **199** permanently to handle routine cleanups.*
 
 ---
 
@@ -77,6 +99,7 @@ If you prefer manual resolution:
 ## 📜 Historical Conflicts
 
 ### Dec 2025
+- **Reappearing Deletions:** Fixed by increasing `max_delete` limit to 199 and documenting the "Resync Loop".
 - **Git Repo Corruption Risk:** Mitigated by adding `index.lock` check to playbook.
 - **Permissions:** GDrive loses `+x` permissions. Mitigated by `post_task` in playbook that restores executable permissions to scripts in `.local/bin` and `MySpaces`.
 
