@@ -1,0 +1,53 @@
+# Plasma Panel & Applet Configuration Reference
+
+**Last updated:** 2025-12-14
+
+## Purpose
+Document how Plasma panels and desktop applets are captured and filtered via chezmoi, replacing the ad-hoc notes that previously lived under `_staging/plasma/`.
+
+## Captured Files
+- `dotfiles/private_dot_config/plasmashellrc.src.ini` – Full panel metadata copied from `~/.config/plasmashellrc` (panel IDs 2, 28, 32, 56, 62).
+- `dotfiles/private_dot_config/plasma-org.kde.plasma.desktop-appletsrc.src.ini` – Desktop/panel containments and applet configs copied from `~/.config/plasma-org.kde.plasma.desktop-appletsrc`.
+- `dotfiles/.chezmoidata/plasma.yaml` – Source of truth for wallpaper paths, lockscreen background, IconTasks launcher order, locale defaults, and holiday regions.
+- `dotfiles/private_dot_config/kscreenlockerrc.tmpl` – Lock screen configuration rendered from `.chezmoidata/plasma.yaml` (no modify_manager needed).
+- `dotfiles/private_dot_config/plasma-localerc.tmpl` – Locale/format template powered by `.chezmoidata/plasma.yaml`.
+- `dotfiles/private_dot_config/plasma_calendar_holiday_regions.tmpl` – Holiday region template powered by `.chezmoidata/plasma.yaml`.
+- `dotfiles/private_dot_config/plasmarc.tmpl` – Theme + wallpaper defaults pulled from `.chezmoidata/plasma.yaml`.
+
+Refresh these source files whenever the live Plasma session is stable to maintain a rollback point before testing new filters.
+
+## Filtering Strategy
+- `modify_plasmashellrc` currently performs **no removals**; it exists as a hook for future incremental ignores (per-resolution sections, unused panels).
+- `modify_plasma-org.kde.plasma.desktop-appletsrc` ignores only:
+  - Wallpaper `Image` entries (host-specific paths)
+  - `ItemGeometries*`, `positions*`, `activityId`, `SlidePaths` (volatile geometry data)
+
+All other sections remain intact, allowing Plasma to recreate panels without plasma-manager.
+
+## Workflow
+1. Capture live configs:
+   ```bash
+   cp ~/.config/plasmashellrc dotfiles/private_dot_config/plasmashellrc.src.ini
+   cp ~/.config/plasma-org.kde.plasma.desktop-appletsrc dotfiles/private_dot_config/plasma-org.kde.plasma.desktop-appletsrc.src.ini
+   ```
+2. Adjust modify scripts using supported directives (`ignore`, `remove`, `transform`).
+3. Run `make plasma-refresh` ... (Templated files such as `kscreenlockerrc`, `plasma-localerc`, `plasma_calendar_holiday_regions`, and `plasmarc` are excluded.)
+4. Verify no differences: `chezmoi diff ~/.config/plasmashellrc ~/.config/plasma-org.kde.plasma.desktop-appletsrc`.
+5. Restart plasmashell (`kquitapp6 plasmashell && kstart plasmashell`) after any high-risk change.
+
+## Current Layout Notes (Text Only)
+- **Panel 56 (primary bottom panel):**
+  - Floating panel, form factor = 2, default thickness ≈42–44px.
+  - Applet order: Kickoff (57) → Pager (89) → IconTasks (59) → System Tray (61) → Kicker quick menu (87) → Show Desktop (74) → System Monitor (83) → Device Notifier (84) → Digital Clock (73).
+  - IconTasks launchers: `applications:systemsettings.desktop`, `preferred://filemanager`, `applications:kitty.desktop`, `applications:firefox.desktop`, `applications:codium.desktop`, `applications:obsidian.desktop`, `applications:org.keepassxc.KeePassXC.desktop`, `applications:claude.desktop`, `applications:brave-browser.desktop`, `applications:spotify.desktop`, `applications:org.gnome.gitg.desktop`.
+  - Digital clock: JetBrains Mono SemiBold, custom date format (`\sdddd dd/MM/yyyy`), seconds always visible, week numbers enabled.
+- **Containments 1 & 26:** Desktop folder views, icon size = 3.
+- **Containment 27:** Folder containment (activity-specific) with digital clock applet (ID 55); wallpaper plugin `org.kde.image`.
+- **Containment 62:** System tray containment hosting keyboard layout, volume, KDE Connect, etc.
+
+Update this section whenever the layout changes so future rebuilds stay accurate without screenshots.
+
+## Next Improvements
+- Template wallpaper paths and launcher lists for multi-host deployments.
+- Expand the text layout notes if major changes occur (new applets/order, different fonts, etc.).
+- Once filters are tighter, schedule VM/fresh-user regression tests before major OS migrations.

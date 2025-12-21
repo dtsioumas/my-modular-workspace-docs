@@ -70,9 +70,89 @@
 - ONNX Runtime build guide for EPs: https://onnxruntime.ai/docs/build/eps.html
 - CK GitHub repo (author guide): https://github.com/BeaconBay/ck
 
-## Next Session Checklist
-1. Read this plan.
-2. Read the research doc listed above.
-3. Review `home-manager/mcp-servers/rust-custom.nix`.
-4. Gather CUDA/cuDNN versions installed on shoshin.
-5. Decide between overlay-based build vs. upstream patch.
+## Session Status (2025-12-15)
+
+### ✅ Completed
+1. ✅ Session initialization and instruction indexing
+2. ✅ Hardware/driver analysis (GTX 960, driver 570.195.03)
+3. ✅ Research doc updated with findings
+4. ✅ Overlay created (`onnxruntime-gpu-11.nix` - blocked, `onnxruntime-gpu-12.nix` - active)
+5. ✅ Flake.nix updated with overlay import
+6. ✅ `programs.ck.enableGpu` option added to rust-custom.nix
+7. ✅ MCP wrapper updated with GPU status indicator
+8. ✅ Documentation created (`docs/tools/ck-gpu-support.md`)
+9. ✅ Changes committed to git (without bot signature)
+
+### ⏳ In Progress
+1. ⏳ **NEXT**: Rebuild home-manager with CUDA 12 overlay
+2. ⏳ Test GPU acceleration with nvidia-smi monitoring
+3. ⏳ Verify GPU utilization during semantic search
+4. ⏳ Document test results (success/failure/degraded)
+
+### 📊 Current State
+- **Overlay**: `overlays/onnxruntime-gpu-12.nix` (CUDA 12.8, experimental)
+- **Status**: Staged in git, ready for rebuild
+- **Risk**: Medium - GTX 960 officially unsupported in CUDA 12+
+- **Fallback**: Easy - comment out overlay, revert to CPU
+
+## Next Session Instructions
+
+### 1. Rebuild and Test (IMMEDIATE)
+```bash
+cd ~/.MyHome/MySpaces/my-modular-workspace/home-manager
+home-manager switch --flake .#mitsio@shoshin -b backup
+```
+
+### 2. Monitor GPU During Test
+**Terminal 1:**
+```bash
+watch -n 0.5 nvidia-smi
+```
+
+**Terminal 2:**
+```bash
+cd ~/.MyHome/MySpaces/my-modular-workspace
+ck --sem "kubernetes nvidia GPU CUDA" docs/ --n 20
+```
+
+### 3. Document Results
+Record in `sessions/ck-gpu-rebuild-2025-12-14/test-results.md`:
+- Build outcome (success/failure)
+- GPU utilization observed (%)
+- Memory usage increase (MB)
+- Performance subjective assessment
+- Any errors or warnings
+
+### 4. Decision Path
+**If successful:**
+- Update docs with CUDA 12 confirmation
+- Add to `docs/tools/ck-gpu-support.md`
+- Close plan as "completed - CUDA 12 works"
+
+**If degraded (works but slow):**
+- Document performance impact
+- Consider CPU-only recommendation
+- Keep as optional feature
+
+**If failed:**
+- Revert overlay (comment out in flake.nix)
+- Document failure mode
+- Update plan to recommend CPU-only or GPU upgrade
+
+## Files to Read After Compaction
+1. **`sessions/ck-gpu-rebuild-2025-12-14/POST_COMPACTION_INSTRUCTIONS.md`** ⭐ START HERE
+2. **`sessions/ck-gpu-rebuild-2025-12-14/cuda-12-update.md`** - Critical blocker info
+3. **`sessions/ck-gpu-rebuild-2025-12-14/session-completion-summary.md`** - Full implementation
+4. **`sessions/summaries/12-15-2025_SUMMARY_CK_GPU_REBUILD_SESSION.md`** - Session summary
+5. This plan file
+
+## Key Paths
+- Session: `sessions/ck-gpu-rebuild-2025-12-14/`
+- Summary: `sessions/summaries/12-15-2025_SUMMARY_CK_GPU_REBUILD_SESSION.md`
+- Plan: `docs/plans/2025-12-14-ck-rebuild-for-gpu-usage-plan.md` (this file)
+- Guide: `docs/tools/ck-gpu-support.md`
+- Research: `docs/researches/2025-12-14_ck_gpu_investigation.md`
+- Overlay (active): `home-manager/overlays/onnxruntime-gpu-12.nix`
+- Overlay (blocked): `home-manager/overlays/onnxruntime-gpu-11.nix`
+- Flake: `home-manager/flake.nix` (line 52: overlay import)
+- Build: `home-manager/mcp-servers/rust-custom.nix`

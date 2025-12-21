@@ -1,0 +1,956 @@
+# NixOS to Ansible Translation Guide
+
+**Date**: 2025-12-17
+**Purpose**: Guide for translating my-modular-workspace NixOS configs to Ansible + rpm-ostree
+**Audience**: Developers familiar with NixOS/home-manager
+**Difficulty**: Advanced
+
+---
+
+## Overview
+
+This guide explains how to **translate declarative NixOS/home-manager configurations** to **Ansible playbooks + rpm-ostree** for Fedora Kinoite.
+
+### The Challenge
+
+**my-modular-workspace currently uses**:
+- **NixOS modules**: System configuration
+- **home-manager**: User environment
+- **Nix language**: Declarative configs
+- **nixpkgs**: Package repository
+
+**Kinoite requires**:
+- **Ansible**: Configuration management
+- **rpm-ostree**: Immutable system packages
+- **Jinja2**: Dynamic configs
+- **Fedora repos**: Package source
+
+---
+
+## Translation Philosophy
+
+### Core Principles
+
+| NixOS Principle | Kinoite Equivalent |
+|-----------------|-------------------|
+| **Declarative** | YAML + Ansible (declarative) |
+| **Reproducible** | Idempotent playbooks |
+| **Immutable** | rpm-ostree (also immutable!) |
+| **Atomic** | OSTree deployments |
+| **Rollback** | `rpm-ostree rollback` |
+
+**Good news**: Both systems share similar philosophies! Translation is conceptual, not just syntactic.
+
+---
+
+## Translation Mapping
+
+### High-Level Mapping
+
+| NixOS/home-manager | Kinoite/Ansible | Notes |
+|--------------------|-----------------|-------|
+| `programs.*` | Ansible roles + chezmoi | Config files |
+| `home.packages` | `rpm-ostree install` | System packages (minimize!) |
+| `home.packages` (dev tools) | toolbox/distrobox | Dev in containers |
+| `services.*` | systemd user services | Via Ansible |
+| `xdg.configFile` | chezmoi templates | Dotfiles |
+| `systemd.user.services` | systemd user units | Via Ansible |
+| `home.activation` | Ansible handlers | Post-install actions |
+
+---
+
+## Translation Patterns
+
+### Pattern 1: Program Configuration
+
+**NixOS/home-manager**:
+```nix
+# programs/git.nix
+programs.git = {
+  enable = true;
+  userName = "Dimitris Tsioumas";
+  userEmail = "dtsioumas0@gmail.com";
+  signing = {
+    key = "ABC123...";
+    signByDefault = true;
+  };
+  aliases = {
+    st = "status";
+    co = "checkout";
+    br = "branch";
+  };
+  extraConfig = {
+    init.defaultBranch = "main";
+    pull.rebase = true;
+  };
+};
+```
+
+**Kinoite/Ansible + Chezmoi**:
+
+```yaml
+# ansible/roles/git/tasks/main.yml
+---
+- name: Ensure git is installed (via toolbox, not layered)
+  ansible.builtin.debug:
+    msg: "Git should be in toolbox, not layered on base system"
+
+- name: Apply git configuration via chezmoi
+  ansible.builtin.command:
+    cmd: chezmoi apply ~/.gitconfig
+  changed_when: false
+```
+
+```yaml
+# shared/chezmoi/dot_gitconfig.tmpl
+[user]
+    name = {{ .git.name }}
+    email = {{ .git.email }}
+{{- if .git.signing_key }}
+[commit]
+    gpgsign = true
+[user]
+    signingkey = {{ .git.signing_key }}
+{{- end }}
+
+[alias]
+    st = status
+    co = checkout
+    br = branch
+
+[init]
+    defaultBranch = main
+
+[pull]
+    rebase = true
+```
+
+```yaml
+# shared/chezmoi/.chezmoi.yaml.tmpl
+data:
+  git:
+    name: "Dimitris Tsioumas"
+    email: "dtsioumas0@gmail.com"
+    signing_key: "ABC123..."
+```
+
+### Pattern 2: System Packages
+
+**NixOS**:
+```nix
+# home.nix
+home.packages = with pkgs; [
+  # CLI tools
+  vim
+  git
+  tmux
+  htop
+  ripgrep
+  fd
+  bat
+
+  # Development
+  go
+  python3
+  nodejs
+
+  # System
+  ansible
+  rclone
+];
+```
+
+**Kinoite** (Three-tier approach):
+
+```yaml
+# ansible/roles/base/tasks/main.yml
+---
+- name: Layer essential system packages ONLY
+  ansible.posix.rpm_ostree_pkg:
+    name:
+      - vim
+      - git
+      - tmux
+      - htop
+      - ansible
+      - rclone
+    state: present
+  become: true
+
+# Development tools → toolbox (not layered!)
+- name: Create development toolbox
+  ansible.builtin.command:
+    cmd: toolbox create --distro fedora --release 41 dev
+  register: toolbox_create
+  changed_when: "'already exists' not in toolbox_create.stderr"
+  failed_when: false
+
+- name: Install dev tools in toolbox
+  ansible.builtin.shell:
+    cmd: |
+      toolbox run -c dev sudo dnf install -y \
+        python3 \
+        python3-pip \
+        golang \
+        nodejs \
+        npm \
+        ripgrep \
+        fd-find \
+        bat
+  register: toolbox_install
+  changed_when: "'Nothing to do' not in toolbox_install.stdout"
+```
+
+**Key Principle**:
+- **Layer**: Only system integrations (vim, git, ansible, rclone)
+- **Toolbox**: All development tools (go, python, node)
+- **Flatpak**: GUI applications
+
+### Pattern 3: Shell Configuration
+
+**NixOS**:
+```nix
+# programs/bash.nix
+programs.bash = {
+  enable = true;
+  shellAliases = {
+    ll = "ls -la";
+    grep = "rg";
+    cat = "bat";
+  };
+  initExtra = ''
+    export EDITOR=vim
+    export VISUAL=vim
+    export PAGER=less
+
+    # Custom prompt
+    PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+  '';
+};
+```
+
+**Kinoite/Chezmoi**:
+
+```bash
+# shared/chezmoi/dot_bashrc.tmpl
+# Generated by chezmoi from my-modular-workspace
+# OS: {{ .chezmoi.os }}
+
+# Aliases
+alias ll='ls -la'
+alias grep='rg'
+alias cat='bat'
+
+# Environment
+export EDITOR=vim
+export VISUAL=vim
+export PAGER=less
+
+# Custom prompt
+PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+
+{{- if eq .chezmoi.os "linux" }}
+# Linux-specific
+export PATH="$HOME/bin:$PATH"
+
+# Toolbox helper
+alias dev='toolbox enter dev'
+alias sre='toolbox enter sre-tools'
+{{- end }}
+
+{{- if .features.atuin }}
+# Atuin shell history
+eval "$(atuin init bash)"
+{{- end }}
+```
+
+### Pattern 4: Systemd User Services
+
+**NixOS**:
+```nix
+# services/rclone.nix
+systemd.user.services.rclone-sync = {
+  Unit = {
+    Description = "Rclone Google Drive Sync";
+    After = [ "network-online.target" ];
+  };
+  Service = {
+    Type = "oneshot";
+    ExecStart = "${pkgs.rclone}/bin/rclone bisync ...";
+    EnvironmentFile = "%h/.config/rclone/secrets.env";
+  };
+  Install = {
+    WantedBy = [ "default.target" ];
+  };
+};
+
+systemd.user.timers.rclone-sync = {
+  Unit = {
+    Description = "Rclone Sync Timer";
+  };
+  Timer = {
+    OnCalendar = "daily";
+    Persistent = true;
+  };
+  Install = {
+    WantedBy = [ "timers.target" ];
+  };
+};
+```
+
+**Kinoite/Ansible**:
+
+```yaml
+# ansible/roles/rclone/tasks/main.yml
+---
+- name: Create systemd user directory
+  ansible.builtin.file:
+    path: ~/.config/systemd/user
+    state: directory
+    mode: '0755'
+
+- name: Install rclone sync service
+  ansible.builtin.copy:
+    dest: ~/.config/systemd/user/rclone-sync.service
+    content: |
+      [Unit]
+      Description=Rclone Google Drive Sync
+      After=network-online.target
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/bin/rclone bisync \
+        %h/.MyHome/ \
+        GoogleDrive-dtsioumas0:MyHome/ \
+        --workdir %h/.cache/rclone/bisync-workdir \
+        --compare size,modtime,checksum \
+        --resilient \
+        --recover
+      EnvironmentFile=%h/.config/rclone/secrets.env
+
+      [Install]
+      WantedBy=default.target
+    mode: '0644'
+
+- name: Install rclone sync timer
+  ansible.builtin.copy:
+    dest: ~/.config/systemd/user/rclone-sync.timer
+    content: |
+      [Unit]
+      Description=Rclone Sync Timer
+
+      [Timer]
+      OnCalendar=daily
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+    mode: '0644'
+
+- name: Reload systemd user daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+    scope: user
+
+- name: Enable and start rclone timer
+  ansible.builtin.systemd:
+    name: rclone-sync.timer
+    enabled: true
+    state: started
+    scope: user
+```
+
+### Pattern 5: KDE Plasma Configuration
+
+**NixOS (via plasma-manager)**:
+```nix
+# programs/plasma.nix
+programs.plasma = {
+  enable = true;
+  workspace = {
+    lookAndFeel = "org.kde.breezedark.desktop";
+    cursor.theme = "breeze_cursors";
+  };
+  shortcuts = {
+    "kwin" = {
+      "Window Quick Tile Bottom" = "Meta+Down";
+      "Window Quick Tile Top" = "Meta+Up";
+    };
+  };
+  configFile = {
+    "kdeglobals"."KDE"."SingleClick" = false;
+  };
+};
+```
+
+**Kinoite/Ansible**:
+
+```yaml
+# ansible/roles/kde-plasma/tasks/main.yml
+---
+- name: Set KDE look and feel
+  ansible.builtin.command:
+    cmd: >
+      kwriteconfig5
+      --file kdeglobals
+      --group KDE
+      --key LookAndFeelPackage
+      org.kde.breezedark.desktop
+  changed_when: true
+
+- name: Configure KDE globals
+  ansible.builtin.command:
+    cmd: >
+      kwriteconfig5
+      --file kdeglobals
+      --group KDE
+      --key SingleClick
+      false
+  changed_when: true
+
+- name: Set KWin shortcuts
+  ansible.builtin.shell:
+    cmd: |
+      kwriteconfig5 --file kglobalshortcutsrc \
+        --group kwin \
+        --key "Window Quick Tile Bottom" "Meta+Down,Meta+Down,Quick Tile Window to the Bottom"
+
+      kwriteconfig5 --file kglobalshortcutsrc \
+        --group kwin \
+        --key "Window Quick Tile Top" "Meta+Up,Meta+Up,Quick Tile Window to the Top"
+  changed_when: true
+
+- name: Restart KWin to apply
+  ansible.builtin.command:
+    cmd: qdbus org.kde.KWin /KWin reconfigure
+  changed_when: false
+  failed_when: false
+```
+
+---
+
+## Translation Workflow
+
+### Step-by-Step Process
+
+#### 1. Inventory Your NixOS Config
+
+```bash
+# In your NixOS config directory
+find . -name "*.nix" -type f | sort
+
+# Common structure:
+# ./home.nix               # Main entry point
+# ./programs/git.nix
+# ./programs/vim.nix
+# ./programs/bash.nix
+# ./programs/plasma.nix
+# ./services/rclone.nix
+```
+
+#### 2. Categorize by Translation Target
+
+| NixOS File | Translation Target | Priority |
+|------------|-------------------|----------|
+| `programs/git.nix` | Chezmoi | High |
+| `programs/vim.nix` | Chezmoi | High |
+| `programs/bash.nix` | Chezmoi | High |
+| `programs/plasma.nix` | Ansible (KDE role) | High |
+| `services/rclone.nix` | Ansible (systemd service) | High |
+| `home.packages` (CLI) | rpm-ostree layer | Medium |
+| `home.packages` (dev) | Toolbox | Medium |
+| `services/syncthing.nix` | Ansible (systemd service) | Low |
+
+#### 3. Create Ansible Role Structure
+
+```bash
+# In my-modular-workspace
+mkdir -p silverblue/ansible/roles/{base,kde-plasma,rclone,development}
+
+# Base role
+silverblue/ansible/roles/base/
+├── tasks/
+│   └── main.yml
+├── vars/
+│   └── main.yml
+└── README.md
+
+# KDE Plasma role
+silverblue/ansible/roles/kde-plasma/
+├── tasks/
+│   ├── main.yml
+│   ├── shortcuts.yml
+│   └── appearance.yml
+├── templates/
+│   └── kderc.j2
+└── README.md
+```
+
+#### 4. Translate One Config at a Time
+
+**Example workflow for `programs/git.nix`**:
+
+1. **Read NixOS config**:
+   ```nix
+   # programs/git.nix
+   programs.git = {
+     enable = true;
+     userName = "Mitsio";
+     userEmail = "dtsioumas0@gmail.com";
+     ...
+   };
+   ```
+
+2. **Decide target**: Chezmoi (config file management)
+
+3. **Create chezmoi template**:
+   ```bash
+   # shared/chezmoi/dot_gitconfig.tmpl
+   [user]
+       name = {{ .git.name }}
+       email = {{ .git.email }}
+   ```
+
+4. **Add data to chezmoi config**:
+   ```yaml
+   # shared/chezmoi/.chezmoi.yaml.tmpl
+   data:
+     git:
+       name: "Mitsio"
+       email: "dtsioumas0@gmail.com"
+   ```
+
+5. **Test application**:
+   ```bash
+   chezmoi apply ~/.gitconfig
+   cat ~/.gitconfig  # Verify
+   ```
+
+#### 5. Create Ansible Playbook to Apply
+
+```yaml
+# silverblue/ansible/site.yml
+---
+- name: Configure Fedora Kinoite
+  hosts: localhost
+  connection: local
+  roles:
+    - base              # Layer system packages
+    - development       # Set up toolboxes
+    - kde-plasma        # Configure KDE
+    - rclone            # Set up sync services
+  post_tasks:
+    - name: Apply chezmoi dotfiles
+      ansible.builtin.command:
+        cmd: chezmoi apply
+      changed_when: false
+```
+
+#### 6. Iterate and Test
+
+```bash
+# Run playbook
+ansible-playbook silverblue/ansible/site.yml
+
+# Check for errors
+# Fix issues
+# Re-run until idempotent
+```
+
+---
+
+## Advanced Translation Examples
+
+### Example 1: Complex Vim Configuration
+
+**NixOS**:
+```nix
+programs.vim = {
+  enable = true;
+  plugins = with pkgs.vimPlugins; [
+    vim-airline
+    nerdtree
+    fzf-vim
+  ];
+  settings = {
+    number = true;
+    relativenumber = true;
+    expandtab = true;
+    tabstop = 2;
+    shiftwidth = 2;
+  };
+  extraConfig = ''
+    colorscheme desert
+    let mapleader = ","
+  '';
+};
+```
+
+**Kinoite/Chezmoi**:
+
+```vim
+" shared/chezmoi/dot_vimrc.tmpl
+" Generated from my-modular-workspace
+
+" Basic settings
+set number
+set relativenumber
+set expandtab
+set tabstop=2
+set shiftwidth=2
+
+" Appearance
+colorscheme desert
+
+" Leader key
+let mapleader = ","
+
+" Plugins (via vim-plug)
+call plug#begin('~/.vim/plugged')
+Plug 'vim-airline/vim-airline'
+Plug 'preservim/nerdtree'
+Plug 'junegunn/fzf.vim'
+call plug#end()
+
+{{- if .vim.extra_plugins }}
+" Extra plugins for {{ .chezmoi.hostname }}
+{{- range .vim.extra_plugins }}
+Plug '{{ . }}'
+{{- end }}
+{{- end }}
+```
+
+**Installation**:
+```yaml
+# ansible/roles/vim/tasks/main.yml
+- name: Install vim-plug
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    dest: ~/.vim/autoload/plug.vim
+    mode: '0644'
+
+- name: Apply vim config via chezmoi
+  ansible.builtin.command:
+    cmd: chezmoi apply ~/.vimrc
+  changed_when: false
+
+- name: Install vim plugins
+  ansible.builtin.command:
+    cmd: vim +PlugInstall +qall
+  changed_when: false
+```
+
+### Example 2: Environment Variables
+
+**NixOS**:
+```nix
+home.sessionVariables = {
+  EDITOR = "vim";
+  BROWSER = "firefox";
+  TERM = "xterm-256color";
+  GOPATH = "$HOME/go";
+  PATH = "$HOME/bin:$HOME/.local/bin:$PATH";
+};
+```
+
+**Kinoite/Chezmoi**:
+
+```bash
+# shared/chezmoi/dot_profile.tmpl
+# Environment variables
+
+export EDITOR=vim
+export BROWSER=firefox
+export TERM=xterm-256color
+
+{{- if .features.go }}
+export GOPATH=$HOME/go
+export PATH=$GOPATH/bin:$PATH
+{{- end }}
+
+export PATH=$HOME/bin:$HOME/.local/bin:$PATH
+
+{{- if eq .chezmoi.os "linux" }}
+# Linux-specific
+export XDG_CONFIG_HOME=$HOME/.config
+export XDG_DATA_HOME=$HOME/.local/share
+export XDG_CACHE_HOME=$HOME/.cache
+{{- end }}
+```
+
+### Example 3: Conditional Configuration
+
+**NixOS**:
+```nix
+# Only on work machines
+programs.vscode = lib.mkIf (config.machine.type == "work") {
+  enable = true;
+  extensions = with pkgs.vscode-extensions; [
+    ms-python.python
+    golang.go
+  ];
+};
+
+# Only on personal machines
+programs.gaming = lib.mkIf (config.machine.type == "personal") {
+  enable = true;
+};
+```
+
+**Kinoite/Ansible + Chezmoi**:
+
+```yaml
+# machines/eyeonix-laptop/vars.yml
+machine_type: work
+features:
+  vscode: true
+  gaming: false
+```
+
+```yaml
+# ansible/roles/development/tasks/main.yml
+- name: Install VSCodium (work machines only)
+  community.general.flatpak:
+    name: com.vscodium.codium
+    state: present
+  when: machine_type == "work" and features.vscode
+```
+
+---
+
+## Testing Your Translation
+
+### Test Strategy
+
+```yaml
+# ansible/test-translation.yml
+---
+- name: Test NixOS → Ansible translation
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Test base role
+      ansible.builtin.include_role:
+        name: base
+      tags: test-base
+
+    - name: Verify layered packages
+      ansible.builtin.command:
+        cmd: rpm -q vim git tmux
+      changed_when: false
+      tags: test-base
+
+    - name: Test chezmoi application
+      ansible.builtin.command:
+        cmd: chezmoi apply --dry-run
+      changed_when: false
+      tags: test-chezmoi
+
+    - name: Verify dotfiles
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - ~/.gitconfig
+        - ~/.bashrc
+        - ~/.vimrc
+      register: dotfile_check
+      failed_when: not dotfile_check.stat.exists
+      tags: test-chezmoi
+```
+
+### Run Tests
+
+```bash
+# Dry run
+ansible-playbook silverblue/ansible/site.yml --check
+
+# Test specific role
+ansible-playbook ansible/test-translation.yml --tags test-base
+
+# Full run
+ansible-playbook silverblue/ansible/site.yml
+```
+
+---
+
+## Common Pitfalls
+
+### Pitfall 1: Layering Too Many Packages
+
+**❌ Don't do this**:
+```yaml
+- name: Layer all development tools
+  ansible.posix.rpm_ostree_pkg:
+    name:
+      - python3
+      - nodejs
+      - golang
+      - rust
+      - gcc
+      - make
+      - ... (50 more packages)
+```
+
+**✅ Do this instead**:
+```yaml
+- name: Create development toolbox
+  ansible.builtin.command:
+    cmd: toolbox create dev
+
+- name: Install dev tools in toolbox
+  ansible.builtin.shell:
+    cmd: toolbox run -c dev sudo dnf install -y python3 nodejs golang...
+```
+
+### Pitfall 2: Ignoring Idempotency
+
+**❌ Not idempotent**:
+```yaml
+- name: Configure KDE
+  ansible.builtin.shell:
+    cmd: kwriteconfig5 --file kdeglobals --group KDE --key Theme Breeze
+  # Always shows as "changed"
+```
+
+**✅ Idempotent**:
+```yaml
+- name: Check current KDE theme
+  ansible.builtin.command:
+    cmd: kreadconfig5 --file kdeglobals --group KDE --key Theme
+  register: current_theme
+  changed_when: false
+
+- name: Configure KDE theme
+  ansible.builtin.shell:
+    cmd: kwriteconfig5 --file kdeglobals --group KDE --key Theme Breeze
+  when: current_theme.stdout != "Breeze"
+```
+
+### Pitfall 3: Forgetting Chezmoi Templates
+
+**❌ Hardcoding values**:
+```bash
+# dot_gitconfig
+[user]
+    name = Mitsio
+    email = dtsioumas0@gmail.com
+```
+
+**✅ Using templates**:
+```bash
+# dot_gitconfig.tmpl
+[user]
+    name = {{ .git.name }}
+    email = {{ .git.email }}
+```
+
+---
+
+## Migration Checklist
+
+### Phase 1: Assessment
+
+- [ ] List all NixOS/home-manager modules in use
+- [ ] Categorize by translation target (Ansible/Chezmoi/Toolbox)
+- [ ] Identify machine-specific configs
+- [ ] Note any complex derivations or custom packages
+
+### Phase 2: Core Translation
+
+- [ ] Create Ansible role structure
+- [ ] Translate shell configurations (bash, zsh)
+- [ ] Translate essential CLI tools (git, vim, tmux)
+- [ ] Set up toolbox for development environments
+- [ ] Create systemd user services
+
+### Phase 3: Desktop Environment
+
+- [ ] Translate KDE Plasma configurations
+- [ ] Set up application launchers
+- [ ] Configure display/monitor settings
+- [ ] Set up keyboard shortcuts
+
+### Phase 4: Services & Automation
+
+- [ ] Translate systemd services
+- [ ] Set up systemd timers
+- [ ] Configure rclone sync
+- [ ] Set up secret management (KeePassXC integration)
+
+### Phase 5: Testing & Validation
+
+- [ ] Test all Ansible playbooks
+- [ ] Verify chezmoi dotfiles
+- [ ] Check toolbox environments
+- [ ] Validate systemd services
+- [ ] Test full bootstrap on clean VM
+
+---
+
+## Maintenance & Evolution
+
+### Keeping Translations in Sync
+
+**If you update NixOS config**:
+
+1. Note the change
+2. Translate to Ansible/Chezmoi equivalent
+3. Test in Kinoite environment
+4. Commit both changes together
+
+```bash
+# Example workflow
+git checkout -b update-vim-config
+
+# Update NixOS config
+vim nixos/programs/vim.nix
+
+# Update Kinoite config
+vim shared/chezmoi/dot_vimrc.tmpl
+
+# Test
+ansible-playbook silverblue/ansible/site.yml --tags vim
+
+# Commit both
+git add nixos/programs/vim.nix shared/chezmoi/dot_vimrc.tmpl
+git commit -m "Update vim configuration (NixOS + Kinoite)"
+```
+
+### Future: Unified Configuration
+
+**Long-term goal**: Single source that generates both NixOS and Ansible configs.
+
+**Possible approaches**:
+1. **Dhall** or **CUE** as configuration language
+2. **Nix generates Ansible** playbooks
+3. **Use Nix in Kinoite toolbox** (reuse home-manager directly)
+
+**For now**: Maintain parallel configs, sync manually.
+
+---
+
+## Summary
+
+### Translation Overview
+
+| Concept | NixOS | Kinoite | Tool |
+|---------|-------|---------|------|
+| **System Packages** | `environment.systemPackages` | `rpm-ostree install` | Ansible |
+| **User Packages** | `home.packages` | toolbox/flatpak | Ansible |
+| **Config Files** | `programs.*` | Templates | Chezmoi |
+| **Services** | `systemd.user.services` | systemd units | Ansible |
+| **Secrets** | `sops-nix` or similar | KeePassXC | Manual/Ansible |
+
+### Key Takeaways
+
+1. **Not 1:1 translation** - Adapt to Kinoite's philosophy
+2. **Three-tier packages** - Layer minimal, toolbox for dev, flatpak for GUI
+3. **Chezmoi for dotfiles** - Replaces most of home-manager
+4. **Ansible for system** - Replaces NixOS modules
+5. **Test incrementally** - Don't translate everything at once
+
+---
+
+**Document Version**: 1.0
+**Last Updated**: 2025-12-17
+**Status**: Complete translation guide

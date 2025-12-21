@@ -264,6 +264,25 @@ Templates are the preferred path, but certain configs (Plasma geometry, apps tha
 
 > Use modify_manager only when a reliable template is impossible today. Every new host must still render the same results, so keep host-specific data inside `.chezmoidata` even when a modify script is involved.
 
+### Avoiding Template/Modify Conflicts
+
+Chezmoi will refuse to apply if the same target is defined twice (for example, both
+`private_dot_config/plasmarc.tmpl` **and** `private_dot_config/modify_plasmarc`). To keep the
+source state healthy:
+
+1. **Pick one controller per file.** If you finish templating a config, delete the associated
+   `modify_*` helper and its `.src.ini` snapshot right away.
+2. **Name attributes, not files.** Don’t create separate files such as
+   `readonly_chezmoi.toml`; instead, combine attributes in the same filename
+   (`private_readonly_dot_config/chezmoi/chezmoi.toml.tmpl`).
+3. **Use `chezmoi apply --dry-run --force`** to confirm there are no prompts or conflicts after
+   each migration round.
+4. **Document the cleanup** in `docs/chezmoi/chezmoi-guide.md` or the relevant ADR so future
+   hosts know why the modify helper disappeared.
+
+Following ADR-012/ADR-013, the plasma stack now renders from templates only—any remaining
+modify scripts signal tech debt that should be addressed in the next migration pass.
+
 ### Testing Templates
 
 ```bash

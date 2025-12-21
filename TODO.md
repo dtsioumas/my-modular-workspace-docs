@@ -1481,6 +1481,8 @@ set -g pane-border-format " #{pane_index} #{pane_current_command} #{pane_current
 - [ ] Template wallpaper paths / launcher lists for multi-host support.
 - [x] Implement `ansible/playbooks/chezmoi-modify-refresh.yml` to pipeline all smart-add operations.
 - [x] Add/update `dot_local/share/navi/cheats/chezmoi-modify-plasma.cheat` so the refresh workflow is one keystroke away.
+- [x] Remove conflicting `modify_*` helpers once a `.tmpl` is stable (plasmashellrc, plasmarc, plasmanotifyrc, plasma_workspace.notifyrc, powerdevilrc, kglobalshortcutsrc, krunnerrc, ksmserverrc).
+- [x] Normalize host-specific values into `.chezmoidata` (plasma.yaml, claude.yaml) and document the new rule in `docs/chezmoi/chezmoi-guide.md`.
 - [ ] Fix CK embedding persistence (`ck --index` caching).
 - [ ] Run full Plasma verification in VM/fresh user once panel/app configs move to chezmoi.
 - [ ] Create Fedora migration guide.

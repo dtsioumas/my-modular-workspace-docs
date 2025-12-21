@@ -1,0 +1,148 @@
+{
+  "version": "0.1.0",
+  "created": 1765750026,
+  "updated": 1766096119,
+  "files": {
+    "./2025-12-14-plasma-migration-to-chezmoi-plan.md..remote-conflict1": {
+      "path": "./2025-12-14-plasma-migration-to-chezmoi-plan.md..remote-conflict1",
+      "hash": "07c31ca629bdea8a52a7da3eaa266d586bfa7b6e45be97cbdbae5642a7629304",
+      "last_modified": 1765749533,
+      "size": 24068
+    },
+    "./2025-12-07-warp-kitty-integration-and-mcp-plan.md": {
+      "path": "./2025-12-07-warp-kitty-integration-and-mcp-plan.md",
+      "hash": "d046d2b944de41f468bb475d957e8add7271449ed53f1d7cd136e4f78ca2cef3",
+      "last_modified": 1765059483,
+      "size": 12895
+    },
+    "./2025-11-30-kitty-integration-verification-plan.md": {
+      "path": "./2025-11-30-kitty-integration-verification-plan.md",
+      "hash": "a4d5d71731e4617a888a1a2ff98c9f66211fdcdf27dfaef2729acf4ceee383f7",
+      "last_modified": 1764613335,
+      "size": 16244
+    },
+    "./2025-12-14-firefox-declarative-implementation-plan.md": {
+      "path": "./2025-12-14-firefox-declarative-implementation-plan.md",
+      "hash": "4badd0b10147700a7669748e47de1e095ef2c73d90a264e4f32f0a0c894658af",
+      "last_modified": 1765733978,
+      "size": 37849
+    },
+    "./2025-12-14-plasma-migration-to-chezmoi-plan.md": {
+      "path": "./2025-12-14-plasma-migration-to-chezmoi-plan.md",
+      "hash": "5cffff16c3710b115610f801957f695e521a8694d6ae8f62a53bb6efc7f21eae",
+      "last_modified": 1766091806,
+      "size": 25406
+    },
+    "./nixos-shoshin-gpu-optimization-plan.md..remote-conflict1": {
+      "path": "./nixos-shoshin-gpu-optimization-plan.md..remote-conflict1",
+      "hash": "4d16f11158a1a0cfce10f0d376c3929f78f5cadb7f244e9f5f23baa7df926a5d",
+      "last_modified": 1765746803,
+      "size": 58280
+    },
+    "./2025-12-14-kitty-enhancements-and-integrations-plan.md": {
+      "path": "./2025-12-14-kitty-enhancements-and-integrations-plan.md",
+      "hash": "88bbba578529bb6b394bf0b0ac8b52b7661ecacb0d185baa6fd5ea3d3cbc6bc2",
+      "last_modified": 1765926277,
+      "size": 40106
+    },
+    "./2025-12-13-shoshin-workspace-fixes-plan-14-12-2025.md": {
+      "path": "./2025-12-13-shoshin-workspace-fixes-plan-14-12-2025.md",
+      "hash": "70871556edcdaa0787bc73511d9de185e2ce141f15a518069ded0b063ac7d469",
+      "last_modified": 1765660303,
+      "size": 8507
+    },
+    "./2025-12-01-semantic-search-tools-integration-plan.md": {
+      "path": "./2025-12-01-semantic-search-tools-integration-plan.md",
+      "hash": "a5bb27ab769f654b709813209054edb3d20a1f9dee3027eeea306be6ad277be3",
+      "last_modified": 1764615854,
+      "size": 8559
+    },
+    "./2025-12-14-kitty-enhancements-and-integrations-plan.md..remote-conflict2": {
+      "path": "./2025-12-14-kitty-enhancements-and-integrations-plan.md..remote-conflict2",
+      "hash": "dcbe7c4ac1538527719f1a0925c89fd6b592bdf901ffb031d349e8afc8f21741",
+      "last_modified": 1765840231,
+      "size": 37481
+    },
+    "./2025-12-14-ck-rebuild-for-gpu-usage-plan.md..remote-conflict1": {
+      "path": "./2025-12-14-ck-rebuild-for-gpu-usage-plan.md..remote-conflict1",
+      "hash": "314c0bde4da6fe12a0edc85f6936267a78be2b17ae60f58a562287b0832891cb",
+      "last_modified": 1765691858,
+      "size": 5020
+    },
+    "./2025-12-12-agent-configs-management-integration-plan.md": {
+      "path": "./2025-12-12-agent-configs-management-integration-plan.md",
+      "hash": "6ccc34d6f69a63b6d2a20c81d6af55e9573f5de86502ed968ca462fc57f5c3c0",
+      "last_modified": 1765491763,
+      "size": 14430
+    },
+    "./2025-11-17-fedora-migration-plan.md": {
+      "path": "./2025-11-17-fedora-migration-plan.md",
+      "hash": "c05df1bacdade4b7450ee8576c1aa822c9e5e96ace7c296774de58af891857c1",
+      "last_modified": 1764613335,
+      "size": 4692
+    },
+    "./2025-12-14-nixos-shoshin-system-fine-tuning-plan.md": {
+      "path": "./2025-12-14-nixos-shoshin-system-fine-tuning-plan.md",
+      "hash": "fd04d14658e70bde880936f2a4a87b8534b7ccc5a92f7b2e286c0d1fc175e39b",
+      "last_modified": 1765729437,
+      "size": 25974
+    },
+    "./2025-12-14-kitty-enhancements-and-integrations-plan.md..remote-conflict1": {
+      "path": "./2025-12-14-kitty-enhancements-and-integrations-plan.md..remote-conflict1",
+      "hash": "f5d08fb0d500038592c0493332d041604bfec707093473e0edf7caba5580dc57",
+      "last_modified": 1765825953,
+      "size": 30865
+    },
+    "./2025-12-01-home-manager-enhancements-plan.md": {
+      "path": "./2025-12-01-home-manager-enhancements-plan.md",
+      "hash": "18ed6c3d9b59c47e0df196d1cddaa7413150c039d3037e2acab6f930ac715fcf",
+      "last_modified": 1764613335,
+      "size": 9276
+    },
+    "./README.md": {
+      "path": "./README.md",
+      "hash": "c22fe3bdf43cc8ca2ab7b01c05258edd700b751da73154e1ae265371f7efdae8",
+      "last_modified": 1765686077,
+      "size": 2454
+    },
+    "./2025-12-06-plan-installing-semantic-tools.md": {
+      "path": "./2025-12-06-plan-installing-semantic-tools.md",
+      "hash": "91707efeb53b5daf11d5b96609255eb350b90c61dc643dddeeb650a6a070806f",
+      "last_modified": 1764984628,
+      "size": 23602
+    },
+    "./2025-11-30-autocomplete-sh-integration-plan.md": {
+      "path": "./2025-11-30-autocomplete-sh-integration-plan.md",
+      "hash": "f3b348cf7a309716dbd0f799bdf1045b8f48cabd26934c569806bbb41de31650",
+      "last_modified": 1765735307,
+      "size": 18966
+    },
+    "./2025-12-14-gemini-cli-installation-and-config-plan.md": {
+      "path": "./2025-12-14-gemini-cli-installation-and-config-plan.md",
+      "hash": "b0f1b5275a93d5962dda8003d2451191018807dc06aa51daae58d98f11bcddb9",
+      "last_modified": 1765670587,
+      "size": 26086
+    },
+    "./2025-12-14-ck-rebuild-for-gpu-usage-plan.md": {
+      "path": "./2025-12-14-ck-rebuild-for-gpu-usage-plan.md",
+      "hash": "8b3c3bf20180c2db4cd1aa81c6a1e38beb186a17d6171ac816b9365f9b83b89f",
+      "last_modified": 1765902493,
+      "size": 7921
+    },
+    "./nixos-shoshin-gpu-optimization-plan.md": {
+      "path": "./nixos-shoshin-gpu-optimization-plan.md",
+      "hash": "7158c8a86ae67466088b29aa6055df55429de14f249a70760936f494a0286567",
+      "last_modified": 1765842131,
+      "size": 59614
+    },
+    "./2025-12-14_FIREFOX_PLAN_ADDENDUM_CRITICAL_FIXES.md": {
+      "path": "./2025-12-14_FIREFOX_PLAN_ADDENDUM_CRITICAL_FIXES.md",
+      "hash": "8142a35944a2428a26ba875510d4976e7387dab28882f3c2c0e154426e8b7b89",
+      "last_modified": 1765736064,
+      "size": 26645
+    }
+  },
+  "embedding_model": null,
+  "embedding_dimensions": null,
+  "chunk_hash_version": 2
+}
