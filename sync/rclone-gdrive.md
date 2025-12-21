@@ -1,6 +1,6 @@
 # RClone Google Drive Sync Guide
 
-**Last Updated:** 2025-11-29
+**Last Updated:** 2025-12-21
 **Sources Merged:** BEST_PRACTICES.md, Health_Status_Report_25-11-2025.md
 **Maintainer:** Mitsos
 
@@ -38,38 +38,26 @@ RClone bisync provides bidirectional synchronization between local files and Goo
 ### Essential Commands
 
 ```bash
-# Normal sync (resilient mode)
-rclone bisync ~/.MyHome/ GoogleDrive-dtsioumas0:MyHome/ \
-  --resilient --recover -v
+# Normal sync (via wrapper)
+sync-gdrive
 
 # Check status
 systemctl --user status rclone-gdrive-sync.timer
 
-# Manual sync
-systemctl --user start rclone-gdrive-sync
+# Manual resync (Fix DB corruption)
+sync-gdrive-resync
 
 # View logs
 journalctl --user -u rclone-gdrive-sync -f
-```
-
-### First-time Setup
-
-```bash
-# 1. Dry-run to preview
-rclone bisync Path1 Path2 --resync --dry-run -v
-
-# 2. Initial resync
-rclone bisync Path1 Path2 --resync -v
-
-# 3. Normal runs (NO --resync!)
-rclone bisync Path1 Path2 --resilient --recover -v
 ```
 
 ---
 
 ## Configuration
 
-### Production Configuration
+### Production Configuration (Ansible Managed)
+
+The Ansible playbook applies the following configuration:
 
 ```bash
 rclone bisync /home/mitsio/.MyHome/ GoogleDrive-dtsioumas0:MyHome/ \
@@ -78,13 +66,20 @@ rclone bisync /home/mitsio/.MyHome/ GoogleDrive-dtsioumas0:MyHome/ \
   --resilient \
   --recover \
   --max-lock 2m \
-  --conflict-resolve newer \
+  --conflict-resolve path1 \
   --create-empty-src-dirs \
   --drive-skip-gdocs \
-  --max-delete 50 \
+  --max-delete 199 \
+  --retries 3 \
+  --timeout 10m \
   --verbose \
-  --log-file ~/.cache/rclone/bisync.log
+  --log-file ~/.logs/gdrive-sync/bisync.log
 ```
+
+### Safety Features (Implemented Dec 2025)
+1.  **Git Lock Check:** Aborts sync if `index.lock` is found to prevent git repo corruption.
+2.  **Permissions Fix:** Automatically restores `+x` permissions to scripts (`.sh`, `.py`, etc.) after sync (since GDrive drops them).
+3.  **Smart Limit:** `max-delete` set to **199** to allow routine cleanups while preventing catastrophic data loss.
 
 ### Recommended Exclude Patterns
 
@@ -106,7 +101,8 @@ rclone bisync /home/mitsio/.MyHome/ GoogleDrive-dtsioumas0:MyHome/ \
 | `--resilient` | Retry on soft errors |
 | `--recover` | Recover from crashes |
 | `--max-lock 2m` | Auto-expire locks |
-| `--max-delete 50` | Safety limit on deletes |
+| `--max-delete 199` | Safety limit on deletes |
+| `--conflict-resolve path1` | **Local Wins** (Safer for automation) |
 | `--drive-skip-gdocs` | Skip Google Docs |
 
 ---
@@ -115,68 +111,29 @@ rclone bisync /home/mitsio/.MyHome/ GoogleDrive-dtsioumas0:MyHome/ \
 
 ### Set-It-And-Forget-It Setup
 
-```bash
-rclone bisync Path1 Path2 \
-  --resilient \
-  --recover \
-  --max-lock 2m \
-  --conflict-resolve newer
-```
+The automated job handles 99% of cases. Your role is:
+1.  **Delete locally:** Use `conflict-manager` or `rm` to manage files.
+2.  **Wait:** Let the hourly sync propagate changes.
+3.  **Don't panic:** If files reappear, it means you deleted >199 files (safety trigger). Run a manual sync with override if needed.
 
 ### When to Use --resync
 
-**ONLY use `--resync` in these situations:**
-1. First bisync run (initial setup)
-2. Filter file changes (modified exclude patterns)
-3. Critical error recovery (when bisync demands it)
+**ONLY use `sync-gdrive-resync` in these situations:**
+1.  **Exit Code 7:** Log says "Bisync aborted. Must run --resync".
+2.  **Filter Changes:** You modified `.gitignore` or exclude patterns.
+3.  **Baseline Mismatch:** Logs show "path1 and path2 have different number of files".
 
-**DO NOT use `--resync` for every run!** It prevents deletions from syncing.
-
-### Resync Modes
-
-```bash
---resync-mode path1   # Local is source of truth
---resync-mode path2   # Remote is source of truth
---resync-mode newer   # Keep newer files
-```
+**DO NOT use `--resync` to fix deleted files reappearing.** (See [conflicts.md](conflicts.md)).
 
 ---
 
 ## Health Monitoring
 
-### Health Check Script
-
-```bash
-#!/usr/bin/env bash
-REMOTE="GoogleDrive-dtsioumas0:MyHome/"
-LOCAL="/home/mitsio/.MyHome/"
-WORKDIR="$HOME/.cache/rclone/bisync-workdir"
-
-echo "=== RClone Bisync Health Check ==="
-
-# Check 1: Remote connectivity
-echo "[1/4] Testing remote connectivity..."
-rclone lsd "$REMOTE" >/dev/null 2>&1 && echo "✅ Remote OK" || echo "❌ Remote FAILED"
-
-# Check 2: Baseline integrity
-echo "[2/4] Checking baselines..."
-LST1=$(ls $WORKDIR/*.path1.lst 2>/dev/null | head -1)
-LST2=$(ls $WORKDIR/*.path2.lst 2>/dev/null | head -1)
-if [ -f "$LST1" ] && [ -f "$LST2" ]; then
-  SIZE1=$(wc -l < "$LST1")
-  SIZE2=$(wc -l < "$LST2")
-  [ "$SIZE1" = "$SIZE2" ] && echo "✅ Baselines equal ($SIZE1 files)" || echo "⚠️ Baselines differ"
-fi
-
-# Check 3: Lock file
-echo "[3/4] Checking lock files..."
-ls $WORKDIR/*.lck 2>/dev/null && echo "⚠️ Lock exists" || echo "✅ No lock"
-
-# Check 4: Conflicts
-echo "[4/4] Checking conflicts..."
-CONFLICTS=$(find "$LOCAL" -name "*.conflict*" 2>/dev/null | wc -l)
-[ "$CONFLICTS" -gt 0 ] && echo "⚠️ $CONFLICTS conflicts" || echo "✅ No conflicts"
-```
+### Automated Checks
+A daily health check (`gdrive-health-check.yml`) runs at 09:00 to:
+*   Check Drive Quota.
+*   Scan for remote conflicts.
+*   Notify desktop if issues found.
 
 ### Maintenance Checklist
 
@@ -185,12 +142,10 @@ CONFLICTS=$(find "$LOCAL" -name "*.conflict*" 2>/dev/null | wc -l)
 - Check for error notifications
 
 **Weekly:**
-- Review and resolve conflict files
-- Check log file sizes
+- Review and resolve conflict files (`conflict-manager scan ~/.MyHome`)
 
 **Monthly:**
-- Run independent integrity check (`rclone check`)
-- Clean old log files
+- The `gdrive-backup` job creates an archival snapshot.
 
 ---
 
@@ -204,43 +159,26 @@ A conflict occurs when a file is new/changed on BOTH sides since last sync.
 
 | Option | Behavior |
 |--------|----------|
-| `none` | Keep both versions (default) |
-| `newer` | Keep newer file (recommended) |
-| `path1` | Always prefer local |
-| `path2` | Always prefer remote |
+| `path1` | **Local Wins** (Current Config) |
+| `path2` | Remote Wins |
+| `newer` | Keep newer file |
 
-### Recommended Configuration
+### Recommended Tool
 
+Use the **Conflict Manager**:
 ```bash
---conflict-resolve newer --conflict-loser num --conflict-suffix conflict
-```
-
-### Cleanup Commands
-
-```bash
-# Preview conflicts
-find ~/.MyHome -name "*.conflict*" -type f
-
-# Remove after review
-find ~/.MyHome -name "*.conflict*" -type f -delete
+conflict-manager scan ~/.MyHome
 ```
 
 ---
 
 ## Recovery Procedures
 
-### Recovery Workflow
+### Fix "Reappearing Files" Loop
 
-```bash
-# Step 1: Dry-run
-rclone bisync Path1 Path2 --resync --resync-mode path1 --dry-run -v
-
-# Step 2: If good, run actual resync
-rclone bisync Path1 Path2 --resync --resync-mode path1 -v
-
-# Step 3: Resume normal syncs (WITHOUT --resync!)
-rclone bisync Path1 Path2 --resilient --recover -v
-```
+If you deleted files but they keep coming back:
+1.  **Clean Remote:** `rclone sync ~/.MyHome GoogleDrive-dtsioumas0:MyHome --drive-skip-gdocs` (Force Push).
+2.  **Reset DB:** `sync-gdrive-resync`.
 
 ### Clear Stale Lock
 
@@ -260,45 +198,9 @@ rm ~/.cache/rclone/bisync-workdir/*.lck
 
 ---
 
-## Troubleshooting
-
-### "Too many deletes" Error
-
-**Cause:** Safety limit triggered (>50 deletes)
-**Solution:** Increase `--max-delete` or investigate why so many files differ
-
-### Baseline Mismatch
-
-**Cause:** Exclude patterns changed, or interrupted sync
-**Solution:** Resync with `--resync --resync-mode path1`
-
-### Lock File Stuck
-
-```bash
-# Check if sync is running
-pgrep -f "rclone bisync"
-
-# If not running, remove lock
-rm ~/.cache/rclone/bisync-workdir/*.lck
-```
-
-### Sync Not Running
-
-```bash
-# Check timer
-systemctl --user status rclone-gdrive-sync.timer
-
-# Enable if needed
-systemctl --user enable --now rclone-gdrive-sync.timer
-```
-
----
-
 ## References
 
 - **Official Docs:** https://rclone.org/bisync/
-- **Filtering:** https://rclone.org/filtering/
-- **Forum:** https://forum.rclone.org/
 - **Ansible Playbook:** `ansible/playbooks/rclone-gdrive-sync.yml`
 - **Home-Manager Module:** `home-manager/rclone-gdrive.nix`
 
