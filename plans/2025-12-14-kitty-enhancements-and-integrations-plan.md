@@ -1,10 +1,10 @@
 # Kitty Terminal Enhancements & Integrations - Master Plan
 
 **Created:** 2025-11-30
-**Last Updated:** 2025-12-21
-**Status:** PHASES A, B, C.1, C.3, D COMPLETE ✅ | PHASE C.2 PENDING USER INPUT
-**Total Time Invested:** ~12 hours
-**Remaining:** 2-4 hours (Phase C.2 only - Phase E replaced by C.3)
+**Last Updated:** 2025-12-22 (Q&A Round 2 + Extended Research Complete)
+**Status:** PHASES A, B, C.1, C.3, D COMPLETE ✅ | PHASE K.14-K.15 DEEP RESEARCH COMPLETE 🔬✅ | READY FOR IMPLEMENTATION
+**Total Time Invested:** ~12 hours (research) + ~5 hours (Q&A + agent research)
+**Remaining:** 7-10 hours (Tmux Implementation) + 2-4 hours (Phase C.2 optional)
 
 ---
 
@@ -635,6 +635,41 @@ Revolutionary color philosophy applied: LOW usage = GORGEOUS Dracula colors (pur
 - **Color Cache Refresh:** Colors refresh every 30 seconds to pick up theme changes
 - **Date Format:** Changed to `DD/MM/YYYY` format (21/12/2025)
 
+### 🚀 Future Enhancements Implemented (2025-12-21 05:45)
+
+**1. Sparkline Trends** ✅
+Visual history for volatile metrics showing last 5 readings as mini-graph.
+- Format: `▁▂▃▄▅` (8 levels: ▁▂▃▄▅▆▇█)
+- Applied to: CPU, RAM, Load Average
+- Display: Icon + sparkline + percentage (e.g., `󰘚▁▂▃▄▅45%`)
+- Config: `SPARKLINE_ENABLED = True`, `SPARKLINE_HISTORY_SIZE = 5`
+
+**2. Color State Memory (Hysteresis)** ✅
+Prevents color flickering when metrics hover near thresholds.
+- Mechanism: Color only changes after N consecutive readings at new level
+- Config: `COLOR_HYSTERESIS_ENABLED = True`, `HYSTERESIS_COUNT = 2`
+- Applied to: CPU, RAM, Load, Battery
+
+**3. Progressive Battery Icons** ✅
+Enhanced battery visualization with 20-level granularity.
+- Discharging: 20 levels (every 5%) for smooth visual feedback
+- Charging: 10 levels with charging-specific icons (󰢜󰂆󰂇󰂈󰢝󰂉󰢞󰂊󰂋󰂅)
+- Critical Alert: ⚠ warning symbol when battery ≤ 10% and not charging
+- Config: `BATTERY_CRITICAL_THRESHOLD = 10`
+
+**4. Git Branch Widget** ✅ (2025-12-21)
+Developer context showing current git branch with status indication.
+- Icon: `` (nf-dev-git_branch)
+- Branch name truncated to 20 chars max
+- Dirty indicator: `*` suffix when uncommitted changes
+- Color coding:
+  - Cyan: Clean working directory
+  - Orange: Dirty (uncommitted changes)
+  - Pink: Detached HEAD state
+- Caching: 5-second TTL to minimize git subprocess calls
+- Uses active window's cwd via `get_boss().active_window.child.current_cwd`
+- Config: `SHOW_GIT_BRANCH = True`, `GIT_CACHE_TTL = 5.0`
+
 **Files Modified:**
 - `~/.local/share/chezmoi/private_dot_config/kitty/tab_bar.py` (source)
 - `~/.config/kitty/tab_bar.py` (deployed)
@@ -643,7 +678,59 @@ Revolutionary color philosophy applied: LOW usage = GORGEOUS Dracula colors (pur
 - Ultrathinking analysis (15 thoughts on adaptive beauty philosophy)
 - Web research: Dracula tmux, WezTerm bars, Starship prompts, r/unixporn
 
+### 🚀 GPU Optimization for AI Agents (2025-12-21 06:30)
+
+**System Configuration:**
+- GPU: NVIDIA GeForce GTX 960 (4GB VRAM)
+- OpenGL: 4.6 with NVIDIA driver 570.195.03
+- Direct rendering: Enabled
+
+**Performance Settings Applied:**
+
+| Setting | Before | After | Impact |
+|---------|--------|-------|--------|
+| `repaint_delay` | 10ms | 6ms | 40% faster screen updates |
+| `input_delay` | 3ms | 1ms | 67% faster keystroke response |
+| `text_composition_strategy` | platform | 1.2 10 | Better dark theme rendering |
+| `wayland_enable_ime` | no | no | Lower latency (already set) |
+
+**Ultra Low Latency Mode (Optional):**
+For maximum performance with AI agents (Claude Code, Codex, Gemini CLI):
+```conf
+input_delay 0
+repaint_delay 2
+sync_to_monitor no
+```
+⚠️ May cause slight screen tearing during fast scrolling.
+
+**Kitty Throughput Benchmarks:**
+| Terminal | Average MB/s |
+|----------|--------------|
+| kitty 0.33 | **134.55** |
+| gnome-terminal | 61.83 |
+| alacritty | 54.05 |
+
+Kitty is 2x+ faster than alternatives - ideal for AI agent output.
+
+**AI Agent Considerations:**
+- Claude Code, Codex, Gemini CLI produce rapid text bursts
+- Lower delays = faster visible output
+- GPU handles glyph caching in VRAM
+- tab_bar.py uses 3-second refresh (low GPU impact)
+
+**tab_bar.py GPU Impact:**
+- Refresh rate: 3 seconds (0.3% CPU)
+- Widgets use cached color values
+- Sparklines use CPU, not GPU (intentional)
+- No GPU bottlenecks identified
+
 ### Implementation Status
+
+**Phase 0: Developer Context** ✅ COMPLETE (2025-12-21)
+   -  Git Branch - Shows current branch with dirty indicator (*)
+   - **Colors:** Cyan=clean, Orange=dirty, Pink=detached HEAD
+   - **Caching:** 5-second TTL to minimize subprocess calls
+   - **Performance:** Negligible (only calls git when cache expires)
 
 **Phase 1: Essential Widgets** ✅ COMPLETE & TESTED (2025-12-16 23:15)
    -  Time (HH:MM format) - Working, updates every 3 seconds
@@ -741,7 +828,7 @@ Revolutionary color philosophy applied: LOW usage = GORGEOUS Dracula colors (pur
 **Advanced Features Deferred (Not Critical):**
 - K8s context (can add as optional widget later)
 - Container count (less relevant when replacing tmux)
-- Git branch (better in shell prompt via starship/zellij)
+- ~~Git branch (better in shell prompt via starship/zellij)~~ ✅ IMPLEMENTED (2025-12-21)
 
 **Conclusion:** This design exceeds original Phase E requirements while being more robust, better documented, and more performant. Phase E is REPLACED, not just completed.
 
@@ -1313,25 +1400,1164 @@ cp ~/.config/kitty/kitty.conf.backup.20251201 ~/.config/kitty/kitty.conf
 
 ---
 
+## 📋 PHASE J: User Ideas & Future Enhancements (2025-12-21)
+
+**Status:** 📝 DOCUMENTED FOR FUTURE IMPLEMENTATION
+**Collected:** 2025-12-21 22:30 (Europe/Athens)
+**Priority:** To be scheduled in future sessions
+
+This section captures user's comprehensive vision for kitty terminal enhancements, collected during planning discussion.
+
+---
+
+### J.1: Keyboard Shortcuts Overhaul
+
+**Goal:** Comprehensive keyboard shortcut reconfiguration for improved workflow
+
+#### J.1.1: Terminal Input Shortcuts (bashrc/readline)
+
+| Shortcut | Current | Desired | Implementation |
+|----------|---------|---------|----------------|
+| `Shift+Enter` | Run command | **New line** (don't execute) | `.inputrc` or bashrc readline binding |
+| `Ctrl+Backspace` | Nothing | **Delete word** backward | `.inputrc` binding: `"\C-h": backward-kill-word` |
+
+**Technical Notes:**
+- These are shell/readline behaviors, not kitty-specific
+- Configure via chezmoi in `dot_inputrc` or `dot_bashrc.tmpl`
+- Research: `bind -x` for bash, `.inputrc` for readline
+
+#### J.1.2: Kitty Terminal Spawning
+
+| Shortcut | Action | Implementation |
+|----------|--------|----------------|
+| `Ctrl+Alt+T` | Spawn new kitty window | `map ctrl+alt+t new_os_window` |
+| `Ctrl+Alt+Enter` | Spawn new kitty window | `map ctrl+alt+enter new_os_window` |
+
+**Note:** May conflict with KDE Plasma global shortcuts - verify no conflicts
+
+#### J.1.3: Split Navigation (Replace Current Config)
+
+| Shortcut | Current | Desired |
+|----------|---------|---------|
+| `Ctrl+Shift+Left` | Previous tab | **Navigate to left split** |
+| `Ctrl+Shift+Right` | Next tab | **Navigate to right split** |
+| `Ctrl+Shift+Up` | (unused) | **Navigate to upper split** |
+| `Ctrl+Shift+Down` | (unused) | **Navigate to lower split** |
+
+**Implementation:**
+```conf
+# Replace current Ctrl+Shift+Arrow (tab nav) with split nav
+map ctrl+shift+left neighboring_window left
+map ctrl+shift+right neighboring_window right
+map ctrl+shift+up neighboring_window up
+map ctrl+shift+down neighboring_window down
+```
+
+**Note:** Tab navigation remains on `Alt+Left/Right` (already configured)
+
+#### J.1.4: Split Layout Management
+
+| Shortcut | Action | Description |
+|----------|--------|-------------|
+| `Ctrl+Space` | Rotate splits clockwise | Cycle window positions within current layout |
+| `Ctrl+Shift+Space` | Cycle layout modes | Switch between layout presets (dynamic) |
+
+**Layout Modes to Implement (Dynamic/Adaptive):**
+```
+2 windows: Horizontal split (side-by-side)
+┌─────────┬─────────┐
+│    1    │    2    │
+└─────────┴─────────┘
+
+3+ windows: Master-Stack (as shown in user screenshot)
+┌─────────┬─────────┐
+│         │    2    │
+│    1    ├─────────┤
+│ (master)│    3    │
+└─────────┴─────────┘
+
+Alternative layouts to cycle:
+- All horizontal
+- All vertical
+- Grid (2x2, 3x3)
+- Master-left (current)
+- Master-right (mirror)
+```
+
+**Research Required:**
+- Kitty `enabled_layouts` configuration
+- Custom layout via Python kitten
+- i3-style dynamic tiling behavior
+
+#### J.1.5: KDE Plasma System Shortcuts (Not Kitty)
+
+| Shortcut | Action | Implementation |
+|----------|--------|----------------|
+| `Meta+Alt+PageUp` | Volume Up | KDE kglobalshortcutsrc |
+| `Meta+Alt+PageDown` | Volume Down | KDE kglobalshortcutsrc |
+
+**Implementation:** Add to chezmoi `kglobalshortcutsrc` template
+
+---
+
+### J.2: Git Widget Comprehensive Redesign
+
+**Current State:** Shows branch name only (✅ working)
+**Goal:** Rich, interactive git status widget with TUI integration
+
+#### J.2.1: Widget Information Expansion
+
+**Current:** ` main*` (branch + dirty indicator)
+
+**Desired Information:**
+| Info | Format | Example | Priority |
+|------|--------|---------|----------|
+| Branch name | `branch` | `main` | ✅ Done |
+| Dirty indicator | `*` suffix | `main*` | ✅ Done |
+| Ahead/behind remote | `↓N ↑M` | `↓3 ↑2` | HIGH |
+| Staged files count | `+N` | `+3` | HIGH |
+| Modified files count | `~N` | `~2` | HIGH |
+| Deleted files count | `-N` | `-1` | MEDIUM |
+| Last commit time | `Nh ago` | `2h ago` | LOW |
+
+**Desired Format Example:**
+```
+ main* ↓3↑2 +3~2-1
+```
+
+#### J.2.2: Widget Layout Reorganization
+
+**Current Layout (left to right after tabs):**
+```
+[Tabs] │ Git │ SRE(Load,CPU,RAM) │ Storage │ Network │ Time │ Date │ Battery
+```
+
+**Desired Layout:**
+```
+[Tabs] │ Git (expanded) │ SRE(CPU only with sparkline) │ Storage │ Network │ Date │ Time │ Battery
+```
+
+**Changes:**
+- [ ] Move Git widget to LEFT (first after tabs) ✅ Already done
+- [ ] Move Date/Time to RIGHT side (before battery)
+- [ ] Remove sparkline history from: RAM, Load (keep CPU only)
+- [ ] Git widget: Dynamic sizing based on content
+- [ ] Compact overall layout to make room for rich git info
+
+#### J.2.3: Git Widget Interactivity (RESEARCH REQUIRED)
+
+**Limitation:** Kitty tab bar does NOT support mouse events by design
+
+**Desired Interactions:**
+| Action | Behavior |
+|--------|----------|
+| **Click** | Open lazygit TUI in new split/pane |
+| **Ctrl+Click** | Open VSCodium Source Control panel |
+| **Hover** | Show detailed git status popup (colorized) |
+
+**Research Directions:**
+1. **pawbar** (https://github.com/codelif/pawbar) - Terminal-based panel using kitty panel kitten
+2. **External overlay tool** - Separate process monitoring mouse position
+3. **Keyboard shortcuts as alternative** - `Ctrl+G` opens lazygit, etc.
+4. **F12 panel enhancement** - Show git info in dropdown panel
+
+**Fallback Plan (if mouse not possible):**
+- `Ctrl+G` or `F9` → Open lazygit in split
+- `Ctrl+Shift+G` → Open VSCodium git panel
+- Git info always visible in widget (no hover needed)
+
+#### J.2.4: Git Auto-Detection on Directory Change
+
+**Behavior:** Widget should:
+1. Detect when `cd` changes to a git repo
+2. Update branch/status immediately
+3. Hide/minimize when not in git repo
+4. Track active window's cwd (already implemented via `get_boss().active_window.child.current_cwd`)
+
+**Current:** 5-second cache - may need reduction for responsiveness
+
+---
+
+### J.3: Kitty Smart Tab Integration
+
+**Tool:** https://github.com/yurikhan/kitty-smart-tab
+**Purpose:** Enhanced tab management with smart behaviors
+
+**Features to Research:**
+- [ ] What does kitty-smart-tab provide over default?
+- [ ] Installation via chezmoi (similar to kitty_search)
+- [ ] Configuration options
+- [ ] Compatibility with current shortcuts
+
+**Installation Plan:**
+```bash
+cd ~/.config/kitty
+git clone https://github.com/yurikhan/kitty-smart-tab smart_tab
+```
+
+**Add to chezmoi:** `dotfiles/private_dot_config/kitty/smart_tab/`
+
+---
+
+### J.4: Implementation Priority Matrix
+
+| Feature | Complexity | Impact | Priority | Session |
+|---------|------------|--------|----------|---------|
+| Ctrl+Shift+Arrow split nav | LOW | HIGH | 🔴 P1 | Next |
+| Ctrl+Space rotate splits | LOW | MEDIUM | 🔴 P1 | Next |
+| Shift+Enter new line | LOW | HIGH | 🔴 P1 | Next |
+| Ctrl+Backspace delete word | LOW | HIGH | 🔴 P1 | Next |
+| New terminal shortcuts | LOW | MEDIUM | 🔴 P1 | Next |
+| Remove RAM/Load sparklines | LOW | LOW | 🟡 P2 | Next |
+| Reorder widgets (git left, time right) | MEDIUM | MEDIUM | 🟡 P2 | Next |
+| Git ahead/behind info | MEDIUM | HIGH | 🟡 P2 | Next |
+| Git staged/modified counts | MEDIUM | HIGH | 🟡 P2 | Next |
+| Ctrl+Shift+Space layout cycling | HIGH | HIGH | 🟠 P3 | Future |
+| kitty-smart-tab integration | MEDIUM | MEDIUM | 🟠 P3 | Future |
+| KDE volume shortcuts | LOW | LOW | 🟢 P4 | Future |
+| Clickable widgets research | HIGH | HIGH | 🔵 Research | Future |
+| lazygit TUI integration | HIGH | HIGH | 🔵 Research | Future |
+
+---
+
+### J.5: Questions for Future Sessions
+
+**Layout Cycling:**
+- [ ] Which exact layouts to include in cycle?
+- [ ] Should layout persist per tab or global?
+- [ ] Keybinding for specific layout (not cycle)?
+
+**Git Widget:**
+- [ ] Maximum width for git widget?
+- [ ] What to show when repo has no remote?
+- [ ] Color scheme for ahead/behind indicators?
+
+**Interactivity:**
+- [ ] Acceptable to use keyboard shortcuts instead of mouse?
+- [ ] Should lazygit open in split, new tab, or overlay?
+- [ ] VSCodium integration: which workspace to open?
+
+---
+
+### J.6: Reference Screenshot
+
+**User's Desired Layout (2025-12-21):**
+```
+Screenshot: /tmp/Spectacle.HscPyQ/Screenshot_20251221_222401.png
+
+Shows: Master-stack layout
+┌─────────────────┬─────────────────┐
+│                 │  Terminal 2     │
+│  Terminal 1     ├─────────────────┤
+│  (Master/Left)  │  Terminal 3     │
+│                 │  (Stacked/Right)│
+└─────────────────┴─────────────────┘
+```
+
+This is the target layout for 3+ windows configuration.
+
+---
+
+## 📋 PHASE K: Advanced Integrations & Optimizations (2025-12-21)
+
+**Status:** 🔬 RESEARCH COMPLETE - Ready for Implementation Planning
+**Collected:** 2025-12-21 23:15 (Europe/Athens)
+**Research Completed:** 2025-12-22
+**Priority:** Features prioritized based on feasibility research
+
+This section captures user's comprehensive vision for advanced kitty terminal integrations, including browser, Obsidian, calendar, and system optimizations.
+
+---
+
+### 🔬 Research Summary (2025-12-22)
+
+**Research Documentation:** `docs/researches/kitty-enhancements-research-22-12-2025.md`
+
+#### ❌ Features Confirmed NOT FEASIBLE
+
+| Feature | Reason | Alternative |
+|---------|--------|-------------|
+| **Firefox Panel Overlay** | Kitty panel kitten only supports terminal programs | Use Browsh (TUI browser) |
+| **Obsidian Panel Overlay** | Electron apps cannot be embedded in terminals | File system + URI scheme |
+| **Calendar Widget Clicks** | Kitty tab bar has no mouse event support | Keyboard shortcuts |
+
+#### ✅ Features Ready for Implementation
+
+| Feature | Effort | Approach |
+|---------|--------|----------|
+| **TUI Browser** | 1-2h | Install Browsh via nixpkgs |
+| **Right-Click Menu** | 4-6h | rofi -dmenu -monitor -3 |
+| **GPU Optimization** | 1h | Update kitty.conf (repaint_delay 6, input_delay 2) |
+| **RAM Optimization** | 30m | scrollback_lines 2000 |
+| **Notifications** | 1-2h | kitten notify + undistract-me |
+| **Document Viewing** | 2-3h | termpdf.py + tdf + glow |
+| **Obsidian Integration** | 2-3h | onote() shell function + URI scheme |
+| **Session Persistence** | 3-4h | kitty --session + custom kitten |
+
+#### Implementation Priority Order
+
+**Phase K.1 (Quick Wins - 2-3 hours):**
+1. GPU/RAM Optimization (config only)
+2. TUI Browser (Browsh)
+3. Terminal Notifications (undistract-me)
+
+**Phase K.2 (Medium Effort - 6-8 hours):**
+4. Right-Click Context Menu (rofi)
+5. Document Viewing Tools (termpdf.py, glow)
+6. Obsidian Integration (shell functions)
+
+**Phase K.3 (Advanced - 4-6 hours):**
+7. Session Persistence (custom kitten)
+8. Quick Notes Widget (tab_bar.py addition)
+9. Calendar Display (gcalcli + keyboard shortcuts)
+
+---
+
+### Multi-Role Review Summary (2025-12-22)
+
+**Reviews Conducted:**
+- 🔬 Technical Researcher: Verified tool versions, security status
+- 💻 Developer: Code quality, error handling, dependencies
+- 🔧 Ops Engineer: System integration, security, reproducibility
+
+#### 🔴 CRITICAL FINDINGS
+
+**1. Security: `allow_remote_control yes` is INSECURE**
+- Current config allows any process to control kitty
+- **MUST change to:** `allow_remote_control socket-only`
+- Generate password: `openssl rand -base64 32 > ~/.config/kitty/.remote_password`
+- **DO NOT implement right-click menu until fixed**
+
+**2. Carbonyl: SECURITY RISK**
+- Last updated Feb 2023 (2+ years ago)
+- Chromium fork with 50+ unpatched vulnerabilities
+- **Recommendation:** Use Browsh only, skip Carbonyl
+
+#### 🟡 IMPORTANT FINDINGS
+
+**3. Revised Effort Estimates:**
+| Original | Realistic |
+|----------|-----------|
+| 12-17 hours | **24-36 hours** |
+
+**4. Code Issues Found:**
+- No error handling in context-menu.sh
+- Unsafe URL encoding in shell scripts
+- Missing input validation in Obsidian helpers
+- Blocking I/O in tab_bar.py widget
+
+**5. NixOS Gaps:**
+- termpdf.py, tdf, undistract-me NOT in nixpkgs
+- Manual installation required (reduces reproducibility)
+
+#### ✅ VERIFIED CORRECT
+
+- GitHub #7632 quote about context menus: Accurate
+- GitHub #4447 tab bar limitation: Confirmed
+- GTX 960 GPU settings: Optimal for hardware
+- Browsh recommendation over Carbonyl: Valid
+- tdf recently updated (v0.5.0, Dec 2025): Very active
+
+#### Revised Priority Order
+
+**Week 1 (Foundation - LOW RISK):**
+1. GPU/RAM Optimization (config only)
+2. Document viewing (glow, zathura - nixpkgs)
+3. Notifications (shell hooks)
+
+**Week 2 (Enhancements - MEDIUM RISK):**
+4. Browsh TUI browser
+5. Obsidian shell functions (with input validation)
+6. Session files (basic, no custom kitten)
+
+**Week 3+ (Advanced - AFTER SECURITY FIX):**
+7. Right-click menu (requires secure remote control)
+8. Quick notes widget
+9. Calendar (optional)
+
+---
+
+### K.1: Browser Integration
+
+**Status:** 🔬 RESEARCH COMPLETE
+**Goal:** Web browsing within kitty terminal environment
+
+#### K.1.1: Firefox Overlay Panel
+
+**Research Finding:** ❌ **NOT FEASIBLE**
+
+| Barrier | Explanation |
+|---------|-------------|
+| Panel kitten architecture | Only supports terminal programs, not GUI apps |
+| Browser XEmbed removal | Firefox/Chrome removed embedding for security |
+| No standard protocol | Wayland has no window embedding protocol |
+
+**Verdict:** Do NOT pursue. Use TUI browser instead.
+
+#### K.1.2: TUI Browser (Browsh) ✅ RECOMMENDED
+
+| Setting | Value |
+|---------|-------|
+| **Tool** | Browsh (Firefox-based) |
+| **Installation** | `pkgs.browsh` in home-manager |
+| **Trigger** | `F10` or shell alias `web` |
+| **Use Cases** | Documentation, AI chat (Claude/ChatGPT) |
+
+**Why Browsh over Carbonyl:**
+- Active development (Jan 2024 vs Feb 2023)
+- Available in nixpkgs
+- Regular Firefox security updates
+- Extension support
+
+**Implementation:**
+```nix
+# home-manager
+home.packages = with pkgs; [ browsh firefox ];
+```
+
+```conf
+# kitty.conf
+map f10 launch --type=overlay browsh
+```
+
+---
+
+### K.2: Right-Click Context Menu
+
+**Status:** 🔬 RESEARCH COMPLETE
+**Goal:** Comprehensive context menu for terminal interactions
+**Implementation:** rofi -dmenu with -monitor -3 (appears at cursor)
+
+#### Research Finding
+
+**Native Support:** ❌ Kitty will NEVER have native context menus (developer confirmed)
+**Solution:** ✅ rofi + kitty remote control
+
+#### Recommended Implementation
+
+**⚠️ SECURITY: Must use secure remote control configuration!**
+
+**kitty.conf (SECURE):**
+```conf
+# SECURE remote control - required for context menu
+allow_remote_control socket-only
+listen_on unix:/tmp/kitty-${KITTY_PID}
+remote_control_password file:~/.config/kitty/.remote_password
+
+# Right-click triggers context menu
+mouse_map right press ungrabbed launch --type=background ~/.config/kitty/context-menu.sh
+```
+
+**Script:** `~/.config/kitty/context-menu.sh` (with error handling)
+```bash
+#!/bin/bash
+set -euo pipefail
+
+# Check rofi is available
+if ! command -v rofi &>/dev/null; then
+    notify-send "Error" "rofi is not installed"
+    exit 1
+fi
+
+# Check kitty remote control
+PASSWORD_FILE="$HOME/.config/kitty/.remote_password"
+if [[ ! -f "$PASSWORD_FILE" ]]; then
+    notify-send "Error" "Kitty password file not found"
+    exit 1
+fi
+
+KITTY_CMD="kitty @ --password-file=$PASSWORD_FILE"
+
+# Show menu with timeout (prevents hanging)
+MENU="📋 Copy\n📄 Paste\n🔗 Open URL\n🔍 Search"
+CHOICE=$(echo -e "$MENU" | timeout 5s rofi -dmenu -i -monitor -3 \
+    -theme-str 'window {width: 200px;}' -p "") || exit 0
+
+case "$CHOICE" in
+    *"Copy"*) $KITTY_CMD send-key ctrl+shift+c ;;
+    *"Paste"*) $KITTY_CMD send-key ctrl+shift+v ;;
+    *"Open URL"*) $KITTY_CMD kitten hints --type url ;;
+    *"Search"*)
+        SEL=$($KITTY_CMD get-text --extent selection | tr -d '\n')
+        # URL-safe encoding via Python
+        ENCODED=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$SEL'))")
+        xdg-open "https://google.com/search?q=${ENCODED}"
+        ;;
+esac
+```
+
+#### K.2.1: Basic Actions ✅
+
+| Action | Implementation |
+|--------|----------------|
+| Copy | `kitty @ send-key ctrl+shift+c` |
+| Paste | `kitty @ send-key ctrl+shift+v` |
+| Select All | `kitty @ send-key ctrl+shift+a` |
+
+#### K.2.2: URL & File Operations ✅
+
+| Action | Implementation |
+|--------|----------------|
+| Open URL | `kitty @ kitten hints --type url` |
+| Open in editor | `xdg-open` on selected path |
+| Copy path | Extract and pipe to `wl-copy` |
+
+**Complexity Rating:**
+- Implementation: 5/10
+- UX: 8/10 (near-native feel with rofi)
+
+---
+
+### K.3: GPU & RAM Optimization
+
+**Status:** 🔬 RESEARCH COMPLETE
+**Goal:** Maximize performance on NVIDIA GTX 960, optimize memory usage
+
+#### K.3.1: GPU Settings ✅ READY
+
+**GTX 960 Profile:**
+- OpenGL 4.6 (exceeds kitty's 3.3 requirement)
+- Use proprietary nvidia drivers
+
+**Recommended kitty.conf:**
+```conf
+# Balanced (RECOMMENDED)
+repaint_delay 6              # 40% faster than default
+input_delay 2                # 33% faster than default
+sync_to_monitor yes          # Prevent tearing
+text_composition_strategy 1.2 10   # Better dark theme rendering
+
+# Ultra Low Latency (for AI agents)
+input_delay 0
+repaint_delay 2
+sync_to_monitor no           # May cause slight tearing
+```
+
+**Performance:** Kitty is 2x+ faster than alternatives (134.55 MB/s vs 61.83 gnome-terminal)
+
+#### K.3.2: RAM Optimization ✅ READY
+
+**Scrollback Buffer Impact:**
+| scrollback_lines | Memory per Window |
+|------------------|-------------------|
+| 10000 (default) | ~12-15 MB |
+| 2000 (recommended) | ~10 MB |
+| 500 (minimal) | ~3 MB |
+
+**Recommended:**
+```conf
+scrollback_lines 2000
+scrollback_pager_history_size 0
+```
+
+**Swap (NixOS):** Enable zram for compressed swap
+```nix
+zramSwap = { enable = true; algorithm = "zstd"; memoryPercent = 50; };
+```
+
+**Effort:** 1 hour total (config changes only)
+
+---
+
+### K.4: Enhanced Refresh (Ctrl+Shift+F5)
+
+**Goal:** Comprehensive terminal refresh shortcut
+**Current:** Ctrl+Shift+F5 = `load_config_file` (reload kitty.conf only)
+
+**Desired Behavior:**
+1. Reload kitty.conf (existing)
+2. Force tab bar redraw (new - refresh all widgets)
+
+**Implementation:**
+```conf
+# Enhanced refresh: config + tab bar
+map ctrl+shift+f5 combine : load_config_file : signal_child SIGUSR1
+```
+
+**Research Needed:**
+- [ ] How to force tab_bar.py to re-render
+- [ ] Signal handling in custom tab bar
+- [ ] Possible: add refresh function in tab_bar.py that resets caches
+
+---
+
+### K.5: Obsidian Integration
+
+**Status:** 🔬 RESEARCH COMPLETE
+**Goal:** Terminal integration with Obsidian vault
+**Vault Location:** `~/.MyHome/vault`
+
+#### K.5.1: Research Findings
+
+**Panel Overlay:** ❌ NOT FEASIBLE (Electron app cannot be embedded)
+
+**Recommended Approach:** ✅ Hybrid file system + URI scheme
+
+#### K.5.2: Implementation ✅ READY
+
+**Shell Functions:**
+```bash
+# ~/.bashrc
+export OBSIDIAN_VAULT="$HOME/.MyHome/vault"
+
+# Quick note to inbox
+onote() { echo "- $(date +%H:%M) - $@" >> "$OBSIDIAN_VAULT/Inbox.md"; }
+
+# Open note in Obsidian app
+oopen() { xdg-open "obsidian://open?vault=MyVault&file=$1"; }
+
+# Render markdown in terminal
+oview() { glow "$OBSIDIAN_VAULT/$1.md"; }
+
+# Search vault
+osearch() { grep -rn "$1" "$OBSIDIAN_VAULT" --include="*.md" | fzf; }
+```
+
+#### K.5.3: Document Viewing ✅ READY
+
+| Format | Tool | Command |
+|--------|------|---------|
+| Markdown | glow | `glow note.md` |
+| PDF | termpdf.py | `termpdf.py doc.pdf` |
+| LaTeX | latexmk -pvc | `latexmk -pdf -pvc doc.tex` + zathura |
+
+**Effort:** 2-3 hours
+
+---
+
+### K.6: Document Viewing in Terminal
+
+**Goal:** View documents without leaving terminal
+
+#### K.6.1: PDF Preview
+
+| Requirement | Description |
+|-------------|-------------|
+| View in panel | PDF viewer in kitty panel overlay |
+| Tools to research | zathura, termpdf, tpdf, pdf2txt |
+
+#### K.6.2: LaTeX Live Preview
+
+| Requirement | Description |
+|-------------|-------------|
+| Live compilation | See output while editing .tex files |
+| Tools to research | latexmk --pvc, tectonic, entr |
+
+#### K.6.3: Markdown Rendering
+
+| Requirement | Description |
+|-------------|-------------|
+| In-terminal render | Formatted markdown in terminal |
+| Tools to research | glow, mdcat, bat with markdown |
+
+---
+
+### K.7: Terminal Notifications
+
+**Goal:** Desktop notifications for terminal events
+
+#### K.7.1: Notification Triggers
+
+| Event | Description |
+|-------|-------------|
+| Long command completion | Commands taking >30 seconds |
+| Build/test results | make, npm, cargo build completion |
+| Background job done | & background processes complete |
+
+**Implementation Approach:**
+- kitty's `notify` action
+- `command_on_bell` configuration
+- Shell integration with notify-send
+- Tools: undistract-me, ntfy, terminal-notifier
+
+**Research Needed:**
+- [ ] kitty native notification support
+- [ ] Shell hooks for command completion
+- [ ] KDE Plasma notification integration
+- [ ] Threshold configuration (>30s, >60s, custom)
+
+---
+
+### K.8: Session Persistence
+
+**Goal:** Save and restore complete terminal sessions
+
+#### K.8.1: What to Save
+
+| Component | Include |
+|-----------|---------|
+| Window layout | Tab structure, split positions |
+| Working directories | cwd per pane |
+| Command history | Recent commands per pane |
+| Environment variables | Exported vars |
+| Running processes | Active commands (where possible) |
+
+**Scope:** Full state persistence
+
+#### K.8.2: Session Naming
+
+| Method | Description |
+|--------|-------------|
+| Primary | Project/repo name (auto-detected from cwd) |
+| Secondary | Tab names included in session name |
+| Format | `{project}-{tab1}-{tab2}-{timestamp}` |
+
+**Research Needed:**
+- [ ] kitty session file format
+- [ ] kitty --session flag capabilities
+- [ ] Saving/restoring environment state
+- [ ] Integration with shell history
+- [ ] Possible: custom kitten for session management
+
+---
+
+### K.9: Calendar Integration
+
+**Status:** 🔬 RESEARCH COMPLETE
+**Goal:** Calendar access from terminal
+
+#### K.9.1: Research Findings
+
+**Clickable Widget:** ❌ NOT SUPPORTED (kitty tab bar has no mouse event handling)
+**Plasma Calendar DBus:** ❌ No method to programmatically open popup
+
+#### K.9.2: Recommended Approach ✅
+
+**Display-only badge + keyboard shortcuts:**
+
+```
+Tab Bar: | ... | 📅 Dec 22 | 3 events | ...
+Keyboard: F8 → Open Merkuro/KOrganizer
+```
+
+**Implementation:**
+```conf
+# kitty.conf
+map f8 launch --type=background merkuro-calendar
+map ctrl+shift+c launch --type=overlay bash -c "gcalcli agenda; read"
+```
+
+**Google Calendar Sync:**
+- Install Merkuro + Akonadi via home-manager
+- Configure via KDE System Settings → Online Accounts
+
+#### K.9.3: Terminal Calendar Tools
+
+| Tool | Purpose |
+|------|---------|
+| gcalcli | CLI for Google Calendar |
+| khal | Terminal calendar with vdirsyncer |
+| Merkuro | Modern KDE calendar app |
+
+**Effort:** 3-4 hours (includes Akonadi setup)
+
+---
+
+### K.10: Widget Layout Reorganization
+
+**Goal:** Optimal tab bar widget arrangement
+
+#### Current Layout
+```
+[Tabs] │ Git │ SRE(Load,CPU,RAM) │ Storage │ Network │ Time │ Date │ Battery
+```
+
+#### Desired Layout
+```
+[Tabs] │ Git │ Notes │ ← LEFT    CENTER → │ CPU │ RAM │ Storage │ Network │    RIGHT → │ Time │ Calendar │ Battery
+```
+
+| Position | Widgets |
+|----------|---------|
+| **Left** (after tabs) | Git (expanded), Quick-notes |
+| **Center** | SRE metrics (CPU with sparkline, RAM, Load) |
+| **Right** (edge) | Time, Calendar, Battery |
+
+**Changes from Current:**
+- Add Quick-notes widget (new)
+- Move Date/Time to right side
+- Add Calendar widget indicator (new)
+- Reorder for logical grouping
+
+---
+
+### K.11: Implementation Priority Matrix (Phase K)
+
+| Feature | Complexity | Research Needed | Priority |
+|---------|------------|-----------------|----------|
+| Ctrl+Shift+F5 refresh | LOW | LOW | 🔴 P1 |
+| Widget layout reorg | MEDIUM | LOW | 🟡 P2 |
+| Terminal notifications | MEDIUM | MEDIUM | 🟡 P2 |
+| Firefox panel | HIGH | HIGH | 🟠 P3 |
+| Right-click menu | HIGH | HIGH | 🟠 P3 |
+| Session persistence | HIGH | MEDIUM | 🟠 P3 |
+| TUI browser | MEDIUM | MEDIUM | 🟠 P3 |
+| GPU/RAM optimization | MEDIUM | HIGH | 🟠 P3 |
+| Obsidian integration | HIGH | HIGH | 🔵 Research |
+| Calendar integration | HIGH | HIGH | 🔵 Research |
+| Document viewing | HIGH | HIGH | 🔵 Research |
+
+---
+
+### K.12: Research Sessions - ✅ COMPLETED
+
+**Research Date:** 2025-12-22
+**Documentation:** `docs/researches/kitty-enhancements-research-22-12-2025.md`
+
+All research sessions completed with the following outcomes:
+
+| Topic | Status | Key Finding |
+|-------|--------|-------------|
+| Browser Panel | ✅ Complete | NOT feasible - use Browsh TUI |
+| Right-Click Menu | ✅ Complete | rofi -monitor -3 solution |
+| Obsidian Integration | ✅ Complete | URI scheme + shell functions |
+| Document Viewing | ✅ Complete | termpdf.py, tdf, glow |
+| Calendar Integration | ✅ Complete | Keyboard shortcuts (no clicks) |
+| GPU/RAM Optimization | ✅ Complete | GTX 960 settings documented |
+| Notifications | ✅ Complete | kitten notify + undistract-me |
+| Session Persistence | ✅ Complete | kitty --session + custom kitten |
+
+**Key Limitations Confirmed:**
+1. Kitty tab bar has NO mouse event support for custom content
+2. GUI apps (Firefox, Obsidian) CANNOT be embedded in terminal
+3. Plasma calendar has NO DBus method for opening popup
+
+---
+
+### K.13: Questions for Future Sessions
+
+**Browser Integration:**
+- [ ] Should Firefox panel persist between kitty restarts?
+- [ ] Default URL for Firefox panel (blank, docs site, AI chat)?
+- [ ] Keyboard shortcuts for browser navigation from terminal?
+
+**Right-Click Menu:**
+- [ ] Menu theme/style (match KDE Plasma theme)?
+- [ ] Submenu organization or flat list?
+- [ ] Custom actions (user-defined scripts)?
+
+**Obsidian:**
+- [ ] Default note location for quick capture?
+- [ ] Template for captured content?
+- [ ] Tags to auto-add to captured notes?
+
+**Session Persistence:**
+- [ ] Auto-save on exit?
+- [ ] Maximum number of saved sessions?
+- [ ] Location for session files?
+
+---
+
+### K.14: Tmux Integration (Added 2025-12-22, Refined via Q&A)
+
+**Status:** 🔬 DEEP RESEARCH COMPLETE - Ready for Implementation
+**Research Documentation:** `docs/researches/kitty-enhancements-research-22-12-2025.md` (Sections 12.14-12.17)
+**Priority:** HIGH
+
+#### User Requirements (Refined via Q&A 2025-12-22)
+
+| Requirement | Value |
+|-------------|-------|
+| **Feature Split** | Kitty splits locally, tmux only for remote SSH |
+| **SSH Behavior** | Always auto-attach/create tmux on SSH |
+| **Bar Position** | Bottom (traditional) |
+| **Theme** | Dracula (match kitty) |
+| **Git Info** | Right side: branch, ahead/behind, staged/unstaged counts |
+| **Time Widget** | ❌ NO - kitty tab bar handles time |
+| **K8s Detail** | Full: cluster/context:namespace (e.g., gke-eu/prod/default) |
+| **K8s Colors** | Production=Red, Staging=Yellow, Dev=Green |
+| **Remote Info** | Full: hostname (IP) ↑uptime session_time |
+| **CPU Widget** | Minimal overlap - only in tmux for remote context |
+| **Local Behavior** | Show local hostname + k8s context |
+| **Server Types** | Mixed: production + development |
+
+#### Recommended Architecture
+
+```
+Kitty (Primary Interface - LOCAL ONLY)
+├── Tabs and splits for local work
+├── Window management (GPU-accelerated)
+├── Tab bar (time, SRE metrics: CPU, RAM, Load)
+└── Visual features (themes, transparency)
+
+Tmux (Secondary - FOR REMOTE + PERSISTENCE)
+├── Session persistence (resurrect/continuum)
+├── Remote SSH session management (auto-attach)
+├── Status bar (git, remote, k8s, CPU)
+└── SSH Config RemoteCommand approach
+```
+
+#### Feature Split Strategy
+
+| Context | Window Splits | Tmux Usage |
+|---------|---------------|------------|
+| **Local work** | Kitty splits only | Session persistence + status bar |
+| **Remote SSH** | Tmux splits | Full tmux features |
+
+#### Implementation Phases
+
+**Phase 1: SSH Auto-Attach Setup (1 hour)**
+1. Configure SSH matchBlocks in Home-Manager:
+   - `prod-tmux` → Auto-attach to tmux
+   - `prod` → Plain connection for git/scp
+   - Same pattern for dev servers
+2. Test nested tmux prevention
+3. Test with `kitten ssh prod-tmux`
+
+**Phase 2: Basic Tmux Setup (1-2 hours)**
+1. Install tmux via Home-Manager
+2. Configure tmux-resurrect for session persistence
+3. Configure tmux-continuum for auto-save (10min interval)
+4. Test session save/restore
+5. Add session management keybindings (S=new, J=join)
+
+**Phase 3: Status Bar Configuration (2-3 hours)**
+1. Install PowerKit (recommended for k8s support)
+2. Configure plugins:
+   - Git (right side): branch ↓↑ +~- with colors
+   - Kubernetes: cluster/context:namespace with env colors
+   - CPU: only for remote context awareness
+   - Remote: hostname (IP) ↑uptime session_time
+3. Apply Dracula theme
+4. Configure caching TTLs:
+   - CPU: 3s
+   - Git: 10s
+   - K8s: 15s
+
+**Phase 4: Kitty Integration (1 hour)**
+1. Configure kitty keybinding forwarding:
+   ```conf
+   map --when-focus-on title:tmux super+n send_text all \x01n
+   map --when-focus-on title:tmux super+p send_text all \x01p
+   ```
+2. Test local vs remote scenarios
+3. Verify no widget duplication with kitty tab bar
+
+**Total Estimated Time:** 5-7 hours
+
+#### Status Bar Layout (Final Design)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ [session] │ 󰣀 server01 (192.168.1.10) ↑45d 2h15m │ 󰠳 CPU 45% │ ⎈ gke-eu/prod/default │  main ↓3↑2 +3~2 │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+LEFT ────────────────────────────────────────────────────────────────────────────── RIGHT
+```
+
+**NO time widget** - kitty tab bar handles time display
+
+**Components:**
+| Position | Widget | Details |
+|----------|--------|---------|
+| Left | Session | tmux session name |
+| Left-Center | Remote | 󰣀 hostname (IP) ↑uptime session_time |
+| Center | CPU | 󰠳 CPU% (remote context only) |
+| Right-Center | K8s | ⎈ cluster/context:namespace (color-coded) |
+| Right | Git |  branch ↓behind ↑ahead +staged ~modified -deleted |
+
+#### SSH Auto-Attach Configuration
+
+```nix
+programs.ssh.matchBlocks = {
+  # Tmux-enabled aliases
+  "prod-tmux" = {
+    hostname = "production.example.com";
+    user = "admin";
+    extraOptions = {
+      RequestTTY = "yes";
+      RemoteCommand = "tmux new-session -A -s prod";
+    };
+  };
+
+  # Regular connections (git push, scp work)
+  "prod" = { hostname = "production.example.com"; user = "admin"; };
+};
+```
+
+#### Home-Manager Configuration (Template)
+
+```nix
+{ pkgs, ... }:
+{
+  programs.tmux = {
+    enable = true;
+    terminal = "tmux-256color";
+    historyLimit = 100000;
+
+    plugins = with pkgs; [
+      # Theme first (ORDER MATTERS)
+      # tmux-powerkit would go here
+
+      # Session persistence
+      {
+        plugin = tmuxPlugins.resurrect;
+        extraConfig = ''
+          set -g @resurrect-strategy-nvim 'session'
+          set -g @resurrect-capture-pane-contents 'on'
+        '';
+      }
+      {
+        plugin = tmuxPlugins.continuum;
+        extraConfig = ''
+          set -g @continuum-restore 'on'
+          set -g @continuum-save-interval '10'
+        '';
+      }
+    ];
+
+    extraConfig = ''
+      set -g prefix C-a
+      set -g mouse on
+      set-option -g status-position bottom
+      set-option -g set-titles on
+      set-option -g set-titles-string "tmux:#S:#I:#W"
+      set -g status-interval 5
+
+      # Dracula theme colors
+      set -g status-style "bg=#282a36,fg=#f8f8f2"
+    '';
+  };
+}
+```
+
+#### Key Findings from Research
+
+| Finding | Impact |
+|---------|--------|
+| Performance overhead | ~50% throughput reduction (acceptable for DevOps) |
+| PowerKit has 37+ plugins | Kubernetes, Terraform, Git all available |
+| Plugin ordering critical | Themes before resurrect/continuum |
+| Keybinding forwarding | Works via window title detection |
+| Dracula theme available | Native support in most frameworks |
+
+---
+
+### K.15: Extended Tmux Configuration (Q&A Round 2 - 2025-12-22)
+
+**Status:** 🔬 DEEP RESEARCH COMPLETE - Ready for Implementation
+**Research Documentation:** `docs/researches/kitty-enhancements-research-22-12-2025.md` (Sections 12.17-12.23)
+**Priority:** HIGH
+
+#### Extended Requirements (Q&A Round 2)
+
+| Requirement | Value | Notes |
+|-------------|-------|-------|
+| **Auto-start** | Manual only | Tmux ONLY for remote SSH |
+| **Docker widget** | Resource usage | Count + CPU% + RAM |
+| **Sessions** | Hybrid approach | Project + context based |
+| **Visual style** | Left rounded | Tab-like segments |
+| **Session names** | Full descriptive | `work-dissertation`, `ssh-server01` |
+| **Persistence** | Full | Auto-restore ALL on reboot |
+
+#### New Components to Add
+
+**1. Docker Widget:**
+```
+🐳 5 ↑12.3% 512MB
+```
+- Custom script with 5s caching
+- Shows: count, total CPU%, total RAM
+
+**2. Rounded Segments:**
+- Nerd Font: `` (\uE0B4) left, `` (\uE0B6) right
+- Catppuccin `rounded` style or manual Dracula
+
+**3. Session Management (sesh + fzf):**
+```toml
+[[session]]
+name = "work-dissertation 📚"
+path = "~/Documents/dissertation"
+
+[[session]]
+name = "infra-prod 🏭"
+startup_command = "ssh admin@prod-server"
+```
+
+**4. Full Persistence:**
+```nix
+plugins = [
+  tmuxPlugins.dracula      # Themes FIRST
+  tmuxPlugins.resurrect    # Then resurrect
+  tmuxPlugins.continuum    # MUST BE LAST
+];
+```
+
+#### Updated Implementation Phases
+
+**Phase 1: SSH Auto-Attach (1 hour)**
+- Configure SSH matchBlocks
+- Test nested tmux prevention
+
+**Phase 2: Basic Tmux + Persistence (2 hours)**
+- Install tmux with resurrect + continuum
+- Configure full persistence
+- Test save/kill/restore cycle
+
+**Phase 3: Visual Styling (1-2 hours)**
+- Configure rounded segments
+- Apply Catppuccin Mocha or Dracula theme
+
+**Phase 4: Status Bar Widgets (2-3 hours)**
+- Docker widget with caching script
+- K8s context with color coding
+- Git status (right side)
+- Remote info (hostname, uptime)
+
+**Phase 5: Session Management (1-2 hours)**
+- Install sesh + fzf + zoxide
+- Configure session templates
+- Add keybindings (prefix + T)
+
+**Total Estimated Time:** 7-10 hours
+
+#### Final Status Bar Layout (Complete)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  work-session  󰣀 server01 (IP) ↑45d 2h  🐳 5 ↑12% 512MB  ⎈ gke-eu/prod/default   main ↓3↑2  │
+└─────────────────────────────────────────────────────────────────────────────────────────────────┘
+LEFT ────────────────────────────────────────────────────────────────────────────────────── RIGHT
+```
+
+**Widgets (left to right):**
+1. Session name (rounded segment)
+2. Remote: hostname (IP) ↑uptime session_time
+3. Docker: 🐳 count ↑CPU% RAM
+4. K8s: ⎈ cluster/context:namespace (color-coded)
+5. Git:  branch ↓behind ↑ahead (right side)
+
+**NO time widget** - kitty tab bar handles time
+
+---
+
 ## 🎬 Conclusion
 
-**Overall Status:** Highly successful implementation with 70% completion
+**Overall Status:** Highly successful implementation with 70% completion + DEEP TMUX RESEARCH COMPLETE
 
 **What Works Excellently:**
 - ✅ Kitty with enhanced shortcuts and kittens
 - ✅ Zellij integration with beautiful zjstatus
 - ✅ Declarative management via chezmoi + home-manager
 - ✅ Comprehensive documentation and cheatsheets
+- ✅ **Complete tmux integration research** (Q&A refined)
+
+**What's Ready for Implementation:**
+- Tmux integration (7-10 hours estimated)
+  - SSH auto-attach
+  - Full persistence (resurrect + continuum)
+  - Rounded segment styling
+  - Docker/K8s/Git widgets
+  - Hybrid session management (sesh)
 
 **What's Pending:**
 - User clarifications for remaining Phase C.2 features
 - User testing of new features
-- Decision on advanced status bar
+- **Tmux implementation** (ready to start)
 
-**Recommendation:** Test current setup in daily workflow before adding more features. The existing implementation already provides a powerful, beautiful terminal experience.
+**Recommendation:** The tmux research is comprehensive and ready for implementation. Start with Phase 1 (SSH auto-attach) and iterate through the phases.
 
 ---
 
 **Plan Maintained By:** Dimitris Tsioumas (Mitsio)
-**Last Updated:** 2025-12-14
-**Next Review:** After user testing and clarifications
+**Last Updated:** 2025-12-22 (Q&A Round 2 Complete)
+**Next Review:** After tmux implementation begins

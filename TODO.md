@@ -1407,14 +1407,13 @@ set -g pane-border-format " #{pane_index} #{pane_current_command} #{pane_current
 
 ## 📅 Timeline & Milestones
 
-### Week 48 (Nov 24-30, 2025)
-- Complete all immediate priority tasks
-- Commit all pending changes across repos
-- Verify home-manager generation #46 stable
-- Begin MCP servers reorganization
-
-### December 2025
-- Complete home-manager enhancements (Phases 1-3)
+### Week 52 (Dec 22-28, 2025)
+- [x] **Agents Configuration Enhancement**
+  - [x] Configure 90% compaction threshold (Gemini, Codex, Claude)
+  - [x] Remove redundant MCPs (Filesystem, Git, Shell)
+  - [x] Implement Custom Commands (/summary, /continuation)
+  - [x] Compact research docs to `docs/tools/*/optimization-research.md`
+- [ ] Complete home-manager enhancements (Phases 1-3)
 - Finalize ansible repository setup
 - Complete rclone collection migration
 - Documentation updates

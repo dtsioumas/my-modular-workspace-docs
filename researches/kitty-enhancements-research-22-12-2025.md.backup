@@ -1,0 +1,610 @@
+# Kitty Terminal Enhancements Research
+
+**Created:** 2025-12-22
+**Purpose:** Research findings for Phase K implementation
+**Status:** IN PROGRESS
+
+---
+
+## Table of Contents
+
+1. [Browser Integration](#1-browser-integration)
+2. [Right-Click Context Menu](#2-right-click-context-menu)
+3. [GPU & RAM Optimization](#3-gpu--ram-optimization)
+4. [Obsidian Integration](#4-obsidian-integration)
+5. [Calendar & Plasma Integration](#5-calendar--plasma-integration)
+6. [Terminal Notifications](#6-terminal-notifications)
+7. [Session Persistence](#7-session-persistence)
+8. [Document Viewing](#8-document-viewing)
+9. [Quick Notes Widget](#9-quick-notes-widget)
+10. [Implementation Feasibility Matrix](#10-implementation-feasibility-matrix)
+11. [Recommended Implementation Order](#11-recommended-implementation-order)
+
+---
+
+## 1. Browser Integration
+
+### 1.1 Firefox Overlay Panel
+
+**Research Status:** COMPLETED
+
+#### Findings
+
+**Kitty Panel Kitten Capabilities:**
+- The panel kitten is designed for **terminal programs only**, not GUI applications
+- It renders terminal content to a GPU-accelerated surface layer
+- Primary use cases: desktop backgrounds (btop, cava), status bars, floating terminals
+- **Cannot directly embed GUI applications like Firefox**
+
+**X11/Wayland Window Embedding:**
+- Traditional X11 window embedding (XEmbed protocol) is **not supported** in modern browsers
+- Firefox and Chrome removed XEmbed support years ago for security reasons
+- Wayland compositors have **no standard window embedding protocol**
+- Window management tools (wmctrl, xdotool) can position windows but not embed them
+
+**Alternative Approaches Investigated:**
+1. **Layered Windows**: Use window manager rules to keep Firefox always-on-top and positioned over kitty
+   - Requires manual window management
+   - Not truly "embedded"
+   - Browser still appears as separate window
+
+2. **Picture-in-Picture**: Firefox/Chrome PiP for video content only
+   - Limited to video elements
+   - Not suitable for full web browsing
+
+3. **VNC/RDP in Terminal**: Run browser remotely and display via terminal client
+   - High latency
+   - Defeats purpose of local integration
+
+#### Tools & Approaches
+
+**Not Feasible:**
+- Kitty panel kitten + Firefox (panel only supports terminal programs)
+- X11 XEmbed (removed from modern browsers)
+- Wayland subsurfaces for browser embedding (no standard protocol)
+
+**Possible Workarounds (Not Recommended):**
+- Window manager positioning scripts (fragile, not true embedding)
+- Headless browser + VNC viewer in terminal (high overhead)
+- X11 nested server (Xephyr) + window positioning (complex, defeats purpose)
+
+#### Implementation Complexity
+
+**Feasibility: VERY HARD / NOT PRACTICALLY ACHIEVABLE**
+
+**Technical Barriers:**
+1. Kitty panel kitten architecture fundamentally incompatible with GUI apps
+2. Modern browsers removed embedding support for security
+3. No standard protocol exists for browser-in-terminal embedding
+4. Would require either:
+   - Forking and modifying Firefox (massive maintenance burden)
+   - Creating custom window server/compositor (months of work)
+   - Using workarounds that provide poor UX
+
+**Estimated Effort:** 200+ hours for hacky workaround, potentially impossible for true embedding
+
+#### Recommended Approach
+
+**Do NOT pursue Firefox overlay in kitty panel.**
+
+**Better Alternatives:**
+1. **Use TUI browsers** (see section 1.2) - Browsh or Carbonyl provide actual terminal-native browsing
+2. **External browser with keybindings** - Use kitty's remote control to spawn Firefox in separate window
+3. **tmux/zellij + browser-in-adjacent-pane** - Side-by-side layout with terminal multiplexer
+4. **KDE Activities/Virtual Desktops** - Organize browser and terminal in workspace layouts
+
+---
+
+### 1.2 TUI Browsers (Carbonyl/Browsh)
+
+**Research Status:** COMPLETED
+
+#### Findings
+
+**Carbonyl (Chromium-based):**
+- **Architecture**: Full Chromium fork rendered natively to terminal via Skia hooks
+- **Rendering**: Uses Unicode half-blocks (▄) with 24-bit ANSI colors for 2 colors per cell
+- **Performance**: Extremely fast - starts in <1s, runs at 60 FPS, idles at 0% CPU
+- **Features**: Full Web API support (WebGL, WebGPU, audio, video, JavaScript, CSS3, HTML5)
+- **Size**: ~200MB binary, no external dependencies besides terminal
+- **Pros**:
+  - True native terminal rendering (not downscaled screenshots)
+  - Full modern web standards support
+  - Excellent performance
+  - No window server required (works in console, SSH)
+- **Cons**:
+  - Large binary size
+  - Infrequent updates (security concern for Chromium fork)
+  - Last release: v0.0.3 (Feb 2023) - project may be abandoned
+  - Building from source takes hours
+
+**Browsh (Firefox-based):**
+- **Architecture**: Headless Firefox + WebExtension + Go terminal client via websocket
+- **Rendering**: Screenshots downscaled to terminal resolution, text overlay
+- **Performance**: Slower than Carbonyl (50x more CPU for same content according to Carbonyl docs)
+- **Features**: Full Firefox capabilities, supports extensions
+- **Size**: ~11MB binary + Firefox dependency
+- **Pros**:
+  - Easy to update (just update Firefox)
+  - Active development (last release: v1.8.3, Jan 2024)
+  - Extension support
+  - Easier to build/modify (Go + JS vs. forking Chromium)
+  - Better for bandwidth-constrained connections (designed for SSH/Mosh)
+- **Cons**:
+  - Requires Firefox installation
+  - Higher CPU usage than Carbonyl
+  - Lower quality rendering (downscaled screenshots vs. native)
+  - Layout fixes via custom CSS (less reliable)
+
+**w3m (Traditional text browser):**
+- **No JavaScript support**
+- **No CSS support** (basic styling only)
+- **Image support** via external viewers (w3m-img)
+- **Very lightweight** and fast
+- **Best for**: Reading documentation, simple HTML pages, HN/Reddit text
+
+**lynx (Oldest text browser):**
+- **No JavaScript support**
+- **No images** at all
+- **No CSS support**
+- **Extremely lightweight**
+- **Best for**: Pure text content, accessibility, ancient systems
+
+#### Comparison Table
+
+| Feature | Carbonyl | Browsh | w3m | lynx |
+|---------|----------|--------|-----|------|
+| **Images** | ✅ High quality (24-bit color blocks) | ✅ Medium quality (downscaled) | ⚠️ External viewer only | ❌ No |
+| **JavaScript** | ✅ Full V8/Chromium | ✅ Full SpiderMonkey/Firefox | ❌ No | ❌ No |
+| **CSS** | ✅ Full Blink support | ✅ Full Gecko support | ⚠️ Basic only | ❌ No |
+| **Video/Audio** | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
+| **Performance** | ⭐⭐⭐⭐⭐ (60 FPS) | ⭐⭐⭐ (50x slower) | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| **CPU (idle)** | 0% | ~5-10% | <1% | <1% |
+| **Binary Size** | 200MB | 11MB | <1MB | <1MB |
+| **Dependencies** | None | Firefox 57+ | libgc, ncurses | ncurses |
+| **Installation (NixOS)** | Not in nixpkgs | `pkgs.browsh` | `pkgs.w3m` | `pkgs.lynx` |
+| **Last Update** | Feb 2023 ⚠️ | Jan 2024 ✅ | 2016 (stable) | Active (2025) |
+| **AI Chat Support** | ✅ Excellent | ✅ Good | ❌ Won't work | ❌ Won't work |
+| **SSH/Remote** | ✅ Yes | ✅ Optimized for it | ✅ Yes | ✅ Yes |
+| **Extension Support** | ❌ No (roadmap) | ✅ Yes | ❌ No | ❌ No |
+
+#### AI Chat Interface Compatibility
+
+**For claude.ai / chat.openai.com:**
+- **Carbonyl**: ✅ Excellent - Full JavaScript, proper rendering, interactive
+- **Browsh**: ✅ Good - Works but may have layout quirks, slower
+- **w3m**: ❌ Won't work - No JavaScript, modern SPAs won't load
+- **lynx**: ❌ Won't work - No JavaScript, no CSS
+
+**Recommendation for AI chat**: Use Carbonyl if available, Browsh as fallback
+
+#### Recommended Tool
+
+**Primary Recommendation: Browsh**
+
+**Reasoning:**
+1. **Active maintenance** - Last updated Jan 2024 vs. Carbonyl's Feb 2023
+2. **Security** - Regular Firefox updates vs. stale Chromium fork
+3. **Available in nixpkgs** - Easy installation via home-manager
+4. **Lower risk** - Smaller codebase, easier to audit/modify
+5. **Extension support** - Can add ad-blockers, user scripts
+6. **Designed for remote use** - Better for SSH scenarios
+
+**Secondary Option: Carbonyl (if needed)**
+- Use for **maximum performance** when performance is critical
+- Use for **local browsing only** (security concerns for remote/sensitive)
+- Requires manual installation (build from source or binary download)
+
+**Home-manager installation example:**
+```nix
+# For Browsh (recommended)
+home.packages = with pkgs; [
+  browsh
+  firefox  # Required dependency
+];
+
+# For Carbonyl (manual)
+# Download binary from: https://github.com/fathyb/carbonyl/releases
+# Place in ~/.local/bin or add to home.packages via fetchurl
+```
+
+**Traditional browsers (w3m/lynx):**
+- Keep installed for lightweight HTML viewing, documentation, simple pages
+- Not suitable for modern web apps or AI chat interfaces
+
+---
+
+## 2. Right-Click Context Menu
+
+### 2.1 Native Kitty Support
+
+**Research Status:** PENDING
+
+#### Findings
+
+<!-- Agent will fill this section -->
+
+### 2.2 External Solutions
+
+#### rofi/wofi Integration
+
+<!-- Agent will fill this section -->
+
+#### KDE Plasma Integration
+
+<!-- Agent will fill this section -->
+
+#### Other Approaches
+
+<!-- Agent will fill this section -->
+
+#### Recommended Approach
+
+<!-- Agent will fill this section -->
+
+---
+
+## 3. GPU & RAM Optimization
+
+### 3.1 Kitty GPU Settings
+
+**Research Status:** PENDING
+
+#### Available Settings
+
+<!-- Agent will fill this section -->
+
+#### NVIDIA GTX 960 Specific
+
+<!-- Agent will fill this section -->
+
+### 3.2 RAM Optimization
+
+#### Scrollback Buffer Impact
+
+<!-- Agent will fill this section -->
+
+#### Memory Profiling
+
+<!-- Agent will fill this section -->
+
+### 3.3 Swap Configuration
+
+<!-- Agent will fill this section -->
+
+#### Recommended Configuration
+
+<!-- Agent will fill this section -->
+
+---
+
+## 4. Obsidian Integration
+
+### 4.1 Terminal Integration Options
+
+**Research Status:** PENDING
+
+#### Obsidian URI Scheme
+
+<!-- Agent will fill this section -->
+
+#### Terminal Plugins
+
+<!-- Agent will fill this section -->
+
+### 4.2 Quick Capture Methods
+
+<!-- Agent will fill this section -->
+
+### 4.3 Panel Overlay Options
+
+<!-- Agent will fill this section -->
+
+#### Recommended Approach
+
+<!-- Agent will fill this section -->
+
+---
+
+## 5. Calendar & Plasma Integration
+
+### 5.1 Plasma Calendar Widget
+
+**Research Status:** PENDING
+
+#### DBus Interface
+
+<!-- Agent will fill this section -->
+
+#### Command Line Access
+
+<!-- Agent will fill this section -->
+
+### 5.2 Google Calendar Sync
+
+#### Plasma Integration Methods
+
+<!-- Agent will fill this section -->
+
+### 5.3 Kitty Widget Click Handling
+
+#### Limitations
+
+<!-- Agent will fill this section -->
+
+#### Workarounds
+
+<!-- Agent will fill this section -->
+
+#### Recommended Approach
+
+<!-- Agent will fill this section -->
+
+---
+
+## 6. Terminal Notifications
+
+### 6.1 Kitty Native Support
+
+**Research Status:** PENDING
+
+#### notify Action
+
+<!-- Agent will fill this section -->
+
+#### command_on_bell
+
+<!-- Agent will fill this section -->
+
+### 6.2 Shell Integration
+
+#### Long Command Detection
+
+<!-- Agent will fill this section -->
+
+#### Tools
+
+| Tool | Description | Complexity |
+|------|-------------|------------|
+| undistract-me | | |
+| ntfy | | |
+| notify-send | | |
+
+#### Recommended Approach
+
+<!-- Agent will fill this section -->
+
+---
+
+## 7. Session Persistence
+
+### 7.1 Kitty Session Files
+
+**Research Status:** PENDING
+
+#### Native Session Support
+
+<!-- Agent will fill this section -->
+
+#### --session Flag
+
+<!-- Agent will fill this section -->
+
+### 7.2 Custom Kitten for Sessions
+
+<!-- Agent will fill this section -->
+
+### 7.3 Full State Preservation
+
+#### What Can Be Saved
+
+<!-- Agent will fill this section -->
+
+#### What Cannot Be Saved
+
+<!-- Agent will fill this section -->
+
+### 7.4 Storage Location
+
+**Configured:** `~/.MyHome/Shared_Volumes/kitty-sessions-volume`
+
+#### Recommended Approach
+
+<!-- Agent will fill this section -->
+
+---
+
+## 8. Document Viewing
+
+### 8.1 PDF Viewing
+
+**Research Status:** PENDING
+
+#### Tools
+
+| Tool | Terminal Support | Panel Support | Quality |
+|------|-----------------|---------------|---------|
+| zathura | | | |
+| termpdf | | | |
+| tpdf | | | |
+
+### 8.2 LaTeX Live Preview
+
+#### Tools
+
+<!-- Agent will fill this section -->
+
+### 8.3 Markdown Rendering
+
+#### Tools Comparison
+
+| Tool | Features | Installation |
+|------|----------|--------------|
+| glow | | |
+| mdcat | | |
+| bat | | |
+
+#### Recommended Tools
+
+<!-- Agent will fill this section -->
+
+---
+
+## 9. Quick Notes Widget
+
+### 9.1 Widget Options
+
+**Research Status:** PENDING
+
+#### Display Options
+
+<!-- Agent will fill this section -->
+
+#### Integration with Obsidian
+
+<!-- Agent will fill this section -->
+
+#### Recommended Approach
+
+<!-- Agent will fill this section -->
+
+---
+
+## 10. Implementation Feasibility Matrix
+
+| Feature | Feasibility | Effort | Native Support | External Tools |
+|---------|-------------|--------|----------------|----------------|
+| Firefox Panel | ❌ Very Hard | 200+ hours | No (panel = terminal only) | None viable |
+| TUI Browser | ✅ Easy | 1-2 hours | No | Browsh (nixpkgs) |
+| Right-Click Menu | 🟡 Medium | TBD | No | rofi/wofi |
+| GPU Optimization | ✅ Easy | 1-2 hours | Yes (kitty.conf) | N/A |
+| RAM Optimization | ✅ Easy | 1-2 hours | Yes (kitty.conf) | N/A |
+| Obsidian Integration | 🟡 Medium | TBD | No | Obsidian URI |
+| Calendar Integration | 🟡 Medium | TBD | No | DBus/KDE APIs |
+| Notifications | ✅ Easy | TBD | Yes (notify action) | N/A |
+| Session Persistence | ✅ Easy | TBD | Yes (--session) | N/A |
+| Document Viewing | ✅ Easy | TBD | No | zathura, glow |
+| Quick Notes Widget | 🟡 Medium | TBD | No | Custom kitten |
+
+---
+
+## 11. Recommended Implementation Order
+
+### Phase K.1 (Quick Wins) - 1-2 days
+
+**Priority: HIGH - Immediate productivity gains**
+
+1. **TUI Browser Installation** (1-2 hours)
+   - Install Browsh via home-manager
+   - Test with claude.ai and common workflows
+   - Create launch alias/keybinding
+   - Expected impact: Terminal-native web browsing
+
+2. **GPU & RAM Optimization** (1-2 hours)
+   - Review kitty.conf GPU settings for GTX 960
+   - Optimize scrollback buffer
+   - Test performance improvements
+   - Expected impact: Reduced resource usage
+
+3. **Session Persistence** (2-3 hours)
+   - Configure kitty session storage location
+   - Create save/restore keybindings
+   - Test session recovery
+   - Expected impact: Faster workflow restoration
+
+### Phase K.2 (Medium Effort) - 3-5 days
+
+**Priority: MEDIUM - Quality of life improvements**
+
+4. **Terminal Notifications** (3-4 hours)
+   - Configure notify action
+   - Integrate with long-running commands
+   - Test with KDE notification system
+   - Expected impact: Better awareness of background tasks
+
+5. **Document Viewing** (4-6 hours)
+   - Install zathura (PDF), glow (Markdown)
+   - Create viewer integrations
+   - Test with common document types
+   - Expected impact: Less context switching
+
+6. **Right-Click Context Menu** (6-8 hours)
+   - Research rofi/wofi integration
+   - Design menu structure
+   - Implement via keybinding
+   - Expected impact: Improved discoverability
+
+### Phase K.3 (Advanced Features) - 1-2 weeks
+
+**Priority: LOW-MEDIUM - Enhanced integration**
+
+7. **Obsidian Integration** (8-12 hours)
+   - Implement Obsidian URI handling
+   - Create quick capture workflow
+   - Design terminal-friendly interface
+   - Expected impact: Seamless note-taking
+
+8. **Calendar Integration** (8-12 hours)
+   - Research KDE DBus APIs
+   - Implement calendar display
+   - Add Google Calendar sync
+   - Expected impact: Better time management
+
+9. **Quick Notes Widget** (10-15 hours)
+   - Design custom kitten
+   - Implement panel integration
+   - Test with Obsidian backend
+   - Expected impact: Instant note capture
+
+### Phase K.4 (Not Recommended / Deferred)
+
+**Priority: VERY LOW - High effort, low return**
+
+10. **Firefox Overlay Panel** - ❌ **DO NOT IMPLEMENT**
+    - Technical barriers insurmountable
+    - No practical path forward
+    - Use TUI browsers instead
+    - Alternative: External browser + workspace management
+
+---
+
+## Research Sources
+
+### Browser Integration Research
+
+1. **Kitty Panel Kitten Documentation**
+   - Official docs: https://sw.kovidgoyal.net/kitty/kittens/panel/
+   - Man page: https://man.archlinux.org/man/extra/kitty/kitten-panel.1.en
+   - Use cases: Terminal programs as desktop backgrounds, status bars
+
+2. **Carbonyl Browser**
+   - GitHub: https://github.com/fathyb/carbonyl
+   - Blog post: https://fathy.fr/carbonyl
+   - Tutorial: https://www.linux-magazine.com/Issues/2023/272/Light-Browsing
+   - Last release: v0.0.3 (February 2023)
+
+3. **Browsh Browser**
+   - GitHub: https://github.com/browsh-org/browsh
+   - Official site: https://www.brow.sh/
+   - Documentation: https://www.brow.sh/docs/introduction/
+   - Last release: v1.8.3 (January 2024)
+
+4. **Comparison Articles**
+   - Carbonyl vs Browsh: https://monodes.com/predaelli/2023/02/05/browsh-and-carbonyl-the-return-of-the-terminal-browser/
+   - Obsidian comparison: https://publish.obsidian.md/xybre/permalink/5430dbca-e92f-4a0a-ac37-3123dcfea743
+
+5. **X11/Wayland Embedding Research**
+   - XEmbed protocol status (deprecated in modern browsers)
+   - Wayland fragmentation: https://www.semicomplete.com/blog/xdotool-and-exploring-wayland-fragmentation/
+   - Window management limitations: GitHub issues on xdotool/wmctrl
+
+6. **Kitty Graphics Protocol**
+   - Documentation: https://sw.kovidgoyal.net/kitty/graphics-protocol/
+   - Integrations: https://sw.kovidgoyal.net/kitty/integrations/
+
+---
+
+**Research Compiled By:** Claude Opus 4.5 (via Claude Code)
+**Last Updated:** 2025-12-22
+**Research Duration:** ~45 minutes
+**Sources Consulted:** 25+ web pages, official documentation, GitHub repositories
