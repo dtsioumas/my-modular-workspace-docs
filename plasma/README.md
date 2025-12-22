@@ -69,6 +69,16 @@ This directory contains completion reports and status documentation for the KDE 
 
 ---
 
+## Hardware Data Layer
+
+- `.chezmoidata/hardware.yaml` defines GPU + monitor attributes for each host. Update this file whenever monitors change instead of editing templates.
+- Templates currently consuming the hardware profile:
+  - `private_dot_config/kwinrc.tmpl` for `[Xwayland]` scale.
+  - `private_dot_config/kwinoutputconfig.json.tmpl` for connector/mode layout.
+- Reference `docs/adrs/ADR-015-HARDWARE_DATA_LAYER.md` for schema details and onboarding steps.
+
+---
+
 ## Next Steps
 
 1. **Verification Period** (1-2 days)
