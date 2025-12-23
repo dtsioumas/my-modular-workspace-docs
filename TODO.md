@@ -159,6 +159,7 @@ docs/home-manager/MIGRATION_FINDINGS.md
 **Remaining:**
 - [ ] Test Firefox with new symlink structure
 - [ ] Verify VSCodium extensions loading correctly
+- [ ] After home-manager rebuild, run `codium --help` to confirm CLI warning fix (docs/tools/editors/vscodium-default-editor.md)
 - [ ] Confirm KeePassXC vault accessible at `~/MyVault`
 - [ ] Check all symlinked directories work: `MySpaces`, `Documents`, `Archives`
 - [ ] Review `.backup` files, delete if everything works
@@ -1351,14 +1352,17 @@ set -g pane-border-format " #{pane_index} #{pane_current_command} #{pane_current
 - [x] Update README.md with current structure
 
 #### Pending
-- [ ] Push dotfiles repo changes to origin
-- [ ] Push docs repo changes to origin
-- [ ] Push home-manager repo changes to origin
+- [x] Push dotfiles repo changes to origin
+- [x] Push docs repo changes to origin
+- [x] Push home-manager repo changes to origin
 - [ ] Test chezmoi apply on fresh terminal
 - [ ] Migrate cline config (simple JSON, low effort)
 - [ ] Set up age encryption for sensitive dotfiles
 - [ ] Integrate KeePassXC with chezmoi templates
 - [ ] Consider migrating: Firefox settings, VSCodium settings
+- [ ] Wire Obsidian launchers/config files to `.chezmoidata.apps.obsidian` once host paths are verified
+- [ ] Template Firefox profile/search files using `.chezmoidata.apps.firefox` (profile names, download dirs, policy path)
+- [ ] Update chezmoi templates or helper scripts to consume `.chezmoidata.apps.vscodium` user-dir and Electron flag data
 
 ### 12. NixOS to Fedora Atomic Migration Planning
 

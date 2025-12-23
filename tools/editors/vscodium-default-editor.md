@@ -205,6 +205,15 @@ edit ~/.bashrc
 
 **Status:** Fixed, need to rebuild home-manager
 
+### Electron CLI Warnings (2025-12-23) ⏳ Pending Verification
+**Problem:** Codium wrapper printed `'use-gl' is not in the list of known options'` warnings because the flags lived in `commandLineArgs`.
+
+**Fix:** Updated `home-manager/vscodium.nix` to:
+- keep only supported flags (`--ozone-platform`, `--password-store`) in `commandLineArgs`;
+- move GPU/VAAPI flags to `ELECTRON_EXTRA_LAUNCH_ARGS` sourced from chezmoi (see `.chezmoidata/apps.vscodium`).
+
+**Next step:** After the next `home-manager switch`, launch `codium --help` once to confirm warnings no longer appear and update this section with the verification result.
+
 ---
 
 ## Files Created/Modified
