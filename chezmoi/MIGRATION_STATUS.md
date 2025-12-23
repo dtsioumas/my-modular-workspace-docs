@@ -114,3 +114,9 @@ chezmoi apply
 - **To:** `private_dot_config/copyq/copyq.conf.tmpl` with `.chezmoidata/apps.yaml` schema
 - **Features:** Portable shortcut map, host-specific overrides, custom theme asset `mitsio-theme-copypasta` tracked in `private_dot_config/copyq/themes/`
 - **Notes:** Template automatically injects theme metadata and keeps CopyQ consistent across shoshin, gyakusatsu, system-laptop01
+
+### Workspace Apps Data Layer (2025-12-23)
+- **From:** Vault paths, Firefox profiles, and VSCodium flags embedded in ad-hoc scripts
+- **To:** `.chezmoidata/apps.yaml` entries for `obsidian`, `firefox`, and `vscodium`
+- **Features:** Host-aware vault lists (MySpaces, LLM Tsukuru, Notebook), profile+download mapping for Firefox, Electron flag overrides and user-dir hints for Codium on Linux/WSL/Windows
+- **Notes:** Templates should consume these keys before any Windows/WSL rollout to avoid hardcoded `/home/mitsio` or `C:\` paths
