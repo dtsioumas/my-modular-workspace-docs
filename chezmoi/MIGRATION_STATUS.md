@@ -108,3 +108,9 @@ chezmoi apply
 - **To:** `dotfiles/dot_config/kitty/` (Catppuccin Mocha)
 - **Merged:** Best features from both configs
 - **Features:** Split windows, dynamic opacity, blur, 40+ keybindings
+
+### CopyQ Theme + Shortcuts (2025-12-23)
+- **From:** GUI-only tweaks under `~/.config/copyq/`
+- **To:** `private_dot_config/copyq/copyq.conf.tmpl` with `.chezmoidata/apps.yaml` schema
+- **Features:** Portable shortcut map, host-specific overrides, custom theme asset `mitsio-theme-copypasta` tracked in `private_dot_config/copyq/themes/`
+- **Notes:** Template automatically injects theme metadata and keeps CopyQ consistent across shoshin, gyakusatsu, system-laptop01
