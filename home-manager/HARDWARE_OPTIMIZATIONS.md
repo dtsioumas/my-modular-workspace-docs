@@ -33,12 +33,12 @@ This works, but the overlay/file names are misleading (`onnxruntime-gpu-optimize
 ```
 overlays/
 └── hardware-build-profiles/
-    ├── rust.nix         # consumes hardwareProfile.packages.<pkg>
+    ├── rust.nix         # IMPLEMENTED: exposes rustSettingsFor (Codex already migrated)
     ├── cpp-cuda.nix     # CUDA/LTO flags, mold vs lld
     └── go.nix           # GOMAXPROCS, linker tweaks (cgo)
 ```
 
-- `rust.nix` replaces the ad-hoc logic inside `modules/agents/*` by exporting helper functions (e.g., `mkRustOverrides pkgName`).  
+- `rust.nix` now replaces the ad-hoc logic inside `modules/agents/codex.nix`; MCP Rust derivations will adopt it next.  
 - `cpp-cuda.nix` takes over the ONNX logic plus future ffmpeg/OBS tuning.  
 - `go.nix` will handle MCP Go servers (mcp-shell, git-mcp-go) once the Go builder lands.
 
