@@ -120,3 +120,15 @@ chezmoi apply
 - **To:** `.chezmoidata/apps.yaml` entries for `obsidian`, `firefox`, and `vscodium`
 - **Features:** Host-aware vault lists (MySpaces, LLM Tsukuru, Notebook), profile+download mapping for Firefox, Electron flag overrides and user-dir hints for Codium on Linux/WSL/Windows
 - **Notes:** Templates should consume these keys before any Windows/WSL rollout to avoid hardcoded `/home/mitsio` or `C:\` paths
+
+### KDE Connect (2025-12-23)
+- **From:** `~/.config/kdeconnect/` with live TLS material
+- **To:** `private_dot_config/kdeconnect/` tracked via chezmoi (private_ prefix preserves 0600 perms)
+- **Features:** Certificates, private keys, trusted device list, and device-specific configs now versioned so WSL/Windows hosts can import pairings after templating host-paths
+- **Next:** Consider age-encrypting privateKey.pem if shared repo leaves trusted boundary
+
+### Session & Signal Electron Apps (2025-12-23)
+- **From:** `~/.config/Session/` & `~/.config/Signal/` entire directories (full cache)
+- **To:** `dot_config/Session/{config.json,ephemeral.json,Preferences}` and `dot_config/Signal/{…}` with `.chezmoiignore` entries blocking Cache/Code Cache/etc.
+- **Features:** Keeps authentication + settings while discarding multi-GB runtime data; ready for templating if we later add host overrides
+- **Note:** Added linux `session/` (KDE session) snapshots for historical state; revisit once we confirm they aren’t auto-generated each login
