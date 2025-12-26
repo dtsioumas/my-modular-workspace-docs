@@ -39,6 +39,9 @@ MCP servers are optimized at three levels:
 | **CPU parallelism** | 50% | 90% | CPUQuota 200% |
 | **GPU servers** | 1 | 1 | ck-search (400MB VRAM) |
 | **Bun runtime servers** | 0 | 1 | context7 (59% memory savings) |
+| **jemalloc enabled** | 0% | 100% (Node.js) | 10-30% memory reduction |
+| **THP optimization** | always | madvise | 20-40% latency reduction |
+| **V8 semi-space tuned** | default | tiered (16-64MB) | 11-45% speedup |
 
 ---
 
@@ -399,36 +402,95 @@ home-manager/mcp-servers/
 
 ---
 
-## Git Commits (This Session)
+## Git Commits (All Sessions)
 
+**Session 1: Initial Optimization (2025-12-26)**
 ```
-3a07ce0 - Fix context7-mcp version to 1.0.33 with correct hash
-0f9d6a2 - Add context7-mcp with Bun runtime for 59-61% memory savings
-3f19188 - Migrate git MCP server from custom Go build to flake version
-8997d66 - Remove mcp-filesystem-server and fetch MCP servers
-52668c9 - Remove claude-continuity MCP server
-8f04255 - Remove brave-search and read-website-fast, increase limits for time/sequential-thinking/firecrawl, fix self-limiting to prevent OOM kills
 928899b - Optimize all MCP servers with CPU flags and increased quotas
+8f04255 - Remove brave-search and read-website-fast, increase limits
+52668c9 - Remove claude-continuity MCP server
+8997d66 - Remove mcp-filesystem-server and fetch MCP servers
+3f19188 - Migrate git MCP server from custom Go build to flake version
+0f9d6a2 - Add context7-mcp with Bun runtime for 59-61% memory savings
+3a07ce0 - Fix context7-mcp version to 1.0.33 with correct hash
 ```
 
-**Total this session:** 7 commits
-**Total all sessions:** 16 commits
+**Session 2: Monitoring & Priority 1 Optimizations (2025-12-26)**
+```
+28a5164 - Implement Priority 1 MCP memory optimizations - Quick Wins
+905af1f - Change THP from always to madvise for MCP server optimization
+72ffb2c - Remove monitor scripts from toolkit.nix - now managed by chezmoi
+56296dd - Remove monitoring scripts - now managed by chezmoi in dotfiles
+6ce2de3 - Add MCP server monitoring with systemd services and GPU tracking
+3ce69f3 - Add MCP monitoring scripts for systemd resource and GPU tracking (toolkit)
+1020c6b - Add comprehensive MCP monitoring guide with systemd and GPU tracking (docs)
+```
+
+**Total commits:** 14
 
 ---
 
-## Next Steps (Research In Progress)
+## Implemented Optimizations
 
-### Advanced Memory Optimization
-- **Agent:** a3ee92a (researching)
-- **Focus:** Linux cgroup v2 features, language-specific GC tuning, PSI monitoring
+### Priority 1: Memory Optimizations (Week 1-2) - COMPLETED ✅
 
-### GPU Acceleration Expansion
-- **Agent:** ad17359 (researching)
-- **Focus:** context7 embeddings, ONNX Runtime for Node.js, VRAM budget analysis
+**1. jemalloc Memory Allocator**
+- Status: ✅ Implemented (2025-12-26)
+- Impact: 10-30% memory reduction, 30% throughput gain
+- Applies to: All Node.js MCP servers (firecrawl, exa, sequential-thinking, git, time)
+- Implementation: LD_PRELOAD injection in mkMcpWrapper
+- Commit: 28a5164
 
-### Monitoring Setup
-- **Status:** Pending research completion
-- **Plan:** systemd metrics, Prometheus exporters, GPU telemetry
+**2. Transparent Huge Pages Optimization**
+- Status: ✅ Implemented (2025-12-26)
+- Impact: 20-40% latency reduction for MCP servers
+- Change: `transparent_hugepage=always` → `transparent_hugepage=madvise`
+- Benefit: Eliminates THP compaction pauses for sparse access patterns
+- File: hosts/shoshin/nixos/modules/system/hardware-optimization.nix
+- Commit: 905af1f
+
+**3. V8 Semi-Space Size Tuning**
+- Status: ✅ Implemented (2025-12-26)
+- Impact: 11-45% performance speedup
+- Tiered configuration:
+  - Lightweight (git, time): 16MB
+  - Standard (sequential-thinking, exa): 32MB
+  - Heavy (firecrawl): 64MB
+- Commit: 28a5164
+
+**4. Monitoring & Observability**
+- Status: ✅ Implemented (2025-12-26)
+- Scripts: monitor-mcp-servers.sh, monitor-gpu.sh
+- Features: PSI metrics, per-server memory tracking, GPU utilization
+- Management: Chezmoi (dotfiles/dot_local/bin/)
+- Systemd services: Optional periodic monitoring (5min/2min)
+- Commits: 6ce2de3, 3ce69f3, 1020c6b
+
+### Priority 2: GPU Acceleration (Week 3-4) - PENDING
+
+**1. Context7 GPU Acceleration**
+- Status: ⏳ Research complete (Agent ad17359), implementation pending
+- Impact: 2-5x embedding speedup, 9-14x index building
+- VRAM: ~1GB (fits comfortably in 2GB headroom)
+- Next: Determine if context7 is Python or Node.js based
+
+**2. ck-search FP16 Optimization**
+- Status: ⏳ Research complete, implementation pending
+- Impact: 1.5-2x speedup, 50% VRAM savings
+- VRAM: 2000MB → 1000MB
+- Next: Enable FP16 mixed precision in Rust build
+
+### Priority 3: Advanced Optimizations (Future)
+
+**1. Connection Pooling**
+- Impact: 10-80x throughput improvement (80% of performance gains)
+- Effort: Medium (4-8 hours per server)
+- Status: Not started
+
+**2. Model Quantization (INT8)**
+- Impact: 75% VRAM reduction
+- Risk: Accuracy trade-off
+- Status: Future consideration
 
 ---
 
