@@ -2,7 +2,7 @@
 **Last Updated:** 2025-12-26
 **Author:** Comprehensive optimization session (3 phases)
 **System:** NixOS (shoshin) - Skylake CPU, NVIDIA GTX 1650 (4GB VRAM), 32GB RAM
-**Status:** Priority 1 ✅ Complete | Priority 2 ✅ Complete | Priority 3 ⏳ Pending
+**Status:** Priority 1 ✅ Complete | Priority 2 ✅ Complete | Priority 3 ✅ Research Complete (Implementation Pending)
 
 ---
 
@@ -490,12 +490,29 @@ home-manager/mcp-servers/
 - Documentation: See `docs/researches/2025-12-26_ONNX_RUNTIME_GPU_FP16_RESEARCH.md`
 - Future: Revisit on hardware upgrade (RTX 3060+ would benefit from FP16)
 
-### Priority 3: Advanced Optimizations (Future)
+### Priority 3: Advanced Optimizations - RESEARCH COMPLETE ✅
 
 **1. Connection Pooling**
-- Impact: 10-80x throughput improvement (80% of performance gains)
-- Effort: Medium (4-8 hours per server)
-- Status: Not started
+- Status: ✅ Research complete (Agent a3c6565, 2025-12-26)
+- Impact: 10-80x throughput improvement for HTTP-based servers
+- Applicable servers:
+  - ✅ firecrawl (Priority 1) - 10-20x improvement (2-5 → 50-100 req/s)
+  - ✅ exa (Priority 1) - 10-20x improvement (5-10 → 100-200 req/s)
+  - ✅ context7 (Priority 2) - 10-20x improvement (10-20 → 200-400 req/s)
+  - ✅ ck-search (Priority 3) - 10x improvement (20 → 200-300 req/s)
+  - ❌ stdio servers (sequential-thinking, git, time, mcp-shell, filesystem) - not applicable
+- Effort breakdown:
+  - Phase 1 (firecrawl): 6-8 hours
+  - Phase 2 (exa): 3-4 hours
+  - Phase 3 (context7): 3-4 hours
+  - Total: 12-16 hours for 3 high-priority servers
+- Memory overhead: <2% (150-200MB for 50-connection pool)
+- Risk: LOW (fallback mechanisms, well-tested libraries)
+- Documentation:
+  - Main research: `researches/2025-12-26_MCP_CONNECTION_POOLING_RESEARCH.md` (46KB)
+  - Implementation templates: `researches/2025-12-26_MCP_POOLING_IMPLEMENTATION_TEMPLATES.md` (28KB)
+  - Quick start: `researches/2025-12-26_MCP_POOLING_RESEARCH_INDEX.md` (17KB)
+- Implementation: Pending user decision (12-16 hour commitment)
 
 **2. Model Quantization (INT8)**
 - Impact: 75% VRAM reduction
