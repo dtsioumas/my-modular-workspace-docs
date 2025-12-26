@@ -259,8 +259,7 @@ NODE_ENV = "production";
 bun install \
   --frozen-lockfile \
   --no-cache \
-  --no-progress \
-  --production=false
+  --no-progress
 ```
 
 **Impact:**
