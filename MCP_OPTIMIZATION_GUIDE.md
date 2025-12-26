@@ -1,7 +1,8 @@
 # MCP Server Optimization Guide
 **Last Updated:** 2025-12-26
-**Author:** Comprehensive optimization session (2 phases)
+**Author:** Comprehensive optimization session (3 phases)
 **System:** NixOS (shoshin) - Skylake CPU, NVIDIA GTX 1650 (4GB VRAM), 32GB RAM
+**Status:** Priority 1 ✅ Complete | Priority 2 ✅ Complete | Priority 3 ⏳ Pending
 
 ---
 
@@ -466,19 +467,28 @@ home-manager/mcp-servers/
 - Systemd services: Optional periodic monitoring (5min/2min)
 - Commits: 6ce2de3, 3ce69f3, 1020c6b
 
-### Priority 2: GPU Acceleration (Week 3-4) - PENDING
+### Priority 2: GPU Acceleration (Week 3-4) - COMPLETED ✅
 
 **1. Context7 GPU Acceleration**
-- Status: ⏳ Research complete (Agent ad17359), implementation pending
-- Impact: 2-5x embedding speedup, 9-14x index building
-- VRAM: ~1GB (fits comfortably in 2GB headroom)
-- Next: Determine if context7 is Python or Node.js based
+- Status: ✅ Research complete (Agent afae05e, 2025-12-26)
+- Findings: **Not applicable** - context7 is an API client
+- Implementation: TypeScript/JavaScript running under Bun runtime
+- Behavior: Makes HTTP requests to https://mcp.context7.com/mcp
+- Conclusion: No local embeddings = no GPU acceleration opportunity
+- Decision: Skip GPU acceleration for context7
 
 **2. ck-search FP16 Optimization**
-- Status: ⏳ Research complete, implementation pending
-- Impact: 1.5-2x speedup, 50% VRAM savings
-- VRAM: 2000MB → 1000MB
-- Next: Enable FP16 mixed precision in Rust build
+- Status: ✅ Research complete (Agent afae05e, 2025-12-26)
+- Hardware: GTX 1650 Maxwell (CUDA 12.8, compute capability 5.2)
+- Current: ONNX Runtime 1.22.0 with GPU support already enabled
+- VRAM Usage: 1.1GB / 4GB (27% headroom, comfortable)
+- FP16 Impact Analysis:
+  - **Speed**: -5-10% slower (Maxwell lacks Tensor Cores, conversion overhead)
+  - **VRAM**: 50% savings (4GB → 2GB model size)
+  - **Conclusion**: FP16 only beneficial if VRAM becomes constrained
+- Decision: **Keep current setup** - no VRAM pressure, speed loss not justified
+- Documentation: See `docs/researches/2025-12-26_ONNX_RUNTIME_GPU_FP16_RESEARCH.md`
+- Future: Revisit on hardware upgrade (RTX 3060+ would benefit from FP16)
 
 ### Priority 3: Advanced Optimizations (Future)
 
