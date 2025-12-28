@@ -449,6 +449,241 @@ nix path-info --store https://modular-workspace.cachix.org \
 
 ---
 
+## 🔄 Part 6: Cross-Workspace Build Workflow (Automated Scripts)
+
+**Purpose:** Simplify the build-and-share workflow with dedicated scripts that handle building all workspaces and pushing to Cachix.
+
+### Overview
+
+Per **ADR-025**, gyakusatsu (WSL with 8GB RAM) cannot build language runtimes locally due to PGO memory requirements. The solution is a **cache-dependent workflow**:
+
+1. **Build on shoshin** (15GB RAM, 6 cores) → Push to Cachix
+2. **Pull on gyakusatsu** (8GB RAM) → 2-5 min instead of 2-3.5 hours
+
+Two scripts automate this workflow:
+- `~/.local/bin/cachix-build-all` (shoshin) - Build all workspaces and push
+- `~/.local/bin/cachix-pull` (gyakusatsu) - Pull pre-built config
+
+### Script 1: `cachix-build-all` (shoshin only)
+
+**Location:** `~/.local/bin/cachix-build-all` (managed via chezmoi)
+
+**Purpose:** Build all home-manager configurations and push to Cachix.
+
+**Usage:**
+
+```bash
+# Build all workspaces (shoshin, kinoite, gyakusatsu)
+cachix-build-all
+
+# Build only gyakusatsu configuration
+cachix-build-all gyakusatsu
+
+# Build with verbose logging
+cachix-build-all --verbose
+
+# Dry-run (don't actually push)
+cachix-build-all --dry-run
+```
+
+**What it does:**
+
+1. Validates prerequisites (cachix CLI, authentication, disk space)
+2. Builds each workspace configuration sequentially
+3. Pushes all build outputs to `modular-workspace` cache
+4. Logs all operations to `~/.cache/cachix-builds/`
+5. Provides detailed progress and timing information
+
+**Example output:**
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Cachix Build & Push - All Workspaces
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[1/3] Building: mitsio@shoshin
+  └─ Build time: 45m 23s
+  └─ Push time: 3m 12s
+  └─ Artifacts: 847 paths (~3.2GB)
+
+[2/3] Building: mitsio@kinoite
+  └─ Build time: 12m 45s (mostly cached)
+  └─ Push time: 1m 34s
+  └─ Artifacts: 234 paths (~1.1GB)
+
+[3/3] Building: mitsio@gyakusatsu
+  └─ Build time: 38m 56s
+  └─ Push time: 2m 48s
+  └─ Artifacts: 612 paths (~2.7GB)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ All builds completed successfully!
+Total time: 1h 44m 38s
+Logs: ~/.cache/cachix-builds/build-20251228-143052.log
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Expected time (first build):**
+- shoshin: ~45-60 min
+- kinoite: ~10-15 min (most packages shared with shoshin)
+- gyakusatsu: ~35-50 min
+- **Total:** ~1.5-2 hours
+
+**Expected time (subsequent builds with cache):**
+- All workspaces: ~5-15 min
+
+### Script 2: `cachix-pull` (gyakusatsu only)
+
+**Location:** `~/.local/bin/cachix-pull` (managed via chezmoi)
+
+**Purpose:** Pull pre-built home-manager configuration from Cachix instead of building locally.
+
+**Usage:**
+
+```bash
+# Pull and apply gyakusatsu configuration
+cachix-pull
+
+# Pull with verbose logging
+cachix-pull --verbose
+
+# Dry-run (show what would be downloaded)
+cachix-pull --dry-run
+```
+
+**What it does:**
+
+1. Validates Cachix configuration
+2. Runs `home-manager switch` with cache-first strategy
+3. Pulls all artifacts from `modular-workspace` cache
+4. Applies configuration without building
+
+**Example output:**
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Cachix Pull - gyakusatsu Configuration
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Cache configured: modular-workspace.cachix.org
+✓ Cache reachable: HTTP 200
+✓ Starting pull...
+
+copying path '/nix/store/...-python313-x86-64-v3-optimized' from 'https://modular-workspace.cachix.org'...
+copying path '/nix/store/...-nodejs-x86-64-v3-optimized' from 'https://modular-workspace.cachix.org'...
+copying path '/nix/store/...-rustc-x86-64-v3-optimized' from 'https://modular-workspace.cachix.org'...
+copying path '/nix/store/...-go-x86-64-v3-optimized' from 'https://modular-workspace.cachix.org'...
+
+✅ Pull completed successfully!
+Downloaded: 612 paths (~2.7GB)
+Time: 3m 47s
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Expected time:**
+- Cache hit: **2-5 minutes** (download ~2-3GB)
+- Cache miss: Falls back to local build (2-3.5 hours)
+
+### Workflow: Build on shoshin, Pull on gyakusatsu
+
+#### Step 1: On shoshin (Builder)
+
+```bash
+# 1. Update flake inputs (optional)
+cd ~/.MyHome/MySpaces/my-modular-workspace/home-manager
+nix flake update
+
+# 2. Commit lockfile
+git add flake.lock
+git commit -m "chore: update flake inputs"
+git push
+
+# 3. Build all workspaces and push to cache
+cachix-build-all
+
+# Expected time: ~1.5-2 hours (first time), ~5-15 min (subsequent)
+```
+
+#### Step 2: On gyakusatsu (Consumer)
+
+```bash
+# 1. Pull latest flake.lock from Git
+cd ~/.MyHome/MySpaces/my-modular-workspace/home-manager
+git pull
+
+# 2. Pull configuration from Cachix
+cachix-pull
+
+# Expected time: 2-5 minutes (vs 2-3.5 hours if built locally!)
+```
+
+### Benefits of This Workflow
+
+✅ **Simple:** Two commands (`cachix-build-all` on shoshin, `cachix-pull` on gyakusatsu)
+✅ **Safe:** Validates prerequisites before starting
+✅ **Logged:** All operations logged for debugging
+✅ **Fast:** 2-5 min on gyakusatsu vs 2-3.5 hours local build
+✅ **Reliable:** Falls back to local build if cache unavailable
+✅ **Deterministic:** Same `flake.lock` ensures identical builds
+
+### Troubleshooting
+
+#### Problem: cachix-build-all fails with "cachix: command not found"
+
+**Solution:**
+
+```bash
+# Install cachix on shoshin
+cd ~/.MyHome/MySpaces/my-modular-workspace/home-manager
+# Add cachix to home.packages in home.nix
+home-manager switch --flake .#shoshin
+```
+
+#### Problem: cachix-pull shows "building instead of downloading"
+
+**Solution:**
+
+```bash
+# 1. Verify cache is configured
+nix show-config | grep modular-workspace
+
+# 2. Check if shoshin has pushed to cache
+curl -I https://modular-workspace.cachix.org/nix-cache-info
+
+# 3. Ensure flake.lock is synced between machines
+cd ~/.MyHome/MySpaces/my-modular-workspace/home-manager
+git pull
+```
+
+#### Problem: Build fails with OOM on shoshin
+
+**Solution:**
+
+```bash
+# Check available RAM
+free -h
+
+# If < 12GB free, close other applications or upgrade RAM
+# shoshin profile assumes 15GB available for PGO builds
+```
+
+### Integration with ADR-025
+
+This workflow implements the **selective caching strategy** from ADR-025:
+
+1. **Heavy builds only:** Language runtimes (Python, Node, Rust, Go) with PGO
+2. **Primary builder:** shoshin (15GB RAM, powerful CPU)
+3. **Consumer machines:** gyakusatsu pulls pre-built artifacts
+4. **Monthly maintenance:** Run `cachix-build-all` monthly to refresh cache
+
+**Storage usage:**
+- Cache limit: 5GB (per ADR-025)
+- Average usage: ~3-4GB (4 language runtimes + dependencies)
+- Remaining: ~1-2GB for other packages
+
+---
+
 ## 🎯 Expected Workflow After Setup
 
 ### On shoshin (Build Machine)
