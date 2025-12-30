@@ -66,45 +66,65 @@ This unified plan consolidates all system-level and user-level optimizations for
 
 ## Phase 0: Memory Optimization (Foundation)
 
+**Status:** ✅ ALREADY IMPLEMENTED in existing NixOS modules
+
+> **IMPORTANT:** Most of Phase 0 is already implemented in existing NixOS modules.
+> Review before adding duplicate configuration!
+
 ### 0.1 Zram Configuration
 
 **Target:** Effective 28GB memory (16GB RAM + 12GB zram)
 
-**NixOS Configuration:**
+**EXISTING Implementation:** `/etc/nixos/modules/system/zram.nix` + `aggressive-ram-optimization.nix`
+
 ```nix
-# hosts/shoshin/nixos/modules/system/memory.nix
-{ config, lib, pkgs, ... }:
-{
-  # Zram - Compressed swap in RAM
-  zramSwap = {
-    enable = true;
-    algorithm = "zstd";          # Best compression ratio for Skylake
-    memoryPercent = 75;          # 12GB zram from 16GB RAM
-    priority = 100;              # Higher than disk swap
-  };
+# Already configured in /etc/nixos/modules/system/zram.nix
+zramSwap = {
+  enable = true;
+  algorithm = "zstd";          # Best compression ratio for Skylake
+  memoryPercent = 75;          # 12GB zram from 16GB RAM
+  priority = 100;              # Higher than disk swap
+};
 
-  # Kernel memory tuning
-  boot.kernel.sysctl = {
-    # Swap behavior - favor keeping apps in RAM
-    "vm.swappiness" = 10;                    # Low swappiness (default 60)
-    "vm.vfs_cache_pressure" = 50;            # Keep dentries/inodes in cache
+# Already configured in /etc/nixos/modules/system/aggressive-ram-optimization.nix
+boot.kernel.sysctl = {
+  # IMPORTANT: High swappiness IS CORRECT for zram!
+  # With zram (compressed swap in RAM), high swappiness improves performance
+  # because swapping to zram is FAST (compressed RAM, not disk)
+  # Reference: https://linuxblog.io/linux-performance-almost-always-add-swap-part2-zram/
+  "vm.swappiness" = lib.mkForce 67;          # CORRECT for zram (not 10!)
 
-    # Memory overcommit - allow but don't go crazy
-    "vm.overcommit_memory" = 0;              # Heuristic overcommit
-    "vm.overcommit_ratio" = 80;              # Allow 80% overcommit
+  # vfs_cache_pressure: 125 is optimal for zram + file-heavy desktop
+  # Too low (50) holds too many dentries/inodes → less RAM for apps
+  # Too high (150+) causes thrashing for file-heavy apps (VSCodium, browsers)
+  "vm.vfs_cache_pressure" = lib.mkForce 125; # CORRECT for zram desktop
 
-    # Dirty page writeback
-    "vm.dirty_ratio" = 10;                   # Start writeback at 10%
-    "vm.dirty_background_ratio" = 5;         # Background writeback at 5%
+  # Memory overcommit
+  "vm.overcommit_memory" = 0;              # Heuristic overcommit
+  "vm.overcommit_ratio" = 50;              # Allow 50% overcommit
 
-    # OOM killer behavior
-    "vm.oom_kill_allocating_task" = 1;       # Kill the allocating task first
-    "vm.panic_on_oom" = 0;                   # Don't panic, just kill
-  };
-}
+  # Dirty page writeback - optimized for 15GB RAM
+  "vm.dirty_ratio" = lib.mkForce 10;       # Force sync at 10% (~1.5GB)
+  "vm.dirty_background_ratio" = lib.mkForce 5; # Start flush at 5% (~750MB)
+
+  # OOM killer behavior
+  "vm.panic_on_oom" = 0;                   # Don't panic, let OOM killer work
+};
 ```
 
+**Verification:**
+```bash
+# Current values (should already be set)
+sysctl vm.swappiness          # Should show 67
+sysctl vm.vfs_cache_pressure  # Should show 125
+zramctl                       # Should show ~17GB
+```
+
+---
+
 ### 0.2 Systemd Resource Slices
+
+**Status:** ⚠️ PARTIALLY IMPLEMENTED - See `/etc/nixos/modules/system/resource-control.nix`
 
 **Target:** Protect critical services, limit resource-hungry apps
 
@@ -113,7 +133,8 @@ This unified plan consolidates all system-level and user-level optimizations for
 { config, lib, pkgs, ... }:
 {
   # User slice defaults
-  systemd.user.slices.user = {
+  # CORRECT SYNTAX: systemd.slices."user-" (NOT systemd.user.slices.user)
+  systemd.slices."user-" = {
     sliceConfig = {
       MemoryHigh = "12G";        # Soft limit for user session
       MemoryMax = "14G";         # Hard limit
@@ -122,6 +143,7 @@ This unified plan consolidates all system-level and user-level optimizations for
   };
 
   # Protect display manager and compositor
+  # ALREADY IN: /etc/nixos/modules/system/resource-control.nix
   systemd.services.display-manager = {
     serviceConfig = {
       OOMScoreAdjust = -900;     # Very hard to kill
@@ -131,6 +153,10 @@ This unified plan consolidates all system-level and user-level optimizations for
   };
 }
 ```
+
+**EXISTING Implementation:** `/etc/nixos/modules/system/resource-control.nix` already has:
+- nix-daemon CPU/Memory limits
+- OOMD protection configuration
 
 ### 0.3 Memory Budget Breakdown
 
@@ -166,15 +192,21 @@ System libraries form the foundation that ALL other software depends on. This ph
 | **glibc** | ALL binaries | 3-8% universal | HIGH |
 | **zlib** | git, nix, compression | 10-20% | MEDIUM |
 
-**Implementation (FIXED - Uses Flake Input):**
+**Implementation Status:** 📝 TO BE IMPLEMENTED
+
+> **NOTE:** The NixOS flake at `/etc/nixos/flake.nix` does NOT currently have
+> the `hm-workspace` input. This pattern must be implemented before using
+> hardware profiles in NixOS-level overlays.
+
+**Required Changes to `/etc/nixos/flake.nix`:**
 
 ```nix
-# /etc/nixos/flake.nix
+# /etc/nixos/flake.nix - PROPOSED CHANGES
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
 
-    # Import home-manager flake for shared hardware profiles
+    # NEW: Import home-manager flake for shared hardware profiles
     # Uses git+file:// for proper lock tracking
     hm-workspace = {
       url = "git+file:///home/mitsio/.MyHome/MySpaces/my-modular-workspace/home-manager";
@@ -185,13 +217,14 @@ System libraries form the foundation that ALL other software depends on. This ph
   let
     system = "x86_64-linux";
 
-    # Import hardware profiles from home-manager workspace
+    # NEW: Import hardware profiles from home-manager workspace
     hardwareProfiles = {
       shoshin = import "${hm-workspace}/modules/profiles/config/hardware/shoshin.nix";
     };
   in {
     nixosConfigurations.shoshin = nixpkgs.lib.nixosSystem {
       inherit system;
+      # NEW: Pass hardware profile via specialArgs
       specialArgs = {
         currentHardwareProfile = hardwareProfiles.shoshin;
         inherit hardwareProfiles;
@@ -403,10 +436,20 @@ sudo nixos-rebuild switch --flake .#shoshin
 | **Signal** | 768MB | 1.5G | 2G | 100% | Messaging |
 | **Zoom** | 1024MB | 2.5G | 4G | 250% | Video calls |
 
-### Implementation Template (FIXED)
+### Implementation Status
+
+**Current:** `home-manager/modules/apps/electron-apps.nix` - Basic GPU wrappers exist but need enhancement
+**Proposed:** `home-manager/modules/apps/electron-optimized/default.nix` - Full systemd + GPU + memory limits
+
+> **NOTE:** The existing `electron-apps.nix` has these issues:
+> - Uses `discord` binary name (should be `Discord` - uppercase)
+> - No systemd cgroup limits (MemoryHigh/MemoryMax/CPUQuota)
+> - Creates `-gpu` suffix wrappers + shell aliases instead of in-place wrappers
+
+### Implementation Template (PROPOSED)
 
 ```nix
-# home-manager/modules/apps/electron-optimized/default.nix
+# home-manager/modules/apps/electron-optimized/default.nix (TO BE CREATED)
 
 { pkgs, lib, config, ... }:
 
@@ -646,8 +689,9 @@ Week 3: Desktop
 - [ ] Record baseline: `free -h > ~/baseline.txt && ps aux --sort=-%mem | head -20 >> ~/baseline.txt`
 
 ### Post Phase 0 (Memory)
-- [ ] Zram enabled: `zramctl`
-- [ ] Kernel params applied: `sysctl vm.swappiness` (should be 10)
+- [x] Zram enabled: `zramctl` (ALREADY DONE - ~17GB configured)
+- [x] Kernel params applied: `sysctl vm.swappiness` (should be 67 for zram!)
+- [x] vfs_cache_pressure: `sysctl vm.vfs_cache_pressure` (should be 125)
 - [ ] Idle memory < 4GB: `free -h`
 
 ### Post Phase 1 (System Libs)
@@ -731,6 +775,34 @@ home-manager switch
 
 ## Engineering Reviews
 
+### Ultrathink Discrepancy Analysis (NEW)
+
+**Review Type:** Deep Dive Cross-Reference
+**Review Date:** 2025-12-30
+**Status:** ✅ Discrepancies Documented & Fixed
+
+#### Critical Discrepancies Found & Corrected
+
+| # | Issue | Plan Said | Reality | Resolution |
+|---|-------|-----------|---------|------------|
+| 1 | vm.swappiness | 10 | 67 | **67 is CORRECT for zram** - Updated plan |
+| 2 | vm.vfs_cache_pressure | 50 | 125 | **125 is CORRECT for zram desktop** - Updated plan |
+| 3 | NixOS hm-workspace input | Exists | NOT IMPLEMENTED | Marked as TO BE IMPLEMENTED |
+| 4 | Electron module path | `electron-optimized/` | `electron-apps.nix` | Documented both current & proposed |
+| 5 | systemd slice syntax | `systemd.user.slices.user` | `systemd.slices."user-"` | Fixed syntax in plan |
+| 6 | Phase 0 status | To implement | ALREADY IMPLEMENTED | Marked as existing |
+
+#### Key Insight: Zram + High Swappiness
+
+**IMPORTANT:** The original plan's `vm.swappiness=10` was WRONG for zram configurations.
+
+With zram (compressed swap in RAM), high swappiness (60-70) is OPTIMAL because:
+- Swapping to zram is FAST (compressed RAM, not disk)
+- Proactive swapping keeps more free RAM available
+- zram compresses 2-3x, making swap nearly free
+
+Reference: https://linuxblog.io/linux-performance-almost-always-add-swap-part2-zram/
+
 ### Ops Engineer Review (UPDATED)
 
 **Reviewer Role:** Site Reliability / Platform Engineer
@@ -788,7 +860,15 @@ home-manager switch
 
 ---
 
-**Document Version:** 2.0.0
-**Last Updated:** 2025-12-30T07:30:00+02:00
-**Reviews:** Ops Engineer ✅ (Updated), Developer Engineer ✅ (Updated)
+**Document Version:** 2.1.0
+**Last Updated:** 2025-12-30T09:15:00+02:00
+**Reviews:** Ultrathink Discrepancy Analysis ✅, Ops Engineer ✅, Developer Engineer ✅
 **Research Agents:** Memory Optimization, Extended System Libs, Flake SpecialArgs
+
+### Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 2.1.0 | 2025-12-30 | Ultrathink analysis: Fixed 6 critical discrepancies |
+| 2.0.0 | 2025-12-30 | Added memory targets, 30+ libs, fixed hardware profile path |
+| 1.0.0 | 2025-12-30 | Initial unified plan |
