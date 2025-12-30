@@ -1,188 +1,85 @@
-# ADR-012: Documentation Organization Strategy
+# ADR-012: Unified Documentation & Project Repository Structure
 
-**Date:** 2025-12-20
-**Status:** Accepted
-**Context:** Documentation organization across multi-repo workspace
-**Decision Makers:** Mitsos
-
----
-
-## Context
-
-The `my-modular-workspace` project consists of multiple Git repositories:
-- `docs/` - Centralized documentation repository
-- `home-manager/` - Home Manager user environment configuration
-- `hosts/shoshin/nixos/` - NixOS system configuration
-- `ansible/` - Ansible automation playbooks
-- `chezmoi/` - Dotfiles management
-
-**Problem:**
-- Documentation was scattered across repositories
-- Duplicate docs existed (e.g., multiple READMEs)
-- No clear policy on where docs should live
-- Hard to discover documentation
-
-**Examples of Issues:**
-- `home-manager/README.md` + `home-manager/docs/*.md` + `docs/home-manager/*.md`
-- Unclear whether to document in repo or centralized docs/
-- AI assistant instructions (WARP.md, AGENTS.md, CLAUDE.md) location unclear
+**Date:** 2025-12-29
+**Status:** Supersedes ADR-012 (2025-12-20)
+**Context:** Documentation consolidation across multi-repo workspace to minimize context fragmentation and maximize agent efficiency.
 
 ---
 
-## Decision
+## 1. The "Single Source of Truth" Philosophy
 
-### Rule 1: Centralized Documentation Repository
+To ensure that AI agents and human developers can efficiently locate context without wading through redundant or outdated files, the `docs/` repository is organized into **Topic-Based Project Clusters**.
 
-**ALL detailed documentation lives in `docs/` repo**, organized by domain:
+### Rule 1: Topic-Based Clustering
+Documentation is no longer split primarily by "type" (Plan vs Research). Instead, everything related to a specific project or complex tool is stored together in a subdirectory under `docs/projects/`.
+
+**Standard Project Sub-structure:**
+- `INDEX.md`: Master table of contents for the project.
+- `RESEARCH.md`: COMPACTED research findings. Old researches are merged and deleted.
+- `PLAN.md`: The active/current implementation plan. Past plans are merged or moved to the issues archive.
+- `USAGE.md`: User-facing guides, cheatsheets, and quick references.
+- `TESTING.md`: Verification steps and checklists.
+
+### Rule 2: Compaction & Deletion
+- **NO redundant context:** When new research is completed, the findings must be integrated into the master `RESEARCH.md` for that topic.
+- **Delete old versions:** Once unique context is captured in the master file, the source/dated research file MUST be deleted to save token/context space.
+- **Minimize Archive:** Do not move things to `archive/` if they can be merged or if they are no longer relevant. Only use `archive/` for truly deprecated system history.
+
+### Rule 3: Issues Archive
+Technical debt, post-mortems, and "how I fixed it" documentation must be extracted into `docs/issues-archive/`.
+- Format: `YYYY-MM-DD-short-description.md`.
+- Content: Clear "Problem" and "Resolution" sections.
+- Purpose: Provides a historical "Fix-it" database for agents to reference when encountering similar errors.
+
+### Rule 4: Sessions Cleanup
+- The root `sessions/` directory is for **Conversational History** (summaries, continuations, prompts) ONLY.
+- Any documentation, research, or TODOs generated during a session MUST be moved to the appropriate `docs/projects/` directory at the end of the session.
+
+---
+
+## 2. Directory Structure
 
 ```
 docs/
-├── home-manager/     # Home Manager docs
-├── nixos/            # NixOS system docs
-├── ansible/          # Ansible docs
-├── chezmoi/          # Dotfiles docs
-├── tools/            # Tool-specific docs (warp, kde-connect, etc.)
-├── services/         # Service docs
-└── adrs/             # Architecture Decision Records
+├── projects/           # Multi-file projects/topics
+│   ├── kitty/          # Merged research, plans, and usage for Kitty
+│   ├── mcp/            # Merged MCP architecture and optimization
+│   ├── sync/           # Rclone, Syncthing, and GDrive migration
+│   ├── home-manager/   # Refactoring and modularity docs
+│   ├── plasma/         # KDE Plasma configuration and themes
+│   └── semantic-tools/ # ck, semtools, and semantic-grep
+├── tools/              # Single-file documentation for simple tools
+├── issues-archive/     # Post-mortems and resolutions
+├── adrs/               # Architecture Decision Records
+└── core/               # High-level workspace strategy and audits
 ```
-
-### Rule 2: README.md Exception
-
-**Every repository MUST have its own `README.md`** in the root:
-
-```
-home-manager/
-├── README.md         ✓ KEEP (repo-specific overview)
-├── flake.nix
-└── ... (no other docs here)
-
-hosts/shoshin/nixos/
-├── README.md         ✓ KEEP (repo-specific overview)
-└── ...
-
-docs/
-├── README.md         ✓ Master documentation index
-└── */
-```
-
-**Purpose of repo README.md:**
-- Quick start / setup instructions
-- Link to detailed docs in `docs/` repo
-- Repo-specific context (architecture, usage, key files)
-
-### Rule 3: AI Instructions Location
-
-**AI assistant instructions stay in their functional location:**
-
-```
-home-manager/
-├── WARP.md           ✓ KEEP (WARP reads from repo root)
-├── AGENTS.md         ✓ KEEP (agents read from repo root)
-└── CLAUDE.md         ✓ KEEP (Claude reads from repo root)
-```
-
-**Rationale:** These files are functional configuration for AI tools, not documentation for humans. They must stay where the tools expect to find them.
-
-### Rule 4: No Nested docs/ in Repos
-
-**Repositories MUST NOT have `<repo>/docs/` subdirectories.**
-
-```bash
-# ❌ WRONG
-home-manager/
-└── docs/
-    ├── TODO.md
-    └── guide.md
-
-# ✓ CORRECT
-home-manager/
-└── README.md     # Links to docs/ repo
-
-docs/
-└── home-manager/
-    ├── TODO.md
-    └── guide.md
-```
-
-**Exception:** Temporary session docs during active work may exist briefly but must be moved to `docs/` before session completion.
 
 ---
 
-## Migration Process (Completed 2025-12-20)
+## 3. Implementation Workflow for Agents
 
-### What Was Moved
-
-From `home-manager/` to `docs/home-manager/`:
-- ✓ `docs/package-upgrade-guide.md` → `docs/home-manager/package-upgrade-guide.md`
-- ✓ `docs/hardware-profile-system.md` → `docs/home-manager/hardware-profile-system.md`
-- ✓ `docs/TODO.md` → `docs/home-manager/CODEX_INSTALLATION_LOG.md` (renamed for clarity)
-
-### What Was Kept in home-manager/
-
-- ✓ `README.md` - Repo overview (per Rule 2)
-- ✓ `WARP.md` - AI instructions (per Rule 3)
-- ✓ `AGENTS.md` - AI instructions (per Rule 3)
-- ✓ `CLAUDE.md` - AI instructions (per Rule 3)
-
-### Cleanup
-
-- ✗ Removed `home-manager/docs/` subdirectory (empty after migration)
-- ✓ Updated `docs/home-manager/INDEX.md` to point to all available docs
+When an agent needs to document something new:
+1. **Identify Topic:** Determine if the task belongs to an existing Project Cluster.
+2. **Read INDEX.md:** Understand the current state of that topic.
+3. **Update Master Files:**
+    - Add to `RESEARCH.md` if it's new knowledge.
+    - Update `PLAN.md` if it's a new implementation step.
+4. **Clean Up:** If a session file was used, move its content to `docs/` and delete the original.
 
 ---
 
-## Consequences
+## 4. Consequences
 
 ### Positive
-
-✓ **Single source of truth** - All docs in one place
-✓ **Easier discovery** - Browse `docs/` to find everything
-✓ **Consistent structure** - Clear organization by domain
-✓ **No duplication** - Each topic documented once
-✓ **Better README.md** - Each repo has focused, concise README linking to full docs
-✓ **AI instructions preserved** - Tools continue working as expected
+- ✅ **Token Efficiency:** Agents don't read 5 different versions of the same research.
+- ✅ **Faster Discovery:** All info for a topic is in one predictable directory.
+- ✅ **Better Continuity:** New sessions can instantly grasp the "Master State" of a project.
 
 ### Negative
-
-⚠️ **Cross-repo navigation** - Need to switch repos to read detailed docs
-⚠️ **README maintenance** - Must keep repo README in sync with docs/ content
-⚠️ **Learning curve** - Contributors need to know the organization policy
-
-### Neutral
-
-- Repos become "code-focused" with minimal docs
-- `docs/` repo becomes "documentation-focused"
+- ⚠️ **Destructive by Design:** Old research files are deleted. If "raw" history is needed, it must be retrieved from Git history.
+- ⚠️ **Maintenance Overhead:** Requires active effort to merge and "compact" rather than just adding new files.
 
 ---
 
-## Compliance Checklist
-
-When creating new documentation:
-
-- [ ] Is this a README for a repo root? → Keep in repo
-- [ ] Is this AI instructions (WARP.md, AGENTS.md, etc.)? → Keep in repo
-- [ ] Is this detailed documentation? → Move to `docs/<domain>/`
-- [ ] Does `docs/<domain>/INDEX.md` link to this new doc?
-- [ ] Does repo README.md link to relevant docs in `docs/` repo?
-
----
-
-## Related ADRs
-
-- **ADR-001** - NixOS System (Stable) vs Home-Manager (Unstable)
-- **ADR-010** - Unified MCP Server Architecture
-- **This ADR (012)** - Documentation Organization
-
----
-
-## References
-
-- Docs repository: `~/.MyHome/MySpaces/my-modular-workspace/docs/`
-- Home Manager README: `~/.MyHome/MySpaces/my-modular-workspace/home-manager/README.md`
-- Documentation index: `~/.MyHome/MySpaces/my-modular-workspace/docs/home-manager/INDEX.md`
-
----
-
-**Approved:** 2025-12-20
-**Implementation:** Completed 2025-12-20
-**Review Date:** 2026-03-20 (after 3 months of usage)
+**Approved By:** Mitsos
+**Date:** 2025-12-29
